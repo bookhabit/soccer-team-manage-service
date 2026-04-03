@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: soccer-app-db
+    environment:
+      POSTGRES_USER: ckeh0827
+      POSTGRES_PASSWORD: ho0827
+      POSTGRES_DB: guide-app
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
