@@ -5,7 +5,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { queryClient } from '@/src/shared/query';
-import { useAuthStore } from '@/src/shared/store';
+import { useAuthStore, initNetworkListener } from '@/src/shared/store';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -43,6 +43,11 @@ export default function RootLayout() {
   useEffect(() => {
     hydrate();
   }, [hydrate]);
+
+  useEffect(() => {
+    const unsubscribe = initNetworkListener();
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (fontsLoaded) {
