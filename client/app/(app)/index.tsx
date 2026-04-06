@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { router } from 'expo-router';
 import { useMe, useLogout } from '@/src/features/auth/data/hooks/useAuth';
+import { Button, TextBox, colors, spacing } from '@ui';
 
 export default function HomeScreen() {
   const { data: me } = useMe();
@@ -8,12 +10,23 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.greeting}>안녕하세요, {me?.nickname ?? '...'}님!</Text>
-      <Text style={styles.email}>{me?.email}</Text>
+      <TextBox variant="heading2" color={colors.grey900} style={styles.greeting}>안녕하세요, {me?.nickname ?? '...'}님!</TextBox>
+      <TextBox variant="body2" color={colors.grey500} style={styles.email}>{me?.email}</TextBox>
 
-      <TouchableOpacity style={styles.button} onPress={() => logout()} disabled={isPending}>
-        <Text style={styles.buttonText}>{isPending ? '로그아웃 중...' : '로그아웃'}</Text>
-      </TouchableOpacity>
+      <Button variant="danger" size="medium" loading={isPending} onPress={() => logout()}>
+        로그아웃
+      </Button>
+
+      <View style={styles.devSection}>
+        <TextBox variant="captionBold" color={colors.grey400} style={styles.devLabel}>DEV</TextBox>
+        <Button
+          variant="ghost"
+          size="small"
+          onPress={() => router.push('/(dev)/design-system' as any)}
+        >
+          🎨 Design System
+        </Button>
+      </View>
     </View>
   );
 }
@@ -23,28 +36,16 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
+    padding: spacing[6],
+    backgroundColor: colors.background,
   },
-  greeting: {
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
+  greeting: { marginBottom: spacing[2] },
+  email: { marginBottom: spacing[10] },
+  devSection: {
+    position: 'absolute',
+    bottom: spacing[8],
+    alignItems: 'center',
+    gap: 4,
   },
-  email: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 40,
-  },
-  button: {
-    backgroundColor: '#ef4444',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 32,
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  devLabel: { letterSpacing: 1 },
 });

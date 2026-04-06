@@ -6,7 +6,7 @@ export interface ApiErrorResponse {
   statusCode: number;
   error: string;
   message: string;
-  code?: string;   // 서버 도메인 에러 코드 (e.g. "INVALID_CREDENTIALS")
+  code?: string; // 서버 도메인 에러 코드 (e.g. "INVALID_CREDENTIALS")
 }
 
 export type PaginatedResponse<T> = {

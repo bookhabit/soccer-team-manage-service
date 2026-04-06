@@ -1,11 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
-import { useAuthStore } from "@/src/shared/store/useAuthStore";
-import { login, signup, logout, getMe } from "../services/auth.service";
-import type { LoginInput, SignupInput } from "../schemas/auth.schema";
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { useAuthStore } from '@/src/shared/store/useAuthStore';
+import { login, signup, logout, getMe } from '../services/auth.service';
+import type { LoginInput, SignupInput } from '../schemas/auth.schema';
 
 export const AUTH_QUERY_KEYS = {
-  me: ["auth", "me"] as const,
+  me: ['auth', 'me'] as const,
 };
 
 /**
@@ -19,10 +19,10 @@ export function useLogin() {
   return useMutation({
     mutationFn: (body: LoginInput) => login(body),
     onSuccess: ({ accessToken }) => {
-      console.log("login successful, received accessToken:", accessToken);
+      console.log('login successful, received accessToken:', accessToken);
       setAccessToken(accessToken);
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
-      router.replace("/(app)");
+      router.replace('/(app)');
     },
     onError: (error) => {
       // 로그인 실패 시 토큰 제거 (예: 만료된 토큰으로 재로그인 시도)
@@ -39,7 +39,7 @@ export function useSignup() {
   return useMutation({
     mutationFn: (body: SignupInput) => signup(body),
     onSuccess: () => {
-      router.replace("/(auth)/login");
+      router.replace('/(auth)/login');
     },
   });
 }
@@ -57,7 +57,7 @@ export function useLogout() {
     onSettled: () => {
       clearAuth();
       queryClient.clear();
-      router.replace("/(auth)/login");
+      router.replace('/(auth)/login');
     },
   });
 }

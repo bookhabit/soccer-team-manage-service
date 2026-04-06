@@ -1,15 +1,9 @@
-import React from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  ActivityIndicator,
-} from "react-native";
-import type { Control, FieldErrors } from "react-hook-form";
-import { Controller } from "react-hook-form";
-import type { SignupInput } from "../../data/schemas/auth.schema";
+import React from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import type { Control, FieldErrors } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
+import type { SignupInput } from '../../data/schemas/auth.schema';
+import { TextField, Button, TextBox, colors, spacing } from '@ui';
 
 interface SignupViewProps {
   control: Control<SignupInput>;
@@ -20,10 +14,6 @@ interface SignupViewProps {
   onGoLogin: () => void;
 }
 
-/**
- * 회원가입 스크린 UI.
- * 상태 로직 없이 props만 렌더링합니다.
- */
 export function SignupView({
   control,
   errors,
@@ -34,16 +24,16 @@ export function SignupView({
 }: SignupViewProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>회원가입</Text>
+      <TextBox style={styles.title}>회원가입</TextBox>
 
       <Controller
         control={control}
         name="email"
         render={({ field: { onChange, value } }) => (
           <View style={styles.fieldWrapper}>
-            <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
-              placeholder="이메일"
+            <TextField
+              title="이메일"
+              placeholder="이메일을 입력하세요"
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
@@ -51,10 +41,8 @@ export function SignupView({
               textContentType="emailAddress"
               value={value}
               onChangeText={onChange}
+              errorMessage={errors.email?.message}
             />
-            {errors.email && (
-              <Text style={styles.errorText}>{errors.email.message}</Text>
-            )}
           </View>
         )}
       />
@@ -64,15 +52,13 @@ export function SignupView({
         name="nickname"
         render={({ field: { onChange, value } }) => (
           <View style={styles.fieldWrapper}>
-            <TextInput
-              style={[styles.input, errors.nickname && styles.inputError]}
+            <TextField
+              title="닉네임"
               placeholder="닉네임 (2~20자)"
               value={value}
               onChangeText={onChange}
+              errorMessage={errors.nickname?.message}
             />
-            {errors.nickname && (
-              <Text style={styles.errorText}>{errors.nickname.message}</Text>
-            )}
           </View>
         )}
       />
@@ -82,8 +68,8 @@ export function SignupView({
         name="password"
         render={({ field: { onChange, value } }) => (
           <View style={styles.fieldWrapper}>
-            <TextInput
-              style={[styles.input, errors.password && styles.inputError]}
+            <TextField
+              title="비밀번호"
               placeholder="비밀번호 (8자 이상)"
               secureTextEntry
               autoCorrect={false}
@@ -92,32 +78,22 @@ export function SignupView({
               textContentType="newPassword"
               value={value}
               onChangeText={onChange}
+              errorMessage={errors.password?.message}
             />
-            {errors.password && (
-              <Text style={styles.errorText}>{errors.password.message}</Text>
-            )}
           </View>
         )}
       />
 
-      {serverError && (
-        <Text style={styles.errorText}>{serverError.message}</Text>
-      )}
+      {serverError && <TextBox variant="caption" color={colors.error} style={styles.serverError}>{serverError.message}</TextBox>}
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={onSubmit}
-        disabled={isPending}
-      >
-        {isPending ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>회원가입</Text>
-        )}
-      </TouchableOpacity>
+      <View style={styles.submitWrapper}>
+        <Button variant="primary" size="large" fullWidth loading={isPending} onPress={onSubmit}>
+          회원가입
+        </Button>
+      </View>
 
       <TouchableOpacity onPress={onGoLogin} style={styles.link}>
-        <Text style={styles.linkText}>이미 계정이 있으신가요? 로그인</Text>
+        <TextBox variant="body2" color={colors.blue500}>이미 계정이 있으신가요? 로그인</TextBox>
       </TouchableOpacity>
     </View>
   );
@@ -126,53 +102,26 @@ export function SignupView({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#fff",
+    justifyContent: 'center',
+    padding: spacing[6],
+    backgroundColor: colors.background,
   },
   title: {
     fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 32,
-    textAlign: "center",
+    fontWeight: '700',
+    marginBottom: spacing[8],
+    textAlign: 'center',
+    color: colors.grey900,
   },
   fieldWrapper: {
-    marginBottom: 16,
+    marginBottom: spacing[4],
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#d1d5db",
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  inputError: {
-    borderColor: "#ef4444",
-  },
-  errorText: {
-    color: "#ef4444",
-    fontSize: 12,
-    marginTop: 4,
-  },
-  button: {
-    backgroundColor: "#2563eb",
-    borderRadius: 8,
-    paddingVertical: 14,
-    alignItems: "center",
-    marginTop: 8,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  serverError: { marginBottom: spacing[3] },
+  submitWrapper: {
+    marginTop: spacing[2],
   },
   link: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  linkText: {
-    color: "#2563eb",
-    fontSize: 14,
+    marginTop: spacing[5],
+    alignItems: 'center',
   },
 });

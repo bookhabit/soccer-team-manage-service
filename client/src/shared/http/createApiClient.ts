@@ -1,9 +1,9 @@
-import axios from "axios";
-import { z } from "zod";
-import { ApiError, NetworkError } from "./errors";
+import axios from 'axios';
+import { z } from 'zod';
+import { ApiError, NetworkError } from './errors';
 
-import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from "axios";
-import type { ApiErrorResponse } from "../types/api";
+import type { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { ApiErrorResponse } from '../types/api';
 
 interface CustomConfig extends AxiosRequestConfig {
   _retry?: boolean;
@@ -50,7 +50,7 @@ function handleResponse<T>(res: AxiosResponse, schema?: z.ZodSchema): T {
   if (schema) {
     const result = schema.safeParse(data);
     if (!result.success) {
-      console.error("❌ 스키마 검증 실패:", result.error.format());
+      console.error('❌ 스키마 검증 실패:', result.error.format());
       throw result.error;
     }
     return result.data as T;
@@ -68,10 +68,7 @@ const formatError = (error: unknown, label: string) => {
 
   if (error.response) {
     // 🔥 모든 API의 상세 로그를 여기서 한 번에 처리
-    console.log(
-      `🔍 [${label}] 서버 응답 데이터:`,
-      JSON.stringify(error.response.data, null, 2),
-    );
+    console.log(`🔍 [${label}] 서버 응답 데이터:`, JSON.stringify(error.response.data, null, 2));
     return new ApiError(error.response.data as ApiErrorResponse);
   }
 
@@ -90,7 +87,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     getRefreshToken,
     onTokenRefreshed,
     onAuthFailure,
-    refreshEndpoint = "/sessions/refresh",
+    refreshEndpoint = '/sessions/refresh',
     withCredentials = false,
     timeout = 10000,
   } = options;
@@ -99,7 +96,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     baseURL,
     timeout,
     withCredentials,
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
   };
 
   const publicApi = axios.create({ ...BASE_CONFIG });
@@ -108,7 +105,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
   // ─── publicApi 에러 인터셉터 ───────────────────────────────────────────────
   publicApi.interceptors.response.use(
     (res) => res,
-    (err) => Promise.reject(formatError(err, "publicApi")),
+    (err) => Promise.reject(formatError(err, 'publicApi')),
   );
 
   // ─── privateApi 요청 인터셉터 (AT 주입) ───────────────────────────────────
@@ -136,7 +133,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
     (res) => res,
     async (error: unknown) => {
       if (!axios.isAxiosError(error)) {
-        console.error("❌ [privateApi] 알 수 없는 오류:", error);
+        console.error('❌ [privateApi] 알 수 없는 오류:', error);
         return Promise.reject(error);
       }
 
@@ -168,7 +165,7 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
           }>(refreshEndpoint, body);
 
           const { accessToken, refreshToken: newRefreshToken } = res.data;
-          onTokenRefreshed(accessToken, newRefreshToken ?? "");
+          onTokenRefreshed(accessToken, newRefreshToken ?? '');
           processQueue(null, accessToken);
 
           if (originalRequest.headers) {
@@ -177,11 +174,9 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
           return privateApi(originalRequest);
         } catch (refreshError) {
           processQueue(refreshError, null);
-          console.error("❌ [privateApi] 토큰 갱신 실패 — 로그아웃 처리");
+          console.error('❌ [privateApi] 토큰 갱신 실패 — 로그아웃 처리');
           onAuthFailure();
-          return Promise.reject(
-            formatError(refreshError, "privateApi:refresh"),
-          );
+          return Promise.reject(formatError(refreshError, 'privateApi:refresh'));
         } finally {
           isRefreshing = false;
         }
@@ -189,20 +184,18 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
 
       // ── 그 외 HTTP 에러 ──
       // 401이 아니거나, 토큰 갱신마저 실패했을 때 마지막에 formatError 호출
-      return Promise.reject(formatError(error, "privateApi"));
+      return Promise.reject(formatError(error, 'privateApi'));
     },
   );
 
   // ─── http 래퍼 ───────────────────────────────────────────────────────────
-  const http: ApiClient["http"] = {
+  const http: ApiClient['http'] = {
     auth: {
       post: <T>(url: string, data?: object, schema?: z.ZodSchema) =>
         publicApi.post(url, data).then((res) => handleResponse<T>(res, schema)),
     },
     get: <T>(url: string, params?: object, schema?: z.ZodSchema) =>
-      privateApi
-        .get(url, { params })
-        .then((res) => handleResponse<T>(res, schema)),
+      privateApi.get(url, { params }).then((res) => handleResponse<T>(res, schema)),
     post: <T>(url: string, data?: object, schema?: z.ZodSchema) =>
       privateApi.post(url, data).then((res) => handleResponse<T>(res, schema)),
     put: <T>(url: string, data?: object, schema?: z.ZodSchema) =>
