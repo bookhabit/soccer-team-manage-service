@@ -8,9 +8,12 @@ export const apiClient = createApiClient({
   refreshEndpoint: '/sessions/refresh',
 
   getAccessToken: () => useAuthStore.getState().accessToken,
+  getRefreshToken: () => useAuthStore.getState().refreshToken,
 
-  onTokenRefreshed: (accessToken) => {
-    useAuthStore.getState().setAccessToken(accessToken);
+  onTokenRefreshed: (accessToken, refreshToken) => {
+    const store = useAuthStore.getState();
+    // 서버가 RT를 새로 발급한 경우에만 갱신, 아니면 기존 RT 유지
+    store.setTokens(accessToken, refreshToken || store.refreshToken || '');
   },
 
   onAuthFailure: () => {

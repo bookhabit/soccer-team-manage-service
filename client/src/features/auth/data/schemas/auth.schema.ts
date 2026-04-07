@@ -20,6 +20,7 @@ export const signupSchema = z.object({
 
 export const accessTokenResponseSchema = z.object({
   accessToken: z.string(),
+  refreshToken: z.string(),
 });
 
 export const signupResponseSchema = z.object({

@@ -13,14 +13,14 @@ export const AUTH_QUERY_KEYS = {
  * 성공 시 accessToken을 SecureStore에 저장하고 앱 홈으로 이동합니다.
  */
 export function useLogin() {
-  const setAccessToken = useAuthStore((s) => s.setAccessToken);
+  const setTokens = useAuthStore((s) => s.setTokens);
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (body: LoginInput) => login(body),
-    onSuccess: ({ accessToken }) => {
+    onSuccess: ({ accessToken, refreshToken }) => {
       console.log('login successful, received accessToken:', accessToken);
-      setAccessToken(accessToken);
+      setTokens(accessToken, refreshToken);
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
       router.replace('/(app)');
     },
