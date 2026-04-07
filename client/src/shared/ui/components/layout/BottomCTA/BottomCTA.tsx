@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { Button } from '@ui/components/general/Button';
 import { colors } from '@ui/foundation/colors';
 import type {
@@ -16,9 +16,8 @@ export function BottomCTASingle({
   loading = false,
   safeArea = false,
 }: BottomCTASingleProps) {
-  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.wrapper, safeArea && { paddingBottom: 16 + insets.bottom }]}>
+    <View style={[styles.wrapper, safeArea && { paddingBottom: 16 }]}>
       <Button
         variant="primary"
         size="large"
@@ -72,15 +71,8 @@ export function BottomCTADouble({
 }
 
 export function FixedBottomCTA({ children, safeArea = false }: FixedBottomCTAProps) {
-  const insets = useSafeAreaInsets();
   return (
-    <View
-      style={[
-        styles.fixedWrapper,
-        { padding: 16 },
-        safeArea && { paddingBottom: 16 + insets.bottom },
-      ]}
-    >
+    <View style={[styles.fixedWrapper, { padding: 16 }, safeArea && { paddingBottom: 16 }]}>
       {children}
     </View>
   );
@@ -89,7 +81,6 @@ export function FixedBottomCTA({ children, safeArea = false }: FixedBottomCTAPro
 const styles = StyleSheet.create({
   wrapper: {
     padding: 16,
-    backgroundColor: colors.background,
     borderTopWidth: 1,
     borderTopColor: colors.grey100,
   },
