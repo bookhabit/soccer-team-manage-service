@@ -1,8 +1,11 @@
 # ERD (Entity Relationship Diagram)
 
-> 기획 문서 기반 전체 도메인 ERD  
-> 마지막 동기화: 2026-04-06  
+> **설계 문서** — 전체 도메인 계획 ERD (Phase 1 + Phase 2)  
+> 비즈니스 규칙·제약 조건 주석 포함  
 > Phase 2 모델은 `[P2]` 로 표시
+>
+> **구현 현황 ERD** (schema.prisma 자동 생성) → `docs/schema-erd.md`  
+> 갱신 방법: `cd server && npx prisma generate`
 
 ---
 
