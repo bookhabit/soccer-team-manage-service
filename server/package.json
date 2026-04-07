@@ -9,8 +9,10 @@
     "lint": "eslint src --max-warnings 0",
     "type-check": "tsc --noEmit",
     "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "db:seed": "ts-node --project tsconfig.json -e \"require('tsconfig-paths/register')\" prisma/seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --testPathPattern=e2e"
@@ -32,6 +34,9 @@
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1"
+  },
+  "prisma": {
+    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
   },
   "devDependencies": {
     "@nestjs/testing": "^10.4.0",
