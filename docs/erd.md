@@ -144,7 +144,7 @@ erDiagram
     int       ourScore
     int       opponentScore
     string    recordedById      FK
-    boolean   mvpVoteOpen       "default false"
+    boolean   momVoteOpen       "default false"
     datetime  createdAt
     datetime  updatedAt
   }
@@ -186,7 +186,7 @@ erDiagram
     datetime  updatedAt
   }
 
-  MvpVote {
+  MomVote {
     string    id                PK
     string    matchId           FK
     string    voterId           FK
@@ -371,7 +371,7 @@ erDiagram
   Match          ||--o{  MatchVote           : "collects"
   Match          ||--o|  MatchRecord         : "has"
   Match          ||--o{  PositionAssignment  : "has"
-  Match          ||--o{  MvpVote            : "collects"
+  Match          ||--o{  MomVote            : "collects"
   Match          ||--o{  MatchComment       : "has"
   Match          ||--o{  MatchVideo         : "has"
   Match          ||--o{  OpponentReview     : "has"
@@ -397,25 +397,25 @@ erDiagram
 
 ## Enum 정의
 
-| Enum | 값 |
-|---|---|
-| `Provider` | LOCAL, KAKAO, GOOGLE, APPLE |
-| `Gender` | MALE, FEMALE |
-| `PlayerPosition` | FW, MF, DF, GK |
-| `Foot` | LEFT, RIGHT, BOTH |
-| `Level` | BEGINNER, AMATEUR, SEMI_PRO |
-| `UserStatus` | ACTIVE, RESTRICTED, DELETED |
-| `ClubRole` | CAPTAIN, VICE_CAPTAIN, TREASURER, MEMBER |
-| `RecruitStatus` | OPEN, CLOSED |
-| `ApplicationStatus` | PENDING, APPROVED, REJECTED |
-| `MatchType` | MATCH, FRIENDLY |
-| `VoteResponse` | ATTEND, ABSENT, UNDECIDED |
-| `MatchResult` | WIN, DRAW, LOSS |
-| `PostType` | NOTICE, GENERAL, INQUIRY |
-| `MatchStatus` | OPEN, MATCHED, EXPIRED |
-| `MercenaryStatus` | OPEN, CLOSED, EXPIRED |
-| `ProfileStatus` | ACTIVE, EXPIRED |
-| `EvaluatorType` | ADMIN, OPPONENT, TEAMMATE |
+| Enum                | 값                                       |
+| ------------------- | ---------------------------------------- |
+| `Provider`          | LOCAL, KAKAO, GOOGLE, APPLE              |
+| `Gender`            | MALE, FEMALE                             |
+| `PlayerPosition`    | FW, MF, DF, GK                           |
+| `Foot`              | LEFT, RIGHT, BOTH                        |
+| `Level`             | BEGINNER, AMATEUR, SEMI_PRO              |
+| `UserStatus`        | ACTIVE, RESTRICTED, DELETED              |
+| `ClubRole`          | CAPTAIN, VICE_CAPTAIN, TREASURER, MEMBER |
+| `RecruitStatus`     | OPEN, CLOSED                             |
+| `ApplicationStatus` | PENDING, APPROVED, REJECTED              |
+| `MatchType`         | MATCH, FRIENDLY                          |
+| `VoteResponse`      | ATTEND, ABSENT, UNDECIDED                |
+| `MatchResult`       | WIN, DRAW, LOSS                          |
+| `PostType`          | NOTICE, GENERAL, INQUIRY                 |
+| `MatchStatus`       | OPEN, MATCHED, EXPIRED                   |
+| `MercenaryStatus`   | OPEN, CLOSED, EXPIRED                    |
+| `ProfileStatus`     | ACTIVE, EXPIRED                          |
+| `EvaluatorType`     | ADMIN, OPPONENT, TEAMMATE                |
 
 ---
 
@@ -423,55 +423,55 @@ erDiagram
 
 ### Phase 1 — Core
 
-| 모델 | 역할 | 주요 제약 |
-|---|---|---|
-| `User` | 서비스 사용자 | Soft Delete, status 관리 |
-| `Session` | RT 세션 | userId unique (1인 1세션) |
-| `Region` | 행정구역 Seed Data | code unique |
-| `Club` | 팀 | Soft Delete |
-| `ClubMember` | 팀원 관계 | userId unique (1인 1팀), jerseyNumber 팀 내 unique |
-| `ClubApplication` | 가입 신청 | (userId, clubId) unique |
-| `ClubBanRecord` | 강퇴 이력 | 재가입 제한 블랙리스트 |
-| `Invitation` | 초대 코드·링크 | code unique, 7일 만료 |
-| `Match` | 경기 (투표·기록 상위) | startAt + endAt으로 경기 상태 자동 계산 |
-| `MatchVote` | 참석 투표 | (userId, matchId) unique |
-| `MatchRecord` | 경기 결과 | matchId unique |
-| `MatchRecordHistory` | 기록 수정 이력 | — |
-| `Goal` | 득점 | — |
-| `Assist` | 도움 | goalId FK |
-| `PositionAssignment` | 쿼터별 포지션 배정 | — |
-| `MvpVote` | MVP 투표 | (voterId, matchId) unique |
-| `MatchComment` | 경기 댓글 | — |
-| `MatchVideo` | 경기 영상 | 유튜브 URL |
-| `OpponentReview` | 상대팀 평가 | 매칭전만 생성 |
-| `MannerScore` | 매너 점수 이력 | 초기값 100, 자체전 생성 안 함 |
-| `NoShowReport` | 노쇼 신고 | — |
-| `Post` | 게시글 | — |
-| `Comment` | 댓글 | — |
+| 모델                 | 역할                  | 주요 제약                                          |
+| -------------------- | --------------------- | -------------------------------------------------- |
+| `User`               | 서비스 사용자         | Soft Delete, status 관리                           |
+| `Session`            | RT 세션               | userId unique (1인 1세션)                          |
+| `Region`             | 행정구역 Seed Data    | code unique                                        |
+| `Club`               | 팀                    | Soft Delete                                        |
+| `ClubMember`         | 팀원 관계             | userId unique (1인 1팀), jerseyNumber 팀 내 unique |
+| `ClubApplication`    | 가입 신청             | (userId, clubId) unique                            |
+| `ClubBanRecord`      | 강퇴 이력             | 재가입 제한 블랙리스트                             |
+| `Invitation`         | 초대 코드·링크        | code unique, 7일 만료                              |
+| `Match`              | 경기 (투표·기록 상위) | startAt + endAt으로 경기 상태 자동 계산            |
+| `MatchVote`          | 참석 투표             | (userId, matchId) unique                           |
+| `MatchRecord`        | 경기 결과             | matchId unique                                     |
+| `MatchRecordHistory` | 기록 수정 이력        | —                                                  |
+| `Goal`               | 득점                  | —                                                  |
+| `Assist`             | 도움                  | goalId FK                                          |
+| `PositionAssignment` | 쿼터별 포지션 배정    | —                                                  |
+| `MomVote`            | MOM 투표              | (voterId, matchId) unique                          |
+| `MatchComment`       | 경기 댓글             | —                                                  |
+| `MatchVideo`         | 경기 영상             | 유튜브 URL                                         |
+| `OpponentReview`     | 상대팀 평가           | 매칭전만 생성                                      |
+| `MannerScore`        | 매너 점수 이력        | 초기값 100, 자체전 생성 안 함                      |
+| `NoShowReport`       | 노쇼 신고             | —                                                  |
+| `Post`               | 게시글                | —                                                  |
+| `Comment`            | 댓글                  | —                                                  |
 
 ### Phase 2 — 매칭·용병
 
-| 모델 | 역할 | 주요 제약 |
-|---|---|---|
-| `MatchPost` | 경기 매칭 게시글 | 날짜 경과 시 자동 EXPIRED |
-| `MatchPostApplication` | 매칭 신청 | — |
-| `MercenaryPost` | 용병 구함 게시글 | 날짜 경과 시 자동 EXPIRED |
-| `MercenaryApplication` | 용병 입단 신청 | (mercenaryPostId, applicantId) unique |
-| `MercenaryProfile` | 용병 가능 프로필 | userId unique |
-| `RecruitApplication` | 영입 신청 | — |
+| 모델                   | 역할             | 주요 제약                             |
+| ---------------------- | ---------------- | ------------------------------------- |
+| `MatchPost`            | 경기 매칭 게시글 | 날짜 경과 시 자동 EXPIRED             |
+| `MatchPostApplication` | 매칭 신청        | —                                     |
+| `MercenaryPost`        | 용병 구함 게시글 | 날짜 경과 시 자동 EXPIRED             |
+| `MercenaryApplication` | 용병 입단 신청   | (mercenaryPostId, applicantId) unique |
+| `MercenaryProfile`     | 용병 가능 프로필 | userId unique                         |
+| `RecruitApplication`   | 영입 신청        | —                                     |
 
 ---
 
 ## 핵심 비즈니스 규칙 (DB 제약 요약)
 
-| 규칙 | 구현 위치 |
-|---|---|
-| 1인 1팀 | `ClubMember.userId` unique |
-| 등번호 팀 내 unique | `(ClubMember.clubId, ClubMember.jerseyNumber)` unique |
-| 가입 신청 중복 방지 | `(ClubApplication.userId, ClubApplication.clubId)` unique |
-| MVP 중복 투표 방지 | `(MvpVote.voterId, MvpVote.matchId)` unique |
-| 투표 중복 방지 | `(MatchVote.userId, MatchVote.matchId)` unique |
+| 규칙                | 구현 위치                                                                         |
+| ------------------- | --------------------------------------------------------------------------------- |
+| 1인 1팀             | `ClubMember.userId` unique                                                        |
+| 등번호 팀 내 unique | `(ClubMember.clubId, ClubMember.jerseyNumber)` unique                             |
+| 가입 신청 중복 방지 | `(ClubApplication.userId, ClubApplication.clubId)` unique                         |
+| MOM 중복 투표 방지  | `(MomVote.voterId, MomVote.matchId)` unique                                       |
+| 투표 중복 방지      | `(MatchVote.userId, MatchVote.matchId)` unique                                    |
 | 용병 중복 지원 방지 | `(MercenaryApplication.mercenaryPostId, MercenaryApplication.applicantId)` unique |
-| 1인 1세션 | `Session.userId` unique |
-| RT Reuse 감지 | `Session.refreshTokenHash` + timingSafeEqual |
-| Soft Delete | `User.deletedAt`, `Club.deletedAt` IS NULL 필터 |
+| 1인 1세션           | `Session.userId` unique                                                           |
+| RT Reuse 감지       | `Session.refreshTokenHash` + timingSafeEqual                                      |
+| Soft Delete         | `User.deletedAt`, `Club.deletedAt` IS NULL 필터                                   |

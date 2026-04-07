@@ -10,22 +10,22 @@
 
 ## 유저 데이터 구조 (User Schema)
 
-| 필드명       | 타입         | 필수 여부 | 설명                                                   |
-| ------------ | ------------ | --------- | ------------------------------------------------------ |
-| `id`         | String(UUID) | 필수      | 시스템 내부 고유 식별자                                |
-| `provider`   | Enum         | 필수      | `LOCAL`, `KAKAO`, `GOOGLE`, `APPLE`                    |
-| `providerId` | String       | 필수      | 소셜 플랫폼 고유 ID (LOCAL 시 userId)                  |
-| `name`       | String       | 필수      | 앱 내 사용 이름 (닉네임으로 통일)                      |
-| `birthYear`  | Int          | 필수      | 출생 연도 — 나이 표시 용도 (가입 신청 페이지 등)       |
-| `gender`     | Enum         | 선택      | `MALE`, `FEMALE` — 팀 가입 필터링 용도                 |
-| `position`   | Enum         | 필수      | `FW`, `MF`, `DF`, `GK` — 주 포지션                     |
-| `foot`       | Enum         | 필수      | `LEFT`, `RIGHT`, `BOTH` — 주 발                        |
-| `years`      | Int          | 필수      | 축구 경력 (연차)                                       |
-| `level`      | Enum         | 필수      | `BEGINNER`, `AMATEUR`, `SEMI_PRO` 등                   |
-| `preferredRegion` | String  | 선택      | 선호 지역 — 클럽 추천 및 검색 기반 데이터              |
-| `avatarUrl`  | String       | 선택      | AI 생성 선수 카드 이미지 경로                          |
-| `status`     | Enum         | 필수      | `ACTIVE`, `RESTRICTED`, `DELETED` — 계정 상태          |
-| `deletedAt`  | DateTime     | 선택      | Soft Delete 타임스탬프                                 |
+| 필드명            | 타입         | 필수 여부 | 설명                                             |
+| ----------------- | ------------ | --------- | ------------------------------------------------ |
+| `id`              | String(UUID) | 필수      | 시스템 내부 고유 식별자                          |
+| `provider`        | Enum         | 필수      | `LOCAL`, `KAKAO`, `GOOGLE`, `APPLE`              |
+| `providerId`      | String       | 필수      | 소셜 플랫폼 고유 ID (LOCAL 시 userId)            |
+| `name`            | String       | 필수      | 앱 내 사용 이름 (닉네임으로 통일)                |
+| `birthYear`       | Int          | 필수      | 출생 연도 — 나이 표시 용도 (가입 신청 페이지 등) |
+| `gender`          | Enum         | 선택      | `MALE`, `FEMALE` — 팀 가입 필터링 용도           |
+| `position`        | Enum         | 필수      | `FW`, `MF`, `DF`, `GK` — 주 포지션               |
+| `foot`            | Enum         | 필수      | `LEFT`, `RIGHT`, `BOTH` — 주 발                  |
+| `years`           | Int          | 필수      | 축구 경력 (연차)                                 |
+| `level`           | Enum         | 필수      | `BEGINNER`, `AMATEUR`, `SEMI_PRO` 등             |
+| `preferredRegion` | String       | 선택      | 선호 지역 — 클럽 추천 및 검색 기반 데이터        |
+| `avatarUrl`       | String       | 선택      | AI 생성 선수 카드 이미지 경로                    |
+| `status`          | Enum         | 필수      | `ACTIVE`, `RESTRICTED`, `DELETED` — 계정 상태    |
+| `deletedAt`       | DateTime     | 선택      | Soft Delete 타임스탬프                           |
 
 > **등번호는 User 테이블에 없음** — 팀마다 다르므로 `ClubMember` 테이블에 저장
 
@@ -113,11 +113,11 @@ Region 모델: id, name(시도), sigungu(시군구), code
 
 경기 유형과 선수 역할에 따라 평가 주체가 다르다.
 
-| 대상 | 평가 주체 | 평가 시점 |
-|---|---|---|
-| 정규 팀원 | 팀 관리자(주장·부주장) | 경기 후 관리자가 직접 관리 |
-| 일반 매치전 선수 | 상대팀 선수도 평가 가능 | 경기 후 상대팀 평가 탭 |
-| 용병 | 함께 뛴 팀의 선수들 | 경기 후 팀원들이 평가 |
+| 대상             | 평가 주체               | 평가 시점                  |
+| ---------------- | ----------------------- | -------------------------- |
+| 정규 팀원        | 팀 관리자(주장·부주장)  | 경기 후 관리자가 직접 관리 |
+| 일반 매치전 선수 | 상대팀 선수도 평가 가능 | 경기 후 상대팀 평가 탭     |
+| 용병             | 함께 뛴 팀의 선수들     | 경기 후 팀원들이 평가      |
 
 > 자체전에서는 매너 평가 없음
 
@@ -149,11 +149,11 @@ Region 모델: id, name(시도), sigungu(시군구), code
 
 ### 업적
 
-| 업적 | 조건 |
-|---|---|
-| MVP 5회 | MVP 선정 5회 이상 |
-| 해트트릭 | 단일 경기 3골 |
-| 연속 출석 | 연속 참석 10경기 |
+| 업적      | 조건              |
+| --------- | ----------------- |
+| MOM 5회   | MOM 선정 5회 이상 |
+| 해트트릭  | 단일 경기 3골     |
+| 연속 출석 | 연속 참석 10경기  |
 
 > 기준 추후 확정 필요
 
@@ -191,6 +191,7 @@ Region 모델: id, name(시도), sigungu(시군구), code
 **Step 1 — PII 즉시 파기**
 
 탈퇴 즉시 아래 필드 `null` 처리:
+
 - 이름, 이메일, 전화번호, 생년월일, 아바타 이미지
 
 **Step 2 — 커뮤니티 콘텐츠**
@@ -200,7 +201,7 @@ Region 모델: id, name(시도), sigungu(시군구), code
 **Step 3 — 경기 기록 (핵심 데이터)**
 
 - 팀 전적 그대로 유지
-- 골·어시스트·MVP 기록 유지, 선수 이름 **"탈퇴 사용자"** 로 익명화
+- 골·어시스트·MOM 기록 유지, 선수 이름 **"탈퇴 사용자"** 로 익명화
 - 프로필 링크만 제거 (스코어 무결성 보존)
 
 > Hard Delete 금지 이유: `ON DELETE CASCADE`로 경기 기록까지 삭제되면 스코어가 깨짐 (3:2 승리인데 골 기록 1개 등)
