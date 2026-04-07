@@ -5,6 +5,9 @@
 `docs/plans/$ARGUMENTS.brief.md` 를 읽고 기획안의 완성도를 검토한다.
 파일이 없으면 현재 대화에서 기획안 내용을 직접 받아 검토한다.
 
+> **파일 규칙**: 기획안은 반드시 `docs/plans/{feature}.brief.md` 에 작성한다.
+> `{feature}.plan.md` 는 `/plan` 에이전트가 생성하는 구현 설계 파일이므로 혼용하지 않는다.
+
 ## 참조 문서
 - `docs/01_concept.md` — 서비스 도메인 및 전체 맥락
 - `server/prisma/schema.prisma` — 현재 데이터 모델
