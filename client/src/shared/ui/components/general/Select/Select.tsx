@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,12 +6,14 @@ import {
   Modal,
   FlatList,
   StyleSheet,
-  SafeAreaView,
+  Animated,
 } from 'react-native';
 import { colors } from '@ui/foundation/colors';
 import { typography } from '@ui/foundation/typography';
 import { ChevronDownIcon, CheckIcon } from '@ui/icons';
 import type { SelectProps } from './Select.types';
+
+const SHEET_ANIMATION_DURATION = 250;
 
 export function Select({
   label,
@@ -27,9 +29,52 @@ export function Select({
   const selected = options.find((o) => o.value === value);
   const hasError = errorMessage !== undefined;
 
+  const backdropOpacity = useRef(new Animated.Value(0)).current;
+  const sheetTranslateY = useRef(new Animated.Value(300)).current;
+
+  const animateIn = () => {
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 1,
+        duration: SHEET_ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+      Animated.timing(sheetTranslateY, {
+        toValue: 0,
+        duration: SHEET_ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const animateOut = (onDone: () => void) => {
+    Animated.parallel([
+      Animated.timing(backdropOpacity, {
+        toValue: 0,
+        duration: SHEET_ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+      Animated.timing(sheetTranslateY, {
+        toValue: 300,
+        duration: SHEET_ANIMATION_DURATION,
+        useNativeDriver: true,
+      }),
+    ]).start(onDone);
+  };
+
+  const open = () => {
+    backdropOpacity.setValue(0);
+    sheetTranslateY.setValue(300);
+    setIsOpen(true);
+  };
+
+  const close = () => {
+    animateOut(() => setIsOpen(false));
+  };
+
   const handleSelect = (optionValue: string) => {
     onChange?.(optionValue);
-    setIsOpen(false);
+    close();
   };
 
   return (
@@ -37,7 +82,7 @@ export function Select({
       {label !== undefined && <Text style={styles.label}>{label}</Text>}
       <TouchableOpacity
         style={[styles.trigger, hasError && styles.triggerError, disabled && styles.disabled]}
-        onPress={() => !disabled && setIsOpen(true)}
+        onPress={() => !disabled && open()}
         activeOpacity={0.8}
       >
         <Text style={[styles.triggerText, !selected && styles.placeholder]}>
@@ -50,35 +95,39 @@ export function Select({
       <Modal
         visible={isOpen}
         transparent
-        animationType="slide"
-        onRequestClose={() => setIsOpen(false)}
+        animationType="none"
+        onRequestClose={close}
+        onShow={animateIn}
       >
-        <TouchableOpacity
-          style={styles.backdrop}
-          activeOpacity={1}
-          onPress={() => setIsOpen(false)}
-        />
-        <View style={styles.sheet}>
-          <View style={styles.handle} />
-          {label !== undefined && <Text style={styles.sheetTitle}>{label}</Text>}
-          <FlatList
-            data={options}
-            keyExtractor={(item) => item.value}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.option, item.disabled && styles.optionDisabled]}
-                onPress={() => !item.disabled && handleSelect(item.value)}
-                activeOpacity={0.7}
-              >
-                <Text style={[styles.optionText, item.value === value && styles.optionSelected]}>
-                  {item.label}
-                </Text>
-                {item.value === value && (
-                  <CheckIcon size={18} color={colors.blue500} strokeWidth={2.5} />
-                )}
-              </TouchableOpacity>
-            )}
-          />
+        <View style={styles.container}>
+          <Animated.View
+            style={[styles.backdrop, { opacity: backdropOpacity }]}
+          >
+            <TouchableOpacity style={styles.backdropTouch} activeOpacity={1} onPress={close} />
+          </Animated.View>
+
+          <Animated.View style={[styles.sheet, { transform: [{ translateY: sheetTranslateY }] }]}>
+            <View style={styles.handle} />
+            {label !== undefined && <Text style={styles.sheetTitle}>{label}</Text>}
+            <FlatList
+              data={options}
+              keyExtractor={(item) => item.value}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.option, item.disabled && styles.optionDisabled]}
+                  onPress={() => !item.disabled && handleSelect(item.value)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.optionText, item.value === value && styles.optionSelected]}>
+                    {item.label}
+                  </Text>
+                  {item.value === value && (
+                    <CheckIcon size={18} color={colors.blue500} strokeWidth={2.5} />
+                  )}
+                </TouchableOpacity>
+              )}
+            />
+          </Animated.View>
         </View>
       </Modal>
     </View>
@@ -104,7 +153,15 @@ const styles = StyleSheet.create({
   triggerText: { ...typography.body1, flex: 1, color: colors.grey900 },
   placeholder: { color: colors.grey400 },
   errorMessage: { ...typography.caption, color: colors.error, marginTop: 4 },
-  backdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  container: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  backdropTouch: { flex: 1 },
   sheet: {
     backgroundColor: colors.background,
     borderTopLeftRadius: 20,
