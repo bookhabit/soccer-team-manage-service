@@ -21,7 +21,7 @@ export async function login(body: LoginInput): Promise<AccessTokenResponse> {
 }
 
 export async function signup(body: SignupInput): Promise<SignupResponse> {
-  return http.auth.post<SignupResponse>('/users', signupSchema.parse(body), signupResponseSchema);
+  return http.auth.post<SignupResponse>('/sessions/signup', signupSchema.parse(body), signupResponseSchema);
 }
 
 export async function logout(): Promise<void> {

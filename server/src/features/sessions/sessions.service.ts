@@ -8,6 +8,7 @@ import { ErrorCode } from "../../common/constants/error-codes";
 import { PrismaService } from "../../prisma/prisma.service";
 import { UsersService } from "../users/users.service";
 import type { LoginDto } from "./dto/login.dto";
+import type { CreateUserDto } from "../users/dto/create-user.dto";
 
 /** RefreshToken 원문을 SHA256으로 해시 — DB에는 해시만 저장 */
 function hashToken(token: string): string {
@@ -65,6 +66,11 @@ export class SessionsService {
       });
     }
 
+    return this.issueTokens(user.id, user.email ?? '');
+  }
+
+  async signup(dto: CreateUserDto): Promise<TokenPair> {
+    const user = await this.usersService.create(dto);
     return this.issueTokens(user.id, user.email ?? '');
   }
 

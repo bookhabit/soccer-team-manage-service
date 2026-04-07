@@ -28,10 +28,15 @@ export function useLogin() {
 }
 
 export function useSignup() {
+  const setTokens = useAuthStore((s) => s.setTokens);
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (body: SignupInput) => signup(body),
-    onSuccess: () => {
-      router.replace('/(auth)/onboarding' as any);
+    onSuccess: ({ accessToken, refreshToken }) => {
+      setTokens(accessToken, refreshToken);
+      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
+      router.replace('/(app)');
     },
   });
 }
@@ -45,7 +50,6 @@ export function useLogout() {
     onSettled: () => {
       clearAuth();
       queryClient.clear();
-      router.replace('/(auth)/login');
     },
   });
 }
@@ -57,8 +61,8 @@ export function useOnboarding() {
 
   return useMutation({
     mutationFn: (body: OnboardingInput) => saveOnboarding(body),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(AUTH_QUERY_KEYS.me, updatedProfile);
       router.replace('/(app)');
     },
   });
@@ -98,7 +102,6 @@ export function useWithdraw() {
     onSuccess: () => {
       clearAuth();
       queryClient.clear();
-      router.replace('/(auth)/login');
     },
   });
 }

@@ -5,8 +5,9 @@ import {
 } from '@nestjs/common';
 import {
   ApiTags, ApiOperation, ApiResponse, ApiBearerAuth,
-  ApiUnauthorizedResponse,
+  ApiUnauthorizedResponse, ApiConflictResponse,
 } from '@nestjs/swagger';
+import { CreateUserDto } from '../users/dto/create-user.dto';
 import { Public } from '../../common/decorators/public.decorator';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import type { JwtPayload } from '../../common/guards/jwt-auth.guard';
@@ -20,6 +21,18 @@ import { AccessTokenResponseDto } from './dto/session-response.dto';
 @Controller('api/v1/sessions')
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
+
+  /** 회원가입 — 유저 생성 + 세션 발급 */
+  @Public()
+  @Post('signup')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: '회원가입' })
+  @ApiResponse({ status: 201, description: '회원가입 성공. accessToken과 refreshToken이 발급됩니다.', type: AccessTokenResponseDto })
+  @ApiConflictResponse({ description: '이미 사용 중인 이메일 (EMAIL_ALREADY_EXISTS)' })
+  async signup(@Body() dto: CreateUserDto): Promise<AccessTokenResponseDto> {
+    const { accessToken, refreshToken } = await this.sessionsService.signup(dto);
+    return { accessToken, refreshToken };
+  }
 
   /**
    * 로그인

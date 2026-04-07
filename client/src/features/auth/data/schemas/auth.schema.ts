@@ -42,12 +42,7 @@ export const accessTokenResponseSchema = z.object({
   refreshToken: z.string(),
 });
 
-export const signupResponseSchema = z.object({
-  id: z.string(),
-  email: z.string().nullable(),
-  name: z.string().nullable(),
-  createdAt: z.string(),
-});
+export const signupResponseSchema = accessTokenResponseSchema;
 
 export const userProfileSchema = z.object({
   id: z.string(),
@@ -80,6 +75,6 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type OnboardingInput = z.infer<typeof onboardingSchema>;
 export type AccessTokenResponse = z.infer<typeof accessTokenResponseSchema>;
-export type SignupResponse = z.infer<typeof signupResponseSchema>;
+export type SignupResponse = AccessTokenResponse;
 export type UserProfile = z.infer<typeof userProfileSchema>;
 export type Region = z.infer<typeof regionSchema>;
