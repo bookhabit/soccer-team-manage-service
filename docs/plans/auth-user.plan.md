@@ -1,207 +1,435 @@
-# 인증 & 유저 기획안
+# auth-user Plan
 
-## 개요
+## 1. 기능 개요
 
-현재는 이메일/패스워드 방식으로 구현하며, **개발 중반 단계에서 소셜 로그인으로 전환 예정**.  
-소셜 전환 시 `email`, `passwordHash` 필드는 모두 삭제하고, 사용자는 이메일·비밀번호를 입력하는 일이 없어진다.  
-유저 모델은 소셜 로그인 확장성을 고려하여 설계한다.
+- **목적**: 이메일/패스워드 기반 인증 + 사용자 프로필 관리 + 온보딩 + 회원 탈퇴 구현. 소셜 로그인 전환을 위한 확장 가능한 User 스키마 설계.
+- **현재 구현 범위**: 로그인·회원가입 기본 골격 완성 (email+password, AT+RT SecureStore). 스키마 확장·온보딩·프로필 페이지 미구현.
 
----
-
-## 유저 데이터 구조 (User Schema)
-
-| 필드명            | 타입         | 필수 여부 | 설명                                             |
-| ----------------- | ------------ | --------- | ------------------------------------------------ |
-| `id`              | String(UUID) | 필수      | 시스템 내부 고유 식별자                          |
-| `provider`        | Enum         | 필수      | `LOCAL`, `KAKAO`, `GOOGLE`, `APPLE`              |
-| `providerId`      | String       | 필수      | 소셜 플랫폼 고유 ID (LOCAL 시 userId)            |
-| `name`            | String       | 필수      | 앱 내 사용 이름 (닉네임으로 통일)                |
-| `birthYear`       | Int          | 필수      | 출생 연도 — 나이 표시 용도 (가입 신청 페이지 등) |
-| `gender`          | Enum         | 선택      | `MALE`, `FEMALE` — 팀 가입 필터링 용도           |
-| `position`        | Enum         | 필수      | `FW`, `MF`, `DF`, `GK` — 주 포지션               |
-| `foot`            | Enum         | 필수      | `LEFT`, `RIGHT`, `BOTH` — 주 발                  |
-| `years`           | Int          | 필수      | 축구 경력 (연차)                                 |
-| `level`           | Enum         | 필수      | `BEGINNER`, `AMATEUR`, `SEMI_PRO` 등             |
-| `preferredRegion` | String       | 선택      | 선호 지역 — 클럽 추천 및 검색 기반 데이터        |
-| `avatarUrl`       | String       | 선택      | AI 생성 선수 카드 이미지 경로                    |
-| `status`          | Enum         | 필수      | `ACTIVE`, `RESTRICTED`, `DELETED` — 계정 상태    |
-| `deletedAt`       | DateTime     | 선택      | Soft Delete 타임스탬프                           |
-
-> **등번호는 User 테이블에 없음** — 팀마다 다르므로 `ClubMember` 테이블에 저장
-
-### 소셜 전환 시 처리
-
-- `email`, `passwordHash` 필드 완전 삭제 (마이그레이션)
-- `provider` + `providerId` 조합으로 계정 식별
-- 기존 LOCAL 계정 데이터는 소셜 전환 시 마이그레이션 스크립트로 처리
-
----
-
-## 온보딩 수집 항목
-
-가입 완료 후 온보딩 화면에서 수집:
-
-1. `name` (닉네임)
-2. `birthYear`
-3. `gender`
-4. `position` (주 포지션)
-5. `foot` (주 발)
-6. `years` (경력)
-7. `level` (실력)
-8. `preferredRegion` (선호 지역 — 클럽 검색·추천에 활용)
-
----
-
-## 능력치 입력 정책
-
-팀원 상세 페이지의 능력치 (속도 / 슛 / 패스 / 드리블 / 수비 / 피지컬):
-
-- **최초 입력**: 본인이 직접 입력
-- **이후 수정**: 팀 관리자(주장·부주장)만 수정 가능
-- **목적**: 감독이 선수를 평가하는 사용자 경험 제공
-- **미입력 or 비공개** 처리 가능
-
----
-
-## 1인 1팀 정책
-
-- 유저는 동시에 **하나의 팀에만** 소속 가능
-- 팀 가입 신청 시 이미 다른 팀에 소속되어 있으면 신청 불가
-- 먼저 현재 팀에서 나가야 새 팀에 가입 가능
-
----
-
-## 지역 데이터 구조
-
-하드코딩 없이 **Seed Data** 방식으로 관리한다.
-
-1. 공공데이터포털에서 행정구역 코드 다운로드
-2. JSON/CSV 변환
-3. Prisma `seed.ts`로 서버 배포 시 DB에 1회 자동 입력
-4. 클라이언트: API로 목록 수신 → Select Box 표시
+### 핵심 사용자 시나리오
 
 ```
-Region 모델: id, name(시도), sigungu(시군구), code
+GIVEN 새 유저가 앱을 설치했을 때
+WHEN 회원가입(이메일·비밀번호·닉네임) → 온보딩(포지션 등 7개 항목) 완료
+THEN 홈 화면으로 진입, isOnboarded = true
+
+GIVEN 앱을 종료했다가 재실행할 때
+WHEN SecureStore에 RT가 존재
+THEN 자동으로 silent refresh → 홈 진입 (자동 로그인)
+
+GIVEN 로그인된 유저가 프로필 탭 진입
+WHEN 본인 정보 조회
+THEN FIFA 카드 스타일 프로필 + 경기 통계 + 매너 온도 표시
+
+GIVEN 유저가 회원 탈퇴를 신청
+WHEN 탈퇴 사유 선택 + 동의 → 확인
+THEN PII 즉시 null 처리, deletedAt 기록, 경기 기록은 "탈퇴 사용자"로 익명화 유지
 ```
 
 ---
 
-## 인증 플로우
+## 2. 클라이언트 라우트
 
-### 회원가입 (현재)
-
-1. 이메일 + 패스워드 입력
-2. 온보딩 (위 항목 수집)
-3. 계정 생성 → `provider: LOCAL`
-
-### 로그인
-
-- 이메일 + 패스워드 → JWT 발급
-- Access Token: 메모리(Zustand) + SecureStore
-- Refresh Token: SecureStore + DB(해시)
-- 상세: `docs/client-docs/specs/auth.md` 참고
+| 경로 | 설명 | 내비게이션 타입 |
+|---|---|---|
+| `(auth)/login` | 로그인 | 이미 존재 |
+| `(auth)/signup` | 회원가입 (이메일·비밀번호·닉네임) | 이미 존재 |
+| `(auth)/onboarding` | 온보딩 Funnel (7개 항목 수집) | replace (뒤로 못 감) |
+| `(app)/(tabs)/profile` | 내 프로필 탭 메인 | 탭 |
+| `(app)/profile/edit` | 프로필 수정 | push |
+| `(app)/profile/manner` | 매너 온도 상세 | push |
+| `(app)/profile/withdraw` | 회원 탈퇴 | push |
+| `(app)/profile/settings` | 설정 (로그아웃 포함) | push |
 
 ---
 
-## 매너 점수
+## 3. API 설계
 
-### 초기값
-
-- 신규 가입 시 **100°C** 부여
-
-### 산출 로직
-
-경기 유형과 선수 역할에 따라 평가 주체가 다르다.
-
-| 대상             | 평가 주체               | 평가 시점                  |
-| ---------------- | ----------------------- | -------------------------- |
-| 정규 팀원        | 팀 관리자(주장·부주장)  | 경기 후 관리자가 직접 관리 |
-| 일반 매치전 선수 | 상대팀 선수도 평가 가능 | 경기 후 상대팀 평가 탭     |
-| 용병             | 함께 뛴 팀의 선수들     | 경기 후 팀원들이 평가      |
-
-> 자체전에서는 매너 평가 없음
-
-### 평가 항목
-
-- 시간 준수
-- 실력
-- 태도
-- 의사소통
-
-### 점수 영향 이벤트
-
-- 노쇼 신고 승인 → 점수 하락
-- 매너 온도 **20°C 이하** → 서비스 이용 제한
+| Method | Endpoint | 설명 | Auth |
+|---|---|---|---|
+| `POST` | `/api/v1/users` | 회원가입 | Public |
+| `POST` | `/api/v1/sessions/login` | 로그인 | Public |
+| `POST` | `/api/v1/sessions/refresh` | AT 갱신 | Public (RT) |
+| `DELETE` | `/api/v1/sessions/logout` | 로그아웃 | Bearer AT |
+| `PATCH` | `/api/v1/users/me/onboarding` | 온보딩 정보 저장 | Bearer AT |
+| `GET` | `/api/v1/users/me` | 내 프로필 조회 | Bearer AT |
+| `PATCH` | `/api/v1/users/me` | 프로필 수정 | Bearer AT |
+| `DELETE` | `/api/v1/users/me` | 회원 탈퇴 (Soft Delete + PII 파기) | Bearer AT |
+| `GET` | `/api/v1/regions` | 지역 목록 조회 | Public |
 
 ---
 
-## 프로필 페이지
+## 4. 데이터 레이어 설계 (client/src/features/auth/data/)
 
-### 나의 카드 (팀 소속 기반)
+### Schemas (Zod)
 
-- 이름
-- 포지션
-- 등번호 (소속팀 ClubMember에서 참조)
+**`auth.schema.ts`** — 기존 파일 확장
 
-### 경기 통계 (팀 + 용병 합산)
+```ts
+// 추가할 스키마
+export const onboardingSchema = z.object({
+  name: z.string().min(2).max(20),
+  birthYear: z.number().int().min(1950).max(2010),
+  gender: z.enum(['MALE', 'FEMALE']).optional(),
+  position: z.enum(['FW', 'MF', 'DF', 'GK']),
+  foot: z.enum(['LEFT', 'RIGHT', 'BOTH']),
+  years: z.number().int().min(0).max(50),
+  level: z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']),
+  preferredRegionId: z.string().optional(),
+});
 
-- 경기 수 / 승률 / 골 / 어시스트
+// 업데이트할 스키마 (현재 userProfileSchema 교체)
+export const userProfileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  birthYear: z.number().int(),
+  gender: z.enum(['MALE', 'FEMALE']).nullable(),
+  position: z.enum(['FW', 'MF', 'DF', 'GK']).nullable(),
+  foot: z.enum(['LEFT', 'RIGHT', 'BOTH']).nullable(),
+  years: z.number().int().nullable(),
+  level: z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']).nullable(),
+  preferredRegionId: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  mannerScore: z.number(),
+  status: z.enum(['ACTIVE', 'RESTRICTED', 'DELETED']),
+  isOnboarded: z.boolean(),
+  provider: z.enum(['LOCAL', 'KAKAO', 'GOOGLE', 'APPLE']),
+});
 
-### 업적
+export const regionSchema = z.object({
+  id: z.string(),
+  name: z.string(),       // 시도
+  sigungu: z.string(),    // 시군구
+});
+```
 
-| 업적      | 조건              |
-| --------- | ----------------- |
-| MOM 5회   | MOM 선정 5회 이상 |
-| 해트트릭  | 단일 경기 3골     |
-| 연속 출석 | 연속 참석 10경기  |
+**`user.schema.ts`** — 신규 파일 (user 도메인 스키마 분리)
 
-> 기준 추후 확정 필요
+```ts
+// 프로필 수정 스키마
+export const updateProfileSchema = z.object({
+  name: z.string().min(2).max(20).optional(),
+  position: z.enum(['FW', 'MF', 'DF', 'GK']).optional(),
+  foot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
+  level: z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']).optional(),
+  preferredRegionId: z.string().optional(),
+});
 
-### 매너 점수
+export const withdrawSchema = z.object({
+  reason: z.enum([
+    'TIME_CONFLICT',
+    'MOVING_TEAM',
+    'QUITTING_SOCCER',
+    'BAD_ATMOSPHERE',
+    'OTHER',
+  ]),
+});
+```
 
-- 매너 온도 요약 (4개 항목)
-- 상세 페이지: 항목별 점수, 받은 평가 목록 (평가자 팀명 / 평점 / 날짜)
+### Services
 
-### 소속팀
+**`auth.service.ts`** — 기존 파일 (login, signup 유지)
 
-- 팀 이름 / 팀원 총원 / 레벨 / 역할
+**`user.service.ts`** — 신규 파일
 
-### 기타
+```ts
+// 함수 목록
+getMyProfile(): Promise<UserProfile>
+updateOnboarding(data: OnboardingInput): Promise<UserProfile>
+updateProfile(data: UpdateProfileInput): Promise<UserProfile>
+withdrawAccount(data: WithdrawInput): Promise<void>
+getRegions(): Promise<Region[]>
+```
 
-- 설정 버튼
-- 로그아웃 버튼
-- 회원 탈퇴 버튼
+### Hooks
+
+| Hook | 종류 | 설명 |
+|---|---|---|
+| `useLogin` | useMutation | 기존 유지 |
+| `useSignup` | useMutation | 기존 유지 |
+| `useOnboarding` | useMutation | PATCH /users/me/onboarding |
+| `useMyProfile` | useQuery | GET /users/me |
+| `useUpdateProfile` | useMutation | PATCH /users/me |
+| `useWithdraw` | useMutation | DELETE /users/me |
+| `useRegions` | useQuery | GET /regions (staleTime: Infinity) |
 
 ---
 
-## 회원 탈퇴 및 데이터 처리
+## 5. UI 레이어 설계 (client/src/features/auth/ui/)
 
-### 탈퇴 플로우
+### Container
 
-1. 탈퇴 페이지 진입
-2. 계정 정보 및 삭제·유지 정보 표시
-3. 탈퇴 사유 선택 (필수)
-4. 계정 삭제 동의
-5. 탈퇴 처리
+**`OnboardingContainer`** — `(auth)/onboarding` 에 마운트
 
-### 데이터 처리 방침 (Soft Delete)
+- `useOnboarding` mutate 주입
+- Funnel 상태 관리 (step: 1~7)
+- 완료 시 `router.replace('/(app)')` 
 
-`User.deletedAt`에 타임스탬프 기록. 모든 쿼리에서 `deletedAt IS NULL` 필터 적용.
+**`ProfileContainer`** — `(app)/(tabs)/profile` 에 마운트
 
-**Step 1 — PII 즉시 파기**
+- `useMyProfile` 조회 → 4-state 분기 (loading / error / empty / data)
+- 프로필 수정, 탈퇴, 로그아웃 핸들러 조립
 
-탈퇴 즉시 아래 필드 `null` 처리:
+**`ProfileEditContainer`** — `(app)/profile/edit` 에 마운트
 
-- 이름, 이메일, 전화번호, 생년월일, 아바타 이미지
+- `useMyProfile` + `useUpdateProfile`
+- react-hook-form + zodResolver
 
-**Step 2 — 커뮤니티 콘텐츠**
+**`WithdrawContainer`** — `(app)/profile/withdraw` 에 마운트
 
-- 게시글·댓글 유지, 작성자 표시만 **"탈퇴 사용자"** 로 변경
+- `useWithdraw` mutate
+- 완료 시 `clearAuth()` → `router.replace('/(auth)/login')`
 
-**Step 3 — 경기 기록 (핵심 데이터)**
+### View / Components
 
-- 팀 전적 그대로 유지
-- 골·어시스트·MOM 기록 유지, 선수 이름 **"탈퇴 사용자"** 로 익명화
-- 프로필 링크만 제거 (스코어 무결성 보존)
+| 파일 | 설명 |
+|---|---|
+| `OnboardingView` | 7단계 Funnel UI — 각 단계별 입력 컴포넌트 |
+| `ProfileView` | 프로필 탭 전체 레이아웃 (카드 + 통계 + 매너) |
+| `ProfileEditView` | 수정 폼 |
+| `MannerDetailView` | 매너 온도 항목별 상세 |
+| `WithdrawView` | 탈퇴 사유 선택 + 동의 체크박스 |
+| `components/PlayerCard` | FIFA 카드 스타일 선수 카드 |
+| `components/MannerBadge` | 매너 온도 배지 (°C 표시) |
+| `components/StatSummary` | 경기 수 / 골 / 어시스트 요약 |
 
-> Hard Delete 금지 이유: `ON DELETE CASCADE`로 경기 기록까지 삭제되면 스코어가 깨짐 (3:2 승리인데 골 기록 1개 등)
+---
+
+## 6. 서버 레이어 설계
+
+### Prisma Schema 변경 (`server/prisma/schema.prisma`)
+
+**추가할 Enum**
+
+```prisma
+enum AuthProvider {
+  LOCAL
+  KAKAO
+  GOOGLE
+  APPLE
+}
+
+enum PlayerFoot {
+  LEFT
+  RIGHT
+  BOTH
+}
+
+enum PlayerLevel {
+  BEGINNER
+  AMATEUR
+  SEMI_PRO
+  PRO
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum UserStatus {
+  ACTIVE
+  RESTRICTED
+  DELETED
+}
+```
+
+**User 모델 확장** (현재 모델 교체)
+
+```prisma
+model User {
+  id               String       @id @default(cuid())
+  // 인증 (LOCAL 전용 — 소셜 전환 시 삭제)
+  email            String?      @unique
+  passwordHash     String?
+  // 소셜 로그인 (현재는 null)
+  provider         AuthProvider @default(LOCAL)
+  providerId       String?
+  // 프로필
+  name             String
+  birthYear        Int?
+  gender           Gender?
+  position         PlayerPosition?
+  foot             PlayerFoot?
+  years            Int?
+  level            PlayerLevel?
+  preferredRegionId String?
+  avatarUrl        String?
+  mannerScore      Float        @default(100)
+  isOnboarded      Boolean      @default(false)
+  // 계정 상태
+  status           UserStatus   @default(ACTIVE)
+  deletedAt        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  sessions         Session[]
+  preferredRegion  Region?      @relation(fields: [preferredRegionId], references: [id])
+
+  @@map("users")
+}
+```
+
+**Region 모델 추가**
+
+```prisma
+model Region {
+  id      String @id @default(cuid())
+  name    String          // 시도 (서울특별시)
+  sigungu String          // 시군구 (강남구)
+  code    String @unique  // 행정구역 코드
+
+  users   User[]
+
+  @@map("regions")
+}
+```
+
+### DTO
+
+**`server/src/features/users/dto/`**
+
+| 파일 | 용도 |
+|---|---|
+| `create-user.dto.ts` | 기존 유지 (email, password, nickname) |
+| `onboarding.dto.ts` | 신규 — 온보딩 7개 항목 |
+| `update-profile.dto.ts` | 확장 — name, position, foot, level, preferredRegionId |
+| `withdraw.dto.ts` | 신규 — reason: WithdrawReason enum |
+| `user-response.dto.ts` | 확장 — 전체 UserProfile 필드 반영 |
+
+**`onboarding.dto.ts`**
+
+```ts
+export class OnboardingDto {
+  @IsString() @MinLength(2) @MaxLength(20)  name: string;
+  @IsInt() @Min(1950) @Max(2010)            birthYear: number;
+  @IsOptional() @IsEnum(Gender)             gender?: Gender;
+  @IsEnum(PlayerPosition)                   position: PlayerPosition;
+  @IsEnum(PlayerFoot)                       foot: PlayerFoot;
+  @IsInt() @Min(0) @Max(50)                 years: number;
+  @IsEnum(PlayerLevel)                      level: PlayerLevel;
+  @IsOptional() @IsString()                 preferredRegionId?: string;
+}
+```
+
+### Service 메서드
+
+**`UsersService`** 확장
+
+```ts
+// 기존 유지
+create(dto: CreateUserDto): Promise<SignupResponseDto>
+findById(id: string): Promise<UserProfileResponseDto | null>
+findByEmailForAuth(email: string): Promise<User | null>
+
+// 추가
+saveOnboarding(id: string, dto: OnboardingDto): Promise<UserProfileResponseDto>
+updateProfile(id: string, dto: UpdateProfileDto): Promise<UserProfileResponseDto>
+withdraw(id: string, dto: WithdrawDto): Promise<void>
+  // → deletedAt = now(), status = DELETED
+  // → name = null, email = null, passwordHash = null, avatarUrl = null (PII 파기)
+```
+
+**`RegionsService`** (신규 모듈)
+
+```ts
+findAll(): Promise<Region[]>   // seed 데이터, 캐싱 권장
+```
+
+### Controller 엔드포인트
+
+**`UsersController`** 확장
+
+```ts
+@Public()  @Post()                          signup(dto)
+           @Get('me')                        getMe(user)
+           @Patch('me/onboarding')           saveOnboarding(user, dto)  // ← 신규
+           @Patch('me')                      updateProfile(user, dto)
+           @Delete('me')                     withdraw(user, dto)        // ← 신규
+```
+
+**`RegionsController`** (신규)
+
+```ts
+@Public()  @Get()   findAll()   // GET /api/v1/regions
+```
+
+---
+
+## 7. 예외 처리
+
+### 서버 에러 코드 추가
+
+| 코드 | 설명 | HTTP |
+|---|---|---|
+| `USER_001` | 존재하지 않는 유저 | 404 |
+| `USER_002` | 이미 사용 중인 이메일 | 409 |
+| `USER_003` | 이미 온보딩 완료된 계정 | 409 |
+| `USER_004` | 탈퇴한 계정 | 403 |
+| `USER_005` | 이용 제한 계정 (mannerScore ≤ 20) | 403 |
+| `AUTH_001` | 이메일 또는 비밀번호 불일치 | 401 |
+| `AUTH_002` | 유효하지 않은 토큰 | 401 |
+| `AUTH_003` | 만료된 RT — 재로그인 필요 | 401 |
+| `REGION_001` | 존재하지 않는 지역 ID | 404 |
+
+### 클라이언트 처리
+
+| 시나리오 | 처리 |
+|---|---|
+| 로그인 실패 (AUTH_001) | 폼 아래 "이메일 또는 비밀번호를 확인해주세요" |
+| 이메일 중복 (USER_002) | 회원가입 폼에 인라인 에러 |
+| AT 만료 → silent refresh 실패 | clearAuth() → login 화면으로 replace |
+| 탈퇴 계정 로그인 시도 (USER_004) | "탈퇴한 계정입니다" 알림 |
+| 이용 제한 계정 (USER_005) | "매너 온도가 너무 낮아 이용이 제한됩니다" |
+| 온보딩 미완료 상태에서 앱 접근 | `(auth)/onboarding` 으로 redirect |
+
+---
+
+## 8. 구현 체크리스트
+
+### Schema / DB
+
+- [ ] Prisma schema에 신규 Enum 추가 (AuthProvider, PlayerFoot, PlayerLevel, Gender, UserStatus)
+- [ ] User 모델 필드 확장 (name, birthYear, gender, foot, years, level, preferredRegionId, mannerScore, isOnboarded, status, deletedAt, provider, providerId)
+- [ ] Region 모델 추가
+- [ ] `prisma migrate dev` 실행
+- [ ] `prisma/seed.ts` — 행정구역 데이터 시딩 스크립트 작성
+- [ ] `/erd` 커맨드로 ERD 갱신
+
+### Server
+
+- [ ] 신규 Enum을 `@prisma/client`에서 import하여 DTO에 적용
+- [ ] `onboarding.dto.ts` 작성
+- [ ] `withdraw.dto.ts` 작성
+- [ ] `user-response.dto.ts` 확장 (전체 프로필 필드)
+- [ ] `UsersService.saveOnboarding()` 구현 (중복 온보딩 방지 포함)
+- [ ] `UsersService.withdraw()` 구현 (Soft Delete + PII null 처리)
+- [ ] `UsersController`에 `PATCH me/onboarding`, `DELETE me` 엔드포인트 추가
+- [ ] `RegionsModule` / `RegionsService` / `RegionsController` 생성
+- [ ] 에러 코드 상수 (`error-codes.ts`)에 신규 코드 추가
+- [ ] 로그인 Guard에서 `deletedAt`, `status` 체크 추가
+- [ ] `findByEmailForAuth`에서 디버그용 `findMany` 코드 제거
+
+### Client — Data Layer
+
+- [ ] `auth.schema.ts`에 `onboardingSchema`, 업데이트된 `userProfileSchema`, `regionSchema` 추가
+- [ ] `user.schema.ts` 신규 파일 생성 (`updateProfileSchema`, `withdrawSchema`)
+- [ ] `user.service.ts` 신규 파일 생성
+- [ ] `useOnboarding` hook 작성
+- [ ] `useMyProfile` hook 작성
+- [ ] `useUpdateProfile` hook 작성
+- [ ] `useWithdraw` hook 작성
+- [ ] `useRegions` hook 작성 (staleTime: Infinity)
+
+### Client — UI Layer
+
+- [ ] `OnboardingView` + `OnboardingContainer` 작성
+- [ ] `(auth)/onboarding` 라우트 파일 생성
+- [ ] `_layout.tsx`에서 `isOnboarded` 체크 → onboarding redirect 로직 추가
+- [ ] `ProfileView` + `ProfileContainer` 작성
+- [ ] `ProfileEditView` + `ProfileEditContainer` 작성
+- [ ] `WithdrawView` + `WithdrawContainer` 작성
+- [ ] `MannerDetailView` 작성
+- [ ] `components/PlayerCard` 컴포넌트 작성
+- [ ] `components/MannerBadge` 컴포넌트 작성
+- [ ] `(app)/(tabs)/profile` 라우트 파일 생성
+- [ ] `(app)/profile/edit`, `(app)/profile/withdraw`, `(app)/profile/manner` 라우트 파일 생성

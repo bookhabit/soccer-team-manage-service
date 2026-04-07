@@ -3,6 +3,7 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import * as bcrypt from "bcryptjs";
+import { UserStatus } from "@prisma/client";
 import { ErrorCode } from "../../common/constants/error-codes";
 import { PrismaService } from "../../prisma/prisma.service";
 import { UsersService } from "../users/users.service";
@@ -38,19 +39,11 @@ export class SessionsService {
   ) {}
 
   async login(dto: LoginDto): Promise<TokenPair> {
-    console.log("dto:", dto);
     const user = await this.usersService.findByEmailForAuth(dto.email);
-
-    console.log("1. 찾은 유저 존재 여부:", !!user);
-    if (user) {
-      console.log("2. DB에서 가져온 해시값:", user.passwordHash);
-      // 만약 여기서 user.passwordHash가 undefined라면 서비스 메서드 수정 필요
-    }
 
     const hashToCompare = user?.passwordHash ?? DUMMY_HASH;
     const isValid = await bcrypt.compare(dto.password, hashToCompare);
 
-    console.log("3. 비밀번호 일치 여부:", isValid);
     if (!user || !isValid) {
       throw new UnauthorizedException({
         code: ErrorCode.INVALID_CREDENTIALS,
@@ -58,7 +51,21 @@ export class SessionsService {
       });
     }
 
-    return this.issueTokens(user.id, user.email);
+    if (user.deletedAt !== null || user.status === UserStatus.DELETED) {
+      throw new UnauthorizedException({
+        code: ErrorCode.USER_DELETED,
+        message: "탈퇴한 계정입니다.",
+      });
+    }
+
+    if (user.status === UserStatus.RESTRICTED) {
+      throw new UnauthorizedException({
+        code: ErrorCode.USER_RESTRICTED,
+        message: "매너 온도가 너무 낮아 이용이 제한된 계정입니다.",
+      });
+    }
+
+    return this.issueTokens(user.id, user.email ?? '');
   }
 
   async refresh(refreshToken: string): Promise<TokenPair> {

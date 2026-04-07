@@ -19,7 +19,7 @@ export function SignupContainer() {
     formState: { errors },
   } = useForm<SignupInput>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { email: '', nickname: '', password: '' },
+    defaultValues: { email: '', name: '', password: '' },
   });
 
   const onSubmit = handleSubmit((data) => mutate(data));

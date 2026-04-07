@@ -1,17 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/src/shared/store/useAuthStore';
-import { login, signup, logout, getMe } from '../services/auth.service';
-import type { LoginInput, SignupInput } from '../schemas/auth.schema';
+import { login, signup, logout, getMe, saveOnboarding } from '../services/auth.service';
+import { updateProfile, withdrawAccount, getRegions } from '../services/user.service';
+import type { LoginInput, SignupInput, OnboardingInput } from '../schemas/auth.schema';
+import type { UpdateProfileInput, WithdrawInput } from '../schemas/user.schema';
 
 export const AUTH_QUERY_KEYS = {
   me: ['auth', 'me'] as const,
+  regions: ['regions'] as const,
 };
 
-/**
- * 로그인 뮤테이션.
- * 성공 시 accessToken을 SecureStore에 저장하고 앱 홈으로 이동합니다.
- */
+// ─── 인증 ────────────────────────────────────────────────────────────────────
+
 export function useLogin() {
   const setTokens = useAuthStore((s) => s.setTokens);
   const queryClient = useQueryClient();
@@ -19,35 +20,22 @@ export function useLogin() {
   return useMutation({
     mutationFn: (body: LoginInput) => login(body),
     onSuccess: ({ accessToken, refreshToken }) => {
-      console.log('login successful, received accessToken:', accessToken);
       setTokens(accessToken, refreshToken);
       queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
       router.replace('/(app)');
     },
-    onError: (error) => {
-      // 로그인 실패 시 토큰 제거 (예: 만료된 토큰으로 재로그인 시도)
-      console.log(error.message);
-    },
   });
 }
 
-/**
- * 회원가입 뮤테이션.
- * 성공 시 로그인 화면으로 이동합니다.
- */
 export function useSignup() {
   return useMutation({
     mutationFn: (body: SignupInput) => signup(body),
     onSuccess: () => {
-      router.replace('/(auth)/login');
+      router.replace('/(auth)/onboarding' as any);
     },
   });
 }
 
-/**
- * 로그아웃 뮤테이션.
- * 서버 세션 삭제 후 토큰을 제거하고 로그인 화면으로 이동합니다.
- */
 export function useLogout() {
   const clearAuth = useAuthStore((s) => s.clearAuth);
   const queryClient = useQueryClient();
@@ -62,11 +50,23 @@ export function useLogout() {
   });
 }
 
-/**
- * 내 프로필 조회 쿼리.
- * accessToken이 있을 때만 활성화됩니다.
- */
-export function useMe() {
+// ─── 온보딩 ──────────────────────────────────────────────────────────────────
+
+export function useOnboarding() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: OnboardingInput) => saveOnboarding(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
+      router.replace('/(app)');
+    },
+  });
+}
+
+// ─── 프로필 ──────────────────────────────────────────────────────────────────
+
+export function useMyProfile() {
   const accessToken = useAuthStore((s) => s.accessToken);
 
   return useQuery({
@@ -75,3 +75,44 @@ export function useMe() {
     enabled: !!accessToken,
   });
 }
+
+export function useUpdateProfile() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: UpdateProfileInput) => updateProfile(body),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUTH_QUERY_KEYS.me });
+    },
+  });
+}
+
+// ─── 회원 탈퇴 ───────────────────────────────────────────────────────────────
+
+export function useWithdraw() {
+  const clearAuth = useAuthStore((s) => s.clearAuth);
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (body: WithdrawInput) => withdrawAccount(body),
+    onSuccess: () => {
+      clearAuth();
+      queryClient.clear();
+      router.replace('/(auth)/login');
+    },
+  });
+}
+
+// ─── 지역 ────────────────────────────────────────────────────────────────────
+
+export function useRegions() {
+  return useQuery({
+    queryKey: AUTH_QUERY_KEYS.regions,
+    queryFn: getRegions,
+    staleTime: Infinity, // seed 데이터 — 변경 없음
+  });
+}
+
+// ─── 하위 호환 (기존 useMe 별칭 유지) ────────────────────────────────────────
+/** @deprecated useMyProfile 을 사용하세요 */
+export const useMe = useMyProfile;

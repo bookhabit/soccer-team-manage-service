@@ -151,11 +151,11 @@ ToastProvider, useToast
 
 ### 파일 규칙
 
-| 파일 | 용도 | 작성 주체 |
-| ---- | ---- | --------- |
-| `docs/plans/{feature}.brief.md` | 기획안 (비즈니스 요구사항) | 개발자가 직접 작성 |
-| `docs/plans/{feature}.plan.md` | 구현 설계 (API·레이어·체크리스트) | `/plan` 에이전트가 생성 |
-| `docs/plans/{feature}.cases.md` | 테스트 케이스 | `/case` 에이전트가 생성 |
+| 파일                            | 용도                              | 작성 주체               |
+| ------------------------------- | --------------------------------- | ----------------------- |
+| `docs/plans/{feature}.brief.md` | 기획안 (비즈니스 요구사항)        | 개발자가 직접 작성      |
+| `docs/plans/{feature}.plan.md`  | 구현 설계 (API·레이어·체크리스트) | `/plan` 에이전트가 생성 |
+| `docs/plans/{feature}.cases.md` | 테스트 케이스                     | `/case` 에이전트가 생성 |
 
 > `/review`는 `{feature}.brief.md`를 읽고 검토한다. `/plan`은 `{feature}.plan.md`를 생성(덮어쓰기)한다. 두 파일을 혼용하지 않는다.
 
@@ -167,7 +167,7 @@ ToastProvider, useToast
 4. /logic {feature}   → Data Layer + Server 구현
 5. /ui {feature}      → UI Layer 구현
 6. /test {feature}    → 테스트 코드 작성
-7. /refactor {feature} → 코드 품질 점검 + ERD 동기화
+7. /refactor {feature} → 코드 품질 점검
 8. /performance {feature} → 성능 최적화
 9. /security {feature} → 보안 점검
 ```

@@ -8,6 +8,13 @@ export const ErrorCode = {
 
   // ─── User ──────────────────────────────────────────────────────────────────
   EMAIL_ALREADY_EXISTS: 'EMAIL_ALREADY_EXISTS',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  ONBOARDING_ALREADY_DONE: 'ONBOARDING_ALREADY_DONE',
+  USER_DELETED: 'USER_DELETED',
+  USER_RESTRICTED: 'USER_RESTRICTED',
+
+  // ─── Region ────────────────────────────────────────────────────────────────
+  REGION_NOT_FOUND: 'REGION_NOT_FOUND',
 
   // ─── Team ──────────────────────────────────────────────────────────────────
   TEAM_NOT_FOUND: 'TEAM_NOT_FOUND',

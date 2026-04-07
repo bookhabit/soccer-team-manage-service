@@ -10,7 +10,7 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <TextBox variant="heading2" color={colors.grey900} style={styles.greeting}>안녕하세요, {me?.nickname ?? '...'}님!</TextBox>
+      <TextBox variant="heading2" color={colors.grey900} style={styles.greeting}>안녕하세요, {me?.name ?? '...'}님!</TextBox>
       <TextBox variant="body2" color={colors.grey500} style={styles.email}>{me?.email}</TextBox>
 
       <Button variant="danger" size="medium" loading={isPending} onPress={() => logout()}>

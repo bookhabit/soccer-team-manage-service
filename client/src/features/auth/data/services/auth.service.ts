@@ -1,46 +1,37 @@
-import { http, apiClient } from '@/src/shared/http';
+import { http } from '@/src/shared/http/apiClient';
+import {
+  loginSchema,
+  signupSchema,
+  accessTokenResponseSchema,
+  signupResponseSchema,
+  userProfileSchema,
+  onboardingSchema,
+} from '../schemas/auth.schema';
 import type {
   LoginInput,
   SignupInput,
   AccessTokenResponse,
   SignupResponse,
   UserProfile,
-} from '../schemas/auth.schema';
-import {
-  accessTokenResponseSchema,
-  signupResponseSchema,
-  userProfileSchema,
+  OnboardingInput,
 } from '../schemas/auth.schema';
 
-/**
- * 로그인 — accessToken은 body, refreshToken은 httpOnly 쿠키로 수신
- */
 export async function login(body: LoginInput): Promise<AccessTokenResponse> {
-  console.log('login service called with', body);
-  return apiClient.http.auth.post<AccessTokenResponse>(
-    '/sessions',
-    body,
-    accessTokenResponseSchema,
-  );
+  return http.auth.post<AccessTokenResponse>('/sessions', loginSchema.parse(body), accessTokenResponseSchema);
 }
 
-/**
- * 회원가입
- */
 export async function signup(body: SignupInput): Promise<SignupResponse> {
-  return apiClient.http.auth.post<SignupResponse>('/users', body, signupResponseSchema);
+  return http.auth.post<SignupResponse>('/users', signupSchema.parse(body), signupResponseSchema);
 }
 
-/**
- * 로그아웃 — DB 세션 삭제 + RT 쿠키 제거
- */
 export async function logout(): Promise<void> {
   await http.delete('/sessions');
 }
 
-/**
- * 내 프로필 조회
- */
 export async function getMe(): Promise<UserProfile> {
   return http.get<UserProfile>('/users/me', undefined, userProfileSchema);
+}
+
+export async function saveOnboarding(body: OnboardingInput): Promise<UserProfile> {
+  return http.patch<UserProfile>('/users/me/onboarding', onboardingSchema.parse(body), userProfileSchema);
 }

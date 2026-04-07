@@ -35,6 +35,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('존재하지 않는 사용자입니다.');
     }
 
-    return { sub: user.id, email: user.email };
+    return { sub: user.id, email: user.email ?? '' };
   }
 }

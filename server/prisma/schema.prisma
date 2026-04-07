@@ -21,19 +21,76 @@ enum PlayerPosition {
   GK
 }
 
+enum AuthProvider {
+  LOCAL
+  KAKAO
+  GOOGLE
+  APPLE
+}
+
+enum PlayerFoot {
+  LEFT
+  RIGHT
+  BOTH
+}
+
+enum PlayerLevel {
+  BEGINNER
+  AMATEUR
+  SEMI_PRO
+  PRO
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum UserStatus {
+  ACTIVE
+  RESTRICTED
+  DELETED
+}
+
 // ─── Models ───────────────────────────────────────────────────────────────────
 
 model User {
-  id           String          @id @default(cuid())
-  email        String          @unique
-  passwordHash String
-  nickname     String
-  position     PlayerPosition?
-  skillLevel   Int             @default(3) // 1~5
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id                String          @id @default(cuid())
 
-  sessions Session[]
+  // 인증 (LOCAL 전용 — 소셜 전환 시 삭제)
+  email             String?         @unique
+  passwordHash      String?
+
+  // 소셜 로그인 (현재는 null — 이후 KAKAO/GOOGLE/APPLE 지원)
+  provider          AuthProvider    @default(LOCAL)
+  providerId        String?
+
+  // 프로필 (PII 필드 — 탈퇴 시 null 처리)
+  name              String?
+  birthYear         Int?
+  gender            Gender?
+  avatarUrl         String?
+
+  // 축구 정보
+  position          PlayerPosition?
+  foot              PlayerFoot?
+  years             Int?
+  level             PlayerLevel?
+
+  // 선호 지역
+  preferredRegionId String?
+
+  // 매너 & 상태
+  mannerScore       Float           @default(100)
+  isOnboarded       Boolean         @default(false)
+  status            UserStatus      @default(ACTIVE)
+  deletedAt         DateTime?
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  sessions          Session[]
+  preferredRegion   Region?         @relation(fields: [preferredRegionId], references: [id])
 
   @@map("users")
 }
@@ -49,4 +106,15 @@ model Session {
 
   @@unique([userId])
   @@map("sessions")
+}
+
+model Region {
+  id      String @id @default(cuid())
+  name    String         // 시도 (서울특별시)
+  sigungu String         // 시군구 (강남구)
+  code    String @unique // 행정구역 코드
+
+  users   User[]
+
+  @@map("regions")
 }

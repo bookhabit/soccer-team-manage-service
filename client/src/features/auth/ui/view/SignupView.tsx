@@ -49,7 +49,7 @@ export function SignupView({
 
       <Controller
         control={control}
-        name="nickname"
+        name="name"
         render={({ field: { onChange, value } }) => (
           <View style={styles.fieldWrapper}>
             <TextField
@@ -57,7 +57,7 @@ export function SignupView({
               placeholder="닉네임 (2~20자)"
               value={value}
               onChangeText={onChange}
-              errorMessage={errors.nickname?.message}
+              errorMessage={errors.name?.message}
             />
           </View>
         )}
