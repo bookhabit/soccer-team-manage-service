@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -14,7 +14,21 @@ export const unstable_settings = {
 };
 
 function RootLayoutNav() {
-  const { isHydrated } = useAuthStore();
+  const { isHydrated, accessToken } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
+
+  const inAuthGroup = segments[0] === '(auth)';
+
+  useEffect(() => {
+    if (!isHydrated) return;
+
+    if (accessToken && inAuthGroup) {
+      router.replace('/(app)');
+    } else if (!accessToken && !inAuthGroup) {
+      router.replace('/(auth)/login');
+    }
+  }, [isHydrated, accessToken, inAuthGroup]);
 
   if (!isHydrated) return null;
 
