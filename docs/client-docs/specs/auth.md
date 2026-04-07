@@ -32,18 +32,53 @@ SecureStore는 iOS Keychain / Android Keystore로 구현되며, OS 레벨 암호
 
 ## 인증 플로우
 
-### 앱 시작 (자동 로그인)
+### 앱 시작 (자동 로그인 유지)
 
 ```
 앱 시작
-  └─ hydrate()
+  └─ RootLayout: hydrate() 호출
        ├─ SecureStore에서 AT, RT 병렬 복원 (Promise.all)
-       ├─ isHydrated: true → RootLayoutNav 렌더
-       │
-       ├─ AT 존재 & 유효 → 앱 진입
-       ├─ AT 존재 & 만료 → 첫 API 401 → Silent Refresh → 앱 유지
-       └─ AT 없음 or RT 만료 → /(auth)/login 리다이렉트
+       ├─ isHydrated: false → RootLayoutNav: null 반환 (스플래시 유지)
+       └─ isHydrated: true → useEffect 발동 (useSegments 기반 라우팅)
+            ├─ AT 있고 (auth) 그룹에 위치 → router.replace('/(app)')
+            ├─ AT 없고 (app) 그룹에 위치 → router.replace('/(auth)/login')
+            └─ 그 외 → 이동 없음 (이미 올바른 위치)
+
+(app)/_layout.tsx 진입 후
+  ├─ AT 유효 → 앱 진입
+  ├─ AT 만료 → 첫 API 401 → Silent Refresh → 앱 유지
+  └─ AT 없음 or RT 만료 → /(auth)/login 리다이렉트
 ```
+
+> **라우팅 방식**: `<Redirect>` 컴포넌트 대신 `useSegments` + `useEffect`를 사용한다.  
+> `<Redirect>`는 렌더 시점에 즉시 발동하므로 hydration 완료 전에 `(app)/_layout`이 null을 반환하면  
+> Expo Router가 `(auth)`로 fallback하는 레이스 컨디션이 발생한다.  
+> `useEffect`는 `isHydrated: true` 확인 후에만 실행되므로 이 문제를 방지한다.
+
+### 회원가입 + 온보딩
+
+```
+useSignup() → signup(body)
+  └─ POST /api/v1/sessions/signup        ← 유저 생성 + 세션 발급을 하나의 엔드포인트에서 처리
+       └─ 응답: { accessToken, refreshToken }
+            └─ setTokens(at, rt)
+                 ├─ Zustand: { accessToken, refreshToken }
+                 ├─ SecureStore: ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY
+                 └─ router.replace('/(app)')
+                      └─ (app)/_layout.tsx: isOnboarded: false 감지
+                           └─ <Redirect href="/(auth)/onboarding" />
+
+useOnboarding() → saveOnboarding(body)
+  └─ PATCH /api/v1/users/me/onboarding   ← privateApi (AT 필요, 위에서 발급됨)
+       └─ 응답: UserProfile (isOnboarded: true)
+            └─ queryClient.setQueryData(AUTH_QUERY_KEYS.me, updatedProfile)
+                 └─ (app)/_layout.tsx: isOnboarded: true → redirect 없음
+                 └─ router.replace('/(app)')
+```
+
+> **setQueryData 사용 이유**: `invalidateQueries`를 쓰면 캐시에 stale된 `isOnboarded: false` 데이터가  
+> 잠시 남아있어 `(app)/_layout`이 온보딩으로 다시 redirect한다.  
+> `setQueryData`로 즉시 업데이트하면 이 문제가 발생하지 않는다.
 
 ### 로그인
 
@@ -54,7 +89,9 @@ useLogin() → login(body)
             └─ setTokens(at, rt)
                  ├─ Zustand: { accessToken, refreshToken }
                  ├─ SecureStore: ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY
+                 ├─ queryClient.invalidateQueries(me)
                  └─ router.replace('/(app)')
+                      └─ (app)/_layout.tsx: isOnboarded: true → 앱 진입
 ```
 
 ### Silent Refresh (AT 만료 시 자동 갱신)
@@ -68,7 +105,9 @@ privateApi 요청 → 401 응답
             └─ 성공: 새 { accessToken, refreshToken }
                  ├─ setTokens(newAt, newRt)
                  └─ 실패한 원래 요청 재시도
-            └─ 실패: onAuthFailure() → clearAuth() → 로그인 화면
+            └─ 실패: onAuthFailure() → clearAuth()
+                 └─ RootLayoutNav useEffect 발동
+                      └─ AT 없음 + (app) 그룹 → router.replace('/(auth)/login')
 ```
 
 > 동시에 여러 요청이 401이 나는 경우, `failedQueue`에 적재 후 갱신 완료 시 일괄 재시도.
@@ -82,8 +121,14 @@ useLogout() → logout()
             └─ clearAuth()
                  ├─ Zustand: { accessToken: null, refreshToken: null }
                  ├─ SecureStore: ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY 삭제
-                 └─ queryClient.clear() → router.replace('/(auth)/login')
+                 ├─ queryClient.clear()
+                 └─ RootLayoutNav useEffect 발동 (router.replace 직접 호출 안 함)
+                      └─ AT 없음 + (app) 그룹 → router.replace('/(auth)/login')
 ```
+
+> `useLogout`, `useWithdraw`는 `router.replace`를 직접 호출하지 않는다.  
+> `clearAuth()` → AT null → `RootLayoutNav` useEffect가 자동으로 login으로 이동시킨다.  
+> `onAuthFailure`(토큰 갱신 실패)도 동일하게 처리된다.
 
 ---
 
@@ -97,7 +142,7 @@ useLogout() → logout()
        ├─ 일치 → 새 토큰 쌍 발급, DB에 hashToken(RT_new) 저장
        └─ 불일치 → 재사용 감지
             └─ DB 세션 강제 삭제 + 401 TOKEN_REUSE_DETECTED
-                 └─ 클라이언트: clearAuth() → 로그인 화면
+                 └─ 클라이언트: clearAuth() → RootLayoutNav useEffect → login 화면
 ```
 
 DB에는 RT 원문이 아닌 **SHA-256 해시만** 저장한다.
@@ -105,6 +150,18 @@ DB에는 RT 원문이 아닌 **SHA-256 해시만** 저장한다.
 ---
 
 ## 서버 API
+
+### `POST /api/v1/sessions/signup` — 회원가입
+
+```
+@Public()  // 인증 불필요
+Request  body: { email, password, name }
+Response body: { accessToken, refreshToken }   ← 유저 생성 + 세션 발급 동시 처리
+```
+
+> 기존 `POST /api/v1/users`는 유저 데이터만 반환했으나, 온보딩 엔드포인트가 AT를 요구하므로  
+> 회원가입 시점에 바로 세션을 발급한다. `SessionsService`가 이미 `UsersService`를 주입받으므로  
+> 순환 의존성 없이 구현 가능하다.
 
 ### `POST /api/v1/sessions` — 로그인
 
@@ -158,7 +215,8 @@ JwtStrategy는 AT 검증 후 DB에서 user 존재 여부만 확인한다 (세션
 | 인증 hooks | `client/src/features/auth/data/hooks/useAuth.ts` |
 | 인증 API 서비스 | `client/src/features/auth/data/services/auth.service.ts` |
 | Zod 스키마 | `client/src/features/auth/data/schemas/auth.schema.ts` |
-| 진입점 라우트 가드 | `client/app/(app)/_layout.tsx` |
+| 진입점 라우트 가드 | `client/app/_layout.tsx` (useSegments + useEffect) |
+| 앱 영역 보호 레이아웃 | `client/app/(app)/_layout.tsx` |
 | hydrate 호출 위치 | `client/app/_layout.tsx` |
 
 ---
@@ -184,11 +242,18 @@ interface AuthState {
 ```
 isHydrated: false  →  null (스플래시 유지)
 isHydrated: true
-  ├─ accessToken 있음  →  (app) 진입
-  └─ accessToken 없음  →  (auth)/login 리다이렉트
+  ├─ accessToken 있음 + (auth) 그룹  →  router.replace('/(app)')
+  ├─ accessToken 없음 + (app) 그룹   →  router.replace('/(auth)/login')
+  └─ 그 외                           →  현재 위치 유지
+
+(app) 진입 후
+  ├─ isOnboarded: true   →  앱 정상 진입
+  └─ isOnboarded: false  →  <Redirect href="/(auth)/onboarding" />
 ```
 
-> `hydrate()`는 `_layout.tsx`에서 앱 최초 마운트 시 1회만 호출한다.
+> 라우팅 책임 분리:
+> - `_layout.tsx` (RootLayoutNav): AT 유무에 따른 auth ↔ app 전환 담당
+> - `(app)/_layout.tsx`: 온보딩 완료 여부 체크 담당
 
 ---
 
