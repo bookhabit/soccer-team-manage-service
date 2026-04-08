@@ -66,6 +66,8 @@ export function Select({
     backdropOpacity.setValue(0);
     sheetTranslateY.setValue(300);
     setIsOpen(true);
+    // onShow 대신 rAF 사용 — Modal mount 다음 프레임에 즉시 시작 (브릿지 왕복 없음)
+    requestAnimationFrame(animateIn);
   };
 
   const close = () => {
@@ -97,7 +99,6 @@ export function Select({
         transparent
         animationType="none"
         onRequestClose={close}
-        onShow={animateIn}
       >
         <View style={styles.container}>
           <Animated.View
@@ -158,7 +159,11 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   backdropTouch: { flex: 1 },
