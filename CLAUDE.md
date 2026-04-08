@@ -162,8 +162,8 @@ ToastProvider, useToast
 ```
 0. {feature}.brief.md 직접 작성 (기획안)
 1. /review {feature}  → 기획안 검토 (brief.md 기반)
-2. /plan {feature}    → 구현 설계 (docs/plans/{feature}.plan.md)
-3. /case {feature}    → 테스트케이스 정의 (docs/plans/{feature}.cases.md)
+2. /plan {feature}    → 구현 설계 (docs/plans/(feature)/{feature}.plan.md)
+3. /case {feature}    → 테스트케이스 정의 (docs/plans/(feature)/{feature}.cases.md)
 4. /logic {feature}   → Data Layer + Server 구현
 5. /ui {feature}      → UI Layer 구현
 6. /refactor {feature} → 코드 품질 점검
