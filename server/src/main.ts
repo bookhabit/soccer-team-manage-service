@@ -2,11 +2,13 @@ import "reflect-metadata";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import helmet from "helmet";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const cookieParser = require("cookie-parser");
 import { AppModule } from "./app.module";
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
+import { SanitizeInterceptor } from "./common/interceptors/sanitize.interceptor";
 
 function requireEnv(key: string): string {
   const value = process.env[key];
@@ -27,10 +29,16 @@ async function bootstrap() {
   // httpOnly Cookie를 읽기 위해 cookie-parser 필수
   app.use(cookieParser());
 
+  // HTTP 보안 헤더 강화 (XSS, 클릭재킹 방어)
+  app.use(helmet());
+
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // 전역 로깅 인터셉터
-  app.useGlobalInterceptors(new LoggingInterceptor());
+  // 전역 인터셉터: 로깅 → Sanitize 순서
+  app.useGlobalInterceptors(
+    new LoggingInterceptor(),
+    new SanitizeInterceptor(),
+  );
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -51,14 +59,14 @@ async function bootstrap() {
     .setTitle("Soccer Team App API")
     .setVersion("1.0")
     .addBearerAuth()
-    .addCookieAuth("guide_app_rt")
+    .addCookieAuth("soccer_app_rt")
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup("api/docs", app, document);
 
   const port = process.env["PORT"] ?? 4000;
   await app.listen(port);
-  console.log(`🚀 Guide App Server running on http://localhost:${port}`);
+  console.log(`🚀 Soccer Team App Server running on http://localhost:${port}`);
   console.log(`📄 Swagger: http://localhost:${port}/api/docs`);
 }
 

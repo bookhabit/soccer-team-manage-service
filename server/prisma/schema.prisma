@@ -91,6 +91,10 @@ model User {
 
   sessions          Session[]
   preferredRegion   Region?         @relation(fields: [preferredRegionId], references: [id])
+  clubMemberships   ClubMember[]
+  clubJoinRequests  ClubJoinRequest[]
+  posts             Post[]
+  comments          Comment[]
 
   @@map("users")
 }
@@ -115,6 +119,198 @@ model Region {
   code    String @unique // 행정구역 코드
 
   users   User[]
+  clubs   Club[]
 
   @@map("regions")
+}
+
+// ─── Club ─────────────────────────────────────────────────────────────────────
+
+enum ClubLevel {
+  BEGINNER
+  AMATEUR
+  SEMI_PRO
+  PRO
+}
+
+enum RecruitmentStatus {
+  OPEN
+  CLOSED
+}
+
+enum ClubRole {
+  CAPTAIN
+  VICE_CAPTAIN
+  MEMBER
+}
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum PostType {
+  NOTICE
+  GENERAL
+  INQUIRY
+}
+
+enum DissolveVoteStatus {
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+model Club {
+  id                  String            @id @default(cuid())
+  name                String
+  regionId            String
+  level               ClubLevel
+  maxMemberCount      Int               // 2–50
+  currentMemberCount  Int               @default(1)
+  mannerScoreAvg      Float             @default(100)
+  recruitmentStatus   RecruitmentStatus @default(OPEN)
+  logoUrl             String?
+  description         String?
+  isDeleted           Boolean           @default(false)
+  deletedAt           DateTime?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  region              Region            @relation(fields: [regionId], references: [id])
+  members             ClubMember[]
+  joinRequests        ClubJoinRequest[]
+  inviteCodes         ClubInviteCode[]
+  banRecords          ClubBanRecord[]
+  dissolveVotes       ClubDissolveVote[]
+  posts               Post[]
+
+  @@map("clubs")
+}
+
+model ClubMember {
+  id            String    @id @default(cuid())
+  clubId        String
+  userId        String
+  role          ClubRole  @default(MEMBER)
+  jerseyNumber  Int?
+  // 능력치
+  speed         Int?
+  shoot         Int?
+  pass          Int?
+  dribble       Int?
+  defense       Int?
+  physical      Int?
+  isStatsPublic Boolean   @default(true)
+  isPhonePublic Boolean   @default(false)
+  joinedAt      DateTime  @default(now())
+
+  club          Club      @relation(fields: [clubId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@unique([clubId, userId])
+  @@unique([clubId, jerseyNumber])
+  @@map("club_members")
+}
+
+model ClubJoinRequest {
+  id        String            @id @default(cuid())
+  clubId    String
+  userId    String
+  message   String?
+  status    JoinRequestStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  club      Club              @relation(fields: [clubId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+
+  @@unique([clubId, userId])
+  @@map("club_join_requests")
+}
+
+model ClubInviteCode {
+  id        String   @id @default(cuid())
+  clubId    String
+  code      String   @unique
+  expiresAt DateTime
+  createdBy String
+  createdAt DateTime @default(now())
+
+  club      Club     @relation(fields: [clubId], references: [id])
+
+  @@map("club_invite_codes")
+}
+
+model ClubBanRecord {
+  id        String   @id @default(cuid())
+  clubId    String
+  userId    String
+  bannedBy  String
+  bannedAt  DateTime @default(now())
+
+  club      Club     @relation(fields: [clubId], references: [id])
+
+  @@map("club_ban_records")
+}
+
+model ClubDissolveVote {
+  id          String             @id @default(cuid())
+  clubId      String
+  initiatedBy String
+  status      DissolveVoteStatus @default(IN_PROGRESS)
+  expiresAt   DateTime
+  createdAt   DateTime           @default(now())
+
+  club        Club               @relation(fields: [clubId], references: [id])
+  responses   ClubDissolveVoteResponse[]
+
+  @@map("club_dissolve_votes")
+}
+
+model ClubDissolveVoteResponse {
+  id      String  @id @default(cuid())
+  voteId  String
+  userId  String
+  agreed  Boolean
+
+  vote    ClubDissolveVote @relation(fields: [voteId], references: [id], onDelete: Cascade)
+
+  @@unique([voteId, userId])
+  @@map("club_dissolve_vote_responses")
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  clubId       String
+  authorId     String
+  type         PostType @default(GENERAL)
+  title        String
+  content      String
+  isPinned     Boolean  @default(false)
+  viewCount    Int      @default(0)
+  commentCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  club         Club     @relation(fields: [clubId], references: [id])
+  author       User     @relation(fields: [authorId], references: [id])
+  comments     Comment[]
+
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@map("comments")
 }

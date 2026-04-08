@@ -49,6 +49,55 @@ RESTRICTED RESTRICTED
 DELETED DELETED
         }
     
+
+
+        ClubLevel {
+            BEGINNER BEGINNER
+AMATEUR AMATEUR
+SEMI_PRO SEMI_PRO
+PRO PRO
+        }
+    
+
+
+        RecruitmentStatus {
+            OPEN OPEN
+CLOSED CLOSED
+        }
+    
+
+
+        ClubRole {
+            CAPTAIN CAPTAIN
+VICE_CAPTAIN VICE_CAPTAIN
+MEMBER MEMBER
+        }
+    
+
+
+        JoinRequestStatus {
+            PENDING PENDING
+APPROVED APPROVED
+REJECTED REJECTED
+        }
+    
+
+
+        PostType {
+            NOTICE NOTICE
+GENERAL GENERAL
+INQUIRY INQUIRY
+        }
+    
+
+
+        DissolveVoteStatus {
+            IN_PROGRESS IN_PROGRESS
+APPROVED APPROVED
+REJECTED REJECTED
+EXPIRED EXPIRED
+        }
+    
   "users" {
     String id "🗝️"
     String email "❓"
@@ -87,6 +136,101 @@ DELETED DELETED
     String code 
     }
   
+
+  "clubs" {
+    String id "🗝️"
+    String name 
+    ClubLevel level 
+    Int maxMemberCount 
+    Int currentMemberCount 
+    Float mannerScoreAvg 
+    RecruitmentStatus recruitmentStatus 
+    String logoUrl "❓"
+    String description "❓"
+    Boolean isDeleted 
+    DateTime deletedAt "❓"
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "club_members" {
+    String id "🗝️"
+    ClubRole role 
+    Int jerseyNumber "❓"
+    Int speed "❓"
+    Int shoot "❓"
+    Int pass "❓"
+    Int dribble "❓"
+    Int defense "❓"
+    Int physical "❓"
+    Boolean isStatsPublic 
+    Boolean isPhonePublic 
+    DateTime joinedAt 
+    }
+  
+
+  "club_join_requests" {
+    String id "🗝️"
+    String message "❓"
+    JoinRequestStatus status 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "club_invite_codes" {
+    String id "🗝️"
+    String code 
+    DateTime expiresAt 
+    String createdBy 
+    DateTime createdAt 
+    }
+  
+
+  "club_ban_records" {
+    String id "🗝️"
+    String userId 
+    String bannedBy 
+    DateTime bannedAt 
+    }
+  
+
+  "club_dissolve_votes" {
+    String id "🗝️"
+    String initiatedBy 
+    DissolveVoteStatus status 
+    DateTime expiresAt 
+    DateTime createdAt 
+    }
+  
+
+  "club_dissolve_vote_responses" {
+    String id "🗝️"
+    String userId 
+    Boolean agreed 
+    }
+  
+
+  "posts" {
+    String id "🗝️"
+    PostType type 
+    String title 
+    String content 
+    Boolean isPinned 
+    Int viewCount 
+    Int commentCount 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "comments" {
+    String id "🗝️"
+    String content 
+    DateTime createdAt 
+    }
+  
     "users" |o--|| "AuthProvider" : "enum:provider"
     "users" |o--|o "Gender" : "enum:gender"
     "users" |o--|o "PlayerPosition" : "enum:position"
@@ -95,4 +239,23 @@ DELETED DELETED
     "users" |o--|| "UserStatus" : "enum:status"
     "users" }o--|o regions : "preferredRegion"
     "sessions" }o--|| users : "user"
+    "clubs" |o--|| "ClubLevel" : "enum:level"
+    "clubs" |o--|| "RecruitmentStatus" : "enum:recruitmentStatus"
+    "clubs" }o--|| regions : "region"
+    "club_members" |o--|| "ClubRole" : "enum:role"
+    "club_members" }o--|| clubs : "club"
+    "club_members" }o--|| users : "user"
+    "club_join_requests" |o--|| "JoinRequestStatus" : "enum:status"
+    "club_join_requests" }o--|| clubs : "club"
+    "club_join_requests" }o--|| users : "user"
+    "club_invite_codes" }o--|| clubs : "club"
+    "club_ban_records" }o--|| clubs : "club"
+    "club_dissolve_votes" |o--|| "DissolveVoteStatus" : "enum:status"
+    "club_dissolve_votes" }o--|| clubs : "club"
+    "club_dissolve_vote_responses" }o--|| club_dissolve_votes : "vote"
+    "posts" |o--|| "PostType" : "enum:type"
+    "posts" }o--|| clubs : "club"
+    "posts" }o--|| users : "author"
+    "comments" }o--|| posts : "post"
+    "comments" }o--|| users : "author"
 ```
