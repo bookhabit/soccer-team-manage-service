@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import {
-  Select, TextBox, Spacing, BottomCTASingle, SafeAreaWrapper, colors, spacing,
+  Select, TextBox, Spacing, BottomCTASingle, ScreenLayout, colors, spacing,
 } from '@ui';
 import type { WithdrawInput } from '../../data/schemas/user.schema';
 
@@ -29,8 +29,9 @@ export function WithdrawView({
   onSubmit,
 }: WithdrawViewProps) {
   return (
-    <View style={styles.container}>
-      <SafeAreaWrapper edges={['top']} />
+    <ScreenLayout
+      bottomSlot={<BottomCTASingle label="탈퇴하기" onClick={onSubmit} loading={isPending} />}
+    >
       <ScrollView
         style={styles.flex1}
         contentContainerStyle={styles.content}
@@ -75,20 +76,11 @@ export function WithdrawView({
           )}
         />
       </ScrollView>
-
-      <SafeAreaWrapper edges={['bottom']}>
-        <BottomCTASingle
-          label="탈퇴하기"
-          onClick={onSubmit}
-          loading={isPending}
-        />
-      </SafeAreaWrapper>
-    </View>
+    </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
   flex1: { flex: 1 },
   content: {
     padding: spacing[6],

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import {
-  TextBox, Spacing, SafeAreaWrapper, Skeleton, colors, spacing,
+  TextBox, Spacing, ScreenLayout, Skeleton, colors, spacing,
 } from '@ui';
 import type { UserProfile } from '../../data/schemas/auth.schema';
 import { MannerBadge } from '../components/MannerBadge';
@@ -31,24 +31,21 @@ function getMannerDescription(score: number): string {
 export function MannerDetailView({ profile, isLoading }: MannerDetailViewProps) {
   if (isLoading) {
     return (
-      <View style={styles.container}>
-        <SafeAreaWrapper>
-          <View style={styles.content}>
-            <Skeleton width="60%" height={32} borderRadius={8} />
-            <Spacing size={4} />
-            <Skeleton width="100%" height={120} borderRadius={16} />
-          </View>
-        </SafeAreaWrapper>
-      </View>
+      <ScreenLayout>
+        <View style={styles.content}>
+          <Skeleton width="60%" height={32} borderRadius={8} />
+          <Spacing size={4} />
+          <Skeleton width="100%" height={120} borderRadius={16} />
+        </View>
+      </ScreenLayout>
     );
   }
 
   const score = profile?.mannerScore ?? 100;
 
   return (
-    <View style={styles.container}>
-      <SafeAreaWrapper>
-        <ScrollView contentContainerStyle={styles.content}>
+    <ScreenLayout>
+      <ScrollView contentContainerStyle={styles.content}>
         <TextBox variant="heading2" color={colors.grey900}>매너 온도</TextBox>
         <Spacing size={6} />
 
@@ -75,14 +72,12 @@ export function MannerDetailView({ profile, isLoading }: MannerDetailViewProps) 
             부정 평가를 받으면 내려갑니다.
           </TextBox>
         </View>
-        </ScrollView>
-      </SafeAreaWrapper>
-    </View>
+      </ScrollView>
+    </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
   content: {
     padding: spacing[5],
     paddingBottom: spacing[10],

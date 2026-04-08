@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import {
   TextField, Select, Spacing,
-  BottomCTASingle, SafeAreaWrapper, TextBox, colors, spacing,
+  BottomCTASingle, ScreenLayout, TextBox, colors, spacing,
 } from '@ui';
 import type { UpdateProfileInput } from '../../data/schemas/user.schema';
 import {
@@ -18,7 +18,6 @@ interface ProfileEditViewProps {
   errors: FieldErrors<UpdateProfileInput>;
   isPending: boolean;
   onSubmit: () => void;
-  onBack: () => void;
 }
 
 export function ProfileEditView({
@@ -26,11 +25,11 @@ export function ProfileEditView({
   errors,
   isPending,
   onSubmit,
-  onBack,
 }: ProfileEditViewProps) {
   return (
-    <View style={styles.container}>
-      <SafeAreaWrapper edges={['top']} />
+    <ScreenLayout
+      bottomSlot={<BottomCTASingle label="저장" onClick={onSubmit} loading={isPending} />}
+    >
       <ScrollView
         style={styles.flex1}
         contentContainerStyle={styles.content}
@@ -103,20 +102,11 @@ export function ProfileEditView({
           )}
         />
       </ScrollView>
-
-      <SafeAreaWrapper edges={['bottom']}>
-        <BottomCTASingle
-          label="저장"
-          onClick={onSubmit}
-          loading={isPending}
-        />
-      </SafeAreaWrapper>
-    </View>
+    </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
   flex1: { flex: 1 },
   content: {
     padding: spacing[6],

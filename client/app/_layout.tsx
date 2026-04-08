@@ -15,17 +15,17 @@ export const unstable_settings = {
 
 function RootLayoutNav() {
   const { isHydrated, accessToken } = useAuthStore();
-  const segments = useSegments();
+
   const router = useRouter();
+  console.log('isHydrated', isHydrated);
+  console.log('accessToken', accessToken);
 
   useEffect(() => {
     if (!isHydrated) return;
 
-    const inAuthGroup = segments[0] === '(auth)';
-
-    if (accessToken && inAuthGroup) {
+    if (accessToken) {
       router.replace('/(app)');
-    } else if (!accessToken && !inAuthGroup) {
+    } else if (!accessToken) {
       router.replace('/(auth)/login');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

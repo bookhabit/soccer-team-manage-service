@@ -41,7 +41,6 @@ export function ProfileEditContainer() {
       errors={errors}
       isPending={isPending}
       onSubmit={onSubmit}
-      onBack={() => router.back()}
     />
   );
 }
