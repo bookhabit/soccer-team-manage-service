@@ -77,9 +77,7 @@ export const DfImage: React.FC<DfImageProps> = ({
     return undefined;
   }, [source]);
 
-  const resolvedSource = objectUrl
-    ? { uri: objectUrl }
-    : (source as ExpoImageProps['source']);
+  const resolvedSource = objectUrl ? { uri: objectUrl } : (source as ExpoImageProps['source']);
 
   const imageStyle: StyleProp<ImageStyle> = aspectRatio ? [style, { aspectRatio }] : style;
   const containerHeight = aspectRatio
@@ -135,7 +133,12 @@ export const ThumbnailImage: React.FC<DfImageProps> = ({
   aspectRatio = 16 / 9,
   ...props
 }) => (
-  <DfImage {...props} style={[styles.thumbnail, style]} aspectRatio={aspectRatio} contentFit="cover" />
+  <DfImage
+    {...props}
+    style={[styles.thumbnail, style]}
+    aspectRatio={aspectRatio}
+    contentFit="cover"
+  />
 );
 
 export const CoverImage: React.FC<DfImageProps> = ({ style, aspectRatio = 2 / 1, ...props }) => (

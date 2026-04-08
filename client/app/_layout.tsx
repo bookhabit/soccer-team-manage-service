@@ -24,8 +24,8 @@ function RootLayoutNav() {
     if (!isHydrated) return;
 
     if (accessToken) {
-      router.replace('/(app)');
-    } else if (!accessToken) {
+      router.replace('/(app)/(tabs)' as any);
+    } else {
       router.replace('/(auth)/login');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

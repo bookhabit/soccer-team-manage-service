@@ -4,7 +4,8 @@ import { useMyProfile } from '@/src/features/auth/data/hooks/useAuth';
 
 /**
  * 인증된 사용자만 접근 가능한 Protected 레이아웃.
- * accessToken이 없으면 로그인 화면으로, 온보딩 미완료 시 온보딩으로 리다이렉트합니다.
+ * - 탭 그룹 `(tabs)` 이 기본 화면
+ * - 클럽·프로필 서브 페이지는 탭바 위 Stack으로 push
  */
 export default function AppLayout() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -14,19 +15,23 @@ export default function AppLayout() {
     return <Redirect href="/(auth)/login" />;
   }
 
-  // 프로필 로드 완료 후 온보딩 미완료 체크
   if (!isLoading && profile && !profile.isOnboarded) {
     return <Redirect href="/(auth)/onboarding" />;
   }
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="profile/index" />
+      {/* 바텀탭 그룹 */}
+      <Stack.Screen name="(tabs)" />
+
+      {/* 프로필 서브 페이지 (탭바 위로 push) */}
       <Stack.Screen name="profile/edit" />
       <Stack.Screen name="profile/manner" />
-      <Stack.Screen name="profile/withdraw" />
       <Stack.Screen name="profile/settings" />
+      <Stack.Screen name="profile/withdraw" />
+
+      {/* 클럽 서브 페이지 (탭바 위로 push) */}
+      <Stack.Screen name="club" />
     </Stack>
   );
 }
