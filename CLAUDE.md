@@ -166,10 +166,10 @@ ToastProvider, useToast
 3. /case {feature}    → 테스트케이스 정의 (docs/plans/{feature}.cases.md)
 4. /logic {feature}   → Data Layer + Server 구현
 5. /ui {feature}      → UI Layer 구현
-6. /test {feature}    → 테스트 코드 작성
-7. /refactor {feature} → 코드 품질 점검
-8. /performance {feature} → 성능 최적화
-9. /security {feature} → 보안 점검
+6. /refactor {feature} → 코드 품질 점검
+7. /performance {feature} → 성능 최적화
+8. /security {feature} → 보안 점검
+9. /verify → 개발자가 직접 case별로 기능 및 예외 검증
 ```
 
 **한 번에 전체 실행**: `/feature {feature}`
