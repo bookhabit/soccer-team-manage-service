@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { onboardingSchema } from '../../data/schemas/auth.schema';
@@ -6,22 +6,10 @@ import type { OnboardingInput } from '../../data/schemas/auth.schema';
 import { useOnboarding } from '../../data/hooks/useAuth';
 import { OnboardingView } from '../view/OnboardingView';
 
-const STEP_FIELDS: (keyof OnboardingInput)[] = [
-  'name',
-  'birthYear',
-  'gender',
-  'position',
-  'foot',
-  'years',
-  'level',
-];
-
 /**
- * 온보딩 단계 흐름을 관리하고 OnboardingView에 주입하는 Container.
+ * 온보딩 흐름을 관리하고 OnboardingView에 주입하는 Container.
  */
 export function OnboardingContainer() {
-  const totalSteps = STEP_FIELDS.length;
-  const [step, setStep] = useState(1);
   const { mutate, isPending } = useOnboarding();
 
   const {
@@ -44,32 +32,15 @@ export function OnboardingContainer() {
     mode: 'onTouched',
   });
 
-  const handleNext = async () => {
-    const field = STEP_FIELDS[step - 1];
-    const valid = await trigger(field);
-    if (!valid) return;
-
-    if (step < totalSteps) {
-      setStep((s) => s + 1);
-    } else {
-      handleSubmit((data) => mutate(data))();
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep((s) => s - 1);
-  };
+  const onSubmit = handleSubmit((data) => mutate(data));
 
   return (
     <OnboardingView
-      step={step}
-      totalSteps={totalSteps}
       control={control}
       errors={errors}
+      trigger={trigger}
       isPending={isPending}
-      onNext={handleNext}
-      onBack={handleBack}
-      isLastStep={step === totalSteps}
+      onSubmit={onSubmit}
     />
   );
 }
