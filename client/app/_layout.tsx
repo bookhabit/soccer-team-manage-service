@@ -18,17 +18,18 @@ function RootLayoutNav() {
   const segments = useSegments();
   const router = useRouter();
 
-  const inAuthGroup = segments[0] === '(auth)';
-
   useEffect(() => {
     if (!isHydrated) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
 
     if (accessToken && inAuthGroup) {
       router.replace('/(app)');
     } else if (!accessToken && !inAuthGroup) {
       router.replace('/(auth)/login');
     }
-  }, [isHydrated, accessToken, inAuthGroup]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isHydrated, accessToken]);
 
   if (!isHydrated) return null;
 

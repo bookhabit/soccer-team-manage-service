@@ -10,23 +10,29 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <TextBox variant="heading2" color={colors.grey900} style={styles.greeting}>안녕하세요, {me?.name ?? '...'}님!</TextBox>
-      <TextBox variant="body2" color={colors.grey500} style={styles.email}>{me?.email}</TextBox>
+      <TextBox variant="heading2" color={colors.grey900} style={styles.greeting}>
+        안녕하세요, {me?.name ?? '...'}님!
+      </TextBox>
+      <TextBox variant="body2" color={colors.grey500} style={styles.email}>
+        {me?.email}
+      </TextBox>
 
       <Button variant="danger" size="medium" loading={isPending} onPress={() => logout()}>
         로그아웃
       </Button>
-
-      <View style={styles.devSection}>
-        <TextBox variant="captionBold" color={colors.grey400} style={styles.devLabel}>DEV</TextBox>
-        <Button
-          variant="ghost"
-          size="small"
-          onPress={() => router.push('/(dev)/design-system' as any)}
-        >
-          🎨 Design System
-        </Button>
-      </View>
+      <Button variant="ghost" size="small" onPress={() => router.push('/(app)/profile')}>
+        Profile Page
+      </Button>
+      {__DEV__ && (
+        <View style={styles.devSection}>
+          <TextBox variant="captionBold" color={colors.grey400} style={styles.devLabel}>
+            DEV
+          </TextBox>
+          <Button variant="ghost" size="small" onPress={() => router.push('/(dev)/design-system')}>
+            🎨 Design System
+          </Button>
+        </View>
+      )}
     </View>
   );
 }
