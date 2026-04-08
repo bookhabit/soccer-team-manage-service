@@ -7,26 +7,11 @@ import {
   BottomCTASingle, SafeAreaWrapper, TextBox, colors, spacing,
 } from '@ui';
 import type { UpdateProfileInput } from '../../data/schemas/user.schema';
-
-const POSITION_OPTIONS = [
-  { value: 'FW', label: '공격수 (FW)' },
-  { value: 'MF', label: '미드필더 (MF)' },
-  { value: 'DF', label: '수비수 (DF)' },
-  { value: 'GK', label: '골키퍼 (GK)' },
-];
-
-const FOOT_OPTIONS = [
-  { value: 'RIGHT', label: '오른발' },
-  { value: 'LEFT', label: '왼발' },
-  { value: 'BOTH', label: '양발' },
-];
-
-const LEVEL_OPTIONS = [
-  { value: 'BEGINNER', label: '입문 (풋살 입문자)' },
-  { value: 'AMATEUR', label: '아마추어 (동호회 수준)' },
-  { value: 'SEMI_PRO', label: '세미프로 (실업팀 수준)' },
-  { value: 'PRO', label: '프로 (선수 출신)' },
-];
+import {
+  POSITION_OPTIONS,
+  FOOT_OPTIONS,
+  LEVEL_OPTIONS,
+} from '@/src/shared/constants/player.constants';
 
 interface ProfileEditViewProps {
   control: Control<UpdateProfileInput>;

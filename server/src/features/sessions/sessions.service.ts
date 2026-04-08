@@ -94,8 +94,8 @@ export class SessionsService {
     const session = await this.prisma.session.findUnique({
       where: { userId: payload.sub },
     });
-    const sessionExists = session !== null;
-    if (!sessionExists) {
+    const hasSession = session !== null;
+    if (!hasSession) {
       throw new UnauthorizedException({
         code: ErrorCode.SESSION_NOT_FOUND,
         message: "세션이 만료되었습니다. 다시 로그인해주세요.",

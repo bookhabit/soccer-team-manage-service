@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextBox, colors, spacing } from '@ui';
 
-interface StatItem {
+export interface StatItem {
   label: string;
   value: string | number;
 }
@@ -11,6 +11,10 @@ interface StatSummaryProps {
   stats: StatItem[];
 }
 
+/**
+ * 여러 통계 항목을 가로로 나열해 표시하는 컴포넌트.
+ * 항목 사이에 구분선을 자동으로 추가한다.
+ */
 export function StatSummary({ stats }: StatSummaryProps) {
   return (
     <View style={styles.row}>

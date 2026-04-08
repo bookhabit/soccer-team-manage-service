@@ -2,13 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import { MannerBadge } from './MannerBadge';
-
-const POSITION_LABEL: Record<string, string> = {
-  FW: '공격수',
-  MF: '미드필더',
-  DF: '수비수',
-  GK: '골키퍼',
-};
+import { POSITION_LABEL } from '@/src/shared/constants/player.constants';
 
 interface PlayerCardProps {
   name: string | null;
@@ -20,6 +14,9 @@ interface PlayerCardProps {
   role?: string | null;
 }
 
+/**
+ * 선수 정보를 카드 형태로 표시한다. 이름, 포지션, 아바타, 매너 점수를 보여준다.
+ */
 export function PlayerCard({
   name,
   position,

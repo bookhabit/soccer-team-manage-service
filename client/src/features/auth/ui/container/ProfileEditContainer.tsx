@@ -7,6 +7,9 @@ import { updateProfileSchema } from '../../data/schemas/user.schema';
 import type { UpdateProfileInput } from '../../data/schemas/user.schema';
 import { ProfileEditView } from '../view/ProfileEditView';
 
+/**
+ * 프로필 수정 폼을 조립하고 ProfileEditView에 주입하는 Container.
+ */
 export function ProfileEditContainer() {
   const { data: profile } = useMyProfile();
   const { mutate, isPending } = useUpdateProfile();
@@ -19,9 +22,9 @@ export function ProfileEditContainer() {
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       name: profile?.name ?? '',
-      position: (profile?.position as UpdateProfileInput['position']) ?? undefined,
-      foot: (profile?.foot as UpdateProfileInput['foot']) ?? undefined,
-      level: (profile?.level as UpdateProfileInput['level']) ?? undefined,
+      position: profile?.position ?? undefined,
+      foot: profile?.foot ?? undefined,
+      level: profile?.level ?? undefined,
       preferredRegionId: profile?.preferredRegionId ?? undefined,
     },
   });

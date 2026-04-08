@@ -1,11 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { useMe, useLogout } from '@/src/features/auth/data/hooks/useAuth';
+import { useMyProfile, useLogout } from '@/src/features/auth/data/hooks/useAuth';
 import { Button, TextBox, colors, spacing } from '@ui';
 
 export default function HomeScreen() {
-  const { data: me } = useMe();
+  const { data: me } = useMyProfile();
   const { mutate: logout, isPending } = useLogout();
 
   return (

@@ -14,8 +14,12 @@ import {
   spacing,
 } from '@ui';
 import type { OnboardingInput } from '../../data/schemas/auth.schema';
-
-const TOTAL_STEPS = 7;
+import {
+  POSITION_OPTIONS,
+  FOOT_OPTIONS,
+  LEVEL_OPTIONS,
+  GENDER_OPTIONS,
+} from '@/src/shared/constants/player.constants';
 
 const STEP_TITLES = [
   '이름을 알려주세요',
@@ -27,33 +31,10 @@ const STEP_TITLES = [
   '실력 수준을 선택해주세요',
 ];
 
-const POSITION_OPTIONS = [
-  { value: 'FW', label: '공격수 (FW)' },
-  { value: 'MF', label: '미드필더 (MF)' },
-  { value: 'DF', label: '수비수 (DF)' },
-  { value: 'GK', label: '골키퍼 (GK)' },
-];
-
-const FOOT_OPTIONS = [
-  { value: 'RIGHT', label: '오른발' },
-  { value: 'LEFT', label: '왼발' },
-  { value: 'BOTH', label: '양발' },
-];
-
-const LEVEL_OPTIONS = [
-  { value: 'BEGINNER', label: '입문 (풋살 입문자)' },
-  { value: 'AMATEUR', label: '아마추어 (동호회 수준)' },
-  { value: 'SEMI_PRO', label: '세미프로 (실업팀 수준)' },
-  { value: 'PRO', label: '프로 (선수 출신)' },
-];
-
-const GENDER_OPTIONS = [
-  { value: 'MALE', label: '남성' },
-  { value: 'FEMALE', label: '여성' },
-];
 
 interface OnboardingViewProps {
   step: number;
+  totalSteps: number;
   control: Control<OnboardingInput>;
   errors: FieldErrors<OnboardingInput>;
   isPending: boolean;
@@ -64,6 +45,7 @@ interface OnboardingViewProps {
 
 export function OnboardingView({
   step,
+  totalSteps,
   control,
   errors,
   isPending,
@@ -71,6 +53,8 @@ export function OnboardingView({
   onBack,
   isLastStep,
 }: OnboardingViewProps) {
+  const progressPercent = `${(step / totalSteps) * 100}%` as `${number}%`;
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -79,7 +63,7 @@ export function OnboardingView({
       {/* 상단 Safe Area + 진행 바 */}
       <SafeAreaWrapper edges={['top']}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressFill, { width: `${(step / TOTAL_STEPS) * 100}%` as any }]} />
+          <View style={[styles.progressFill, { width: progressPercent }]} />
         </View>
       </SafeAreaWrapper>
 
@@ -98,7 +82,7 @@ export function OnboardingView({
 
         <Spacing size={4} />
         <TextBox variant="caption" color={colors.grey400}>
-          {step} / {TOTAL_STEPS}
+          {step} / {totalSteps}
         </TextBox>
         <Spacing size={2} />
         <TextBox variant="heading2" color={colors.grey900} style={styles.title}>

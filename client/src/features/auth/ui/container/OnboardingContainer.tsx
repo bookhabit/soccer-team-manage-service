@@ -6,8 +6,6 @@ import type { OnboardingInput } from '../../data/schemas/auth.schema';
 import { useOnboarding } from '../../data/hooks/useAuth';
 import { OnboardingView } from '../view/OnboardingView';
 
-const TOTAL_STEPS = 7;
-
 const STEP_FIELDS: (keyof OnboardingInput)[] = [
   'name',
   'birthYear',
@@ -18,7 +16,11 @@ const STEP_FIELDS: (keyof OnboardingInput)[] = [
   'level',
 ];
 
+/**
+ * 온보딩 단계 흐름을 관리하고 OnboardingView에 주입하는 Container.
+ */
 export function OnboardingContainer() {
+  const totalSteps = STEP_FIELDS.length;
   const [step, setStep] = useState(1);
   const { mutate, isPending } = useOnboarding();
 
@@ -47,7 +49,7 @@ export function OnboardingContainer() {
     const valid = await trigger(field);
     if (!valid) return;
 
-    if (step < TOTAL_STEPS) {
+    if (step < totalSteps) {
       setStep((s) => s + 1);
     } else {
       handleSubmit((data) => mutate(data))();
@@ -61,12 +63,13 @@ export function OnboardingContainer() {
   return (
     <OnboardingView
       step={step}
+      totalSteps={totalSteps}
       control={control}
       errors={errors}
       isPending={isPending}
       onNext={handleNext}
       onBack={handleBack}
-      isLastStep={step === TOTAL_STEPS}
+      isLastStep={step === totalSteps}
     />
   );
 }

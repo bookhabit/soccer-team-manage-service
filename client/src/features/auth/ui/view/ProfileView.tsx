@@ -6,23 +6,12 @@ import {
 import type { UserProfile } from '../../data/schemas/auth.schema';
 import { PlayerCard } from '../components/PlayerCard';
 import { StatSummary } from '../components/StatSummary';
-
-const LEVEL_LABEL: Record<string, string> = {
-  BEGINNER: '입문',
-  AMATEUR: '아마추어',
-  SEMI_PRO: '세미프로',
-  PRO: '프로',
-};
-
-const FOOT_LABEL: Record<string, string> = {
-  LEFT: '왼발',
-  RIGHT: '오른발',
-  BOTH: '양발',
-};
+import type { StatItem } from '../components/StatSummary';
 
 interface ProfileViewProps {
   profile: UserProfile | undefined;
   isLoading: boolean;
+  stats: StatItem[];
   onEditPress: () => void;
   onMannerPress: () => void;
   onSettingsPress: () => void;
@@ -32,6 +21,7 @@ interface ProfileViewProps {
 export function ProfileView({
   profile,
   isLoading,
+  stats,
   onEditPress,
   onMannerPress,
   onSettingsPress,
@@ -50,12 +40,6 @@ export function ProfileView({
       </View>
     );
   }
-
-  const stats = [
-    { label: '경력', value: profile?.years !== null && profile?.years !== undefined ? `${profile.years}년` : '-' },
-    { label: '실력', value: profile?.level ? (LEVEL_LABEL[profile.level] ?? '-') : '-' },
-    { label: '주 발', value: profile?.foot ? (FOOT_LABEL[profile.foot] ?? '-') : '-' },
-  ];
 
   return (
     <View style={styles.container}>

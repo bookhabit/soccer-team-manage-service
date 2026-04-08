@@ -6,15 +6,25 @@ import {
 import type { UserProfile } from '../../data/schemas/auth.schema';
 import { MannerBadge } from '../components/MannerBadge';
 
+/** 매너 점수 설명 텍스트 임계값 */
+const SCORE_DESCRIPTION_THRESHOLDS = { GREAT: 80, GOOD: 60, FAIR: 40 } as const;
+
 interface MannerDetailViewProps {
   profile: UserProfile | undefined;
   isLoading: boolean;
 }
 
+/**
+ * 매너 점수에 따른 안내 문구를 반환한다.
+ * - ≥ 80: 매우 좋음
+ * - ≥ 60: 양호
+ * - ≥ 40: 향상 필요
+ * - < 40: 낮음
+ */
 function getMannerDescription(score: number): string {
-  if (score >= 80) return '팀원들에게 매우 좋은 평가를 받고 있어요!';
-  if (score >= 60) return '양호한 매너를 유지하고 있어요.';
-  if (score >= 40) return '매너 향상이 필요합니다.';
+  if (score >= SCORE_DESCRIPTION_THRESHOLDS.GREAT) return '팀원들에게 매우 좋은 평가를 받고 있어요!';
+  if (score >= SCORE_DESCRIPTION_THRESHOLDS.GOOD) return '양호한 매너를 유지하고 있어요.';
+  if (score >= SCORE_DESCRIPTION_THRESHOLDS.FAIR) return '매너 향상이 필요합니다.';
   return '매너 점수가 낮습니다. 팀원들에게 더 배려해주세요.';
 }
 

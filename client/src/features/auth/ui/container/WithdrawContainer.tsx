@@ -6,6 +6,9 @@ import { withdrawSchema } from '../../data/schemas/user.schema';
 import type { WithdrawInput } from '../../data/schemas/user.schema';
 import { WithdrawView } from '../view/WithdrawView';
 
+/**
+ * 회원 탈퇴 폼을 조립하고 WithdrawView에 주입하는 Container.
+ */
 export function WithdrawContainer() {
   const { mutate, isPending } = useWithdraw();
 

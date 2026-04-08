@@ -116,6 +116,3 @@ export function useRegions() {
   });
 }
 
-// ─── 하위 호환 (기존 useMe 별칭 유지) ────────────────────────────────────────
-/** @deprecated useMyProfile 을 사용하세요 */
-export const useMe = useMyProfile;
