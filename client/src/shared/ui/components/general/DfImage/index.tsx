@@ -124,8 +124,17 @@ export const DfImage: React.FC<DfImageProps> = ({
 };
 
 // ─── 미리 정의된 이미지 패턴 ──────────────────────────────────────────────────
-export const AvatarImage: React.FC<Omit<DfImageProps, 'aspectRatio'>> = ({ style, ...props }) => (
-  <DfImage {...props} style={[styles.avatar, style]} contentFit="cover" />
+interface AvatarImageProps extends Omit<DfImageProps, 'aspectRatio'> {
+  /** 아바타 지름 (px). borderRadius는 자동으로 size/2 적용. 기본값 48 */
+  size?: number;
+}
+
+export const AvatarImage: React.FC<AvatarImageProps> = ({ size = 48, style, ...props }) => (
+  <DfImage
+    {...props}
+    style={[{ width: size, height: size, borderRadius: size / 2 }, style]}
+    contentFit="cover"
+  />
 );
 
 export const ThumbnailImage: React.FC<DfImageProps> = ({
@@ -160,11 +169,6 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     gap: 4,
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
   },
   thumbnail: {
     width: '100%',
