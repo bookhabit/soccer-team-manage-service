@@ -169,7 +169,8 @@ ToastProvider, useToast
 6. /refactor {feature} → 코드 품질 점검
 7. /performance {feature} → 성능 최적화
 8. /security {feature} → 보안 점검
-9. /verify → 개발자가 직접 case별로 기능 및 예외 검증
+9. /seed {feature} -> 테스트 데이터 생성
+10. /verify → 개발자가 직접 case별로 기능 및 예외 검증
 ```
 
 **한 번에 전체 실행**: `/feature {feature}`
