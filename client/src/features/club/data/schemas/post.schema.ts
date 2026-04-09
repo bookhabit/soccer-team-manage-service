@@ -48,8 +48,8 @@ export const CreatePostInputSchema = z.object({
   type: PostTypeSchema,
   title: z.string().min(1, '제목을 입력해주세요.').max(100, '제목은 최대 100자입니다.'),
   content: z.string().min(1, '내용을 입력해주세요.').max(2000, '본문은 최대 2,000자입니다.'),
-  isPinned: z.boolean().default(false),
-  sendNotification: z.boolean().default(false),
+  isPinned: z.boolean(),
+  sendNotification: z.boolean(),
 });
 
 export const CreateCommentInputSchema = z.object({

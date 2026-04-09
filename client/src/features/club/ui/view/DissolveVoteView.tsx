@@ -4,7 +4,7 @@ import { TextBox, Button, Spacing, ScreenLayout, ConfirmDialog, colors, spacing 
 import type { DissolveVote } from '../../data/schemas/club.schema';
 
 interface DissolveVoteViewProps {
-  vote: DissolveVote | undefined;
+  vote: DissolveVote | undefined | null;
   isCaptain: boolean;
   isResponding: boolean;
   isStarting: boolean;
@@ -36,7 +36,9 @@ export function DissolveVoteView({
       <View style={styles.content}>
         {vote == null || vote.status === 'EXPIRED' || vote.status === 'REJECTED' ? (
           <>
-            <TextBox variant="heading3" color={colors.grey900}>팀 해체</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              팀 해체
+            </TextBox>
             <Spacing size={2} />
             <TextBox variant="body2" color={colors.grey500}>
               해체를 요청하면 팀원 전체에게 동의 요청이 전송됩니다.{'\n'}
@@ -44,23 +46,37 @@ export function DissolveVoteView({
             </TextBox>
             <Spacing size={6} />
             {isCaptain ? (
-              <Button variant="danger" size="large" fullWidth onPress={onOpenConfirm} loading={isStarting}>
+              <Button
+                variant="danger"
+                size="large"
+                fullWidth
+                onPress={onOpenConfirm}
+                loading={isStarting}
+              >
                 해체 요청
               </Button>
             ) : (
-              <TextBox variant="body2" color={colors.grey400}>주장만 해체를 요청할 수 있습니다.</TextBox>
+              <TextBox variant="body2" color={colors.grey400}>
+                주장만 해체를 요청할 수 있습니다.
+              </TextBox>
             )}
           </>
         ) : vote.status === 'APPROVED' ? (
           <>
-            <TextBox variant="heading3" color={colors.grey900}>팀이 해체되었습니다</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              팀이 해체되었습니다
+            </TextBox>
             <Spacing size={2} />
-            <TextBox variant="body2" color={colors.grey500}>팀이 해체 처리되었습니다.</TextBox>
+            <TextBox variant="body2" color={colors.grey500}>
+              팀이 해체 처리되었습니다.
+            </TextBox>
           </>
         ) : (
           /* IN_PROGRESS */
           <>
-            <TextBox variant="heading3" color={colors.grey900}>해체 투표 진행 중</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              해체 투표 진행 중
+            </TextBox>
             <Spacing size={4} />
 
             <View style={styles.voteStatus}>
@@ -77,12 +93,24 @@ export function DissolveVoteView({
             {vote.myResponse == null ? (
               <View style={styles.buttonRow}>
                 <View style={styles.btn}>
-                  <Button variant="secondary" size="large" fullWidth onPress={onDisagree} loading={isResponding}>
+                  <Button
+                    variant="secondary"
+                    size="large"
+                    fullWidth
+                    onPress={onDisagree}
+                    loading={isResponding}
+                  >
                     반대
                   </Button>
                 </View>
                 <View style={styles.btn}>
-                  <Button variant="danger" size="large" fullWidth onPress={onAgree} loading={isResponding}>
+                  <Button
+                    variant="danger"
+                    size="large"
+                    fullWidth
+                    onPress={onAgree}
+                    loading={isResponding}
+                  >
                     동의
                   </Button>
                 </View>

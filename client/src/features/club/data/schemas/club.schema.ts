@@ -77,7 +77,12 @@ export const MemberDetailSchema = ClubMemberSchema.extend({
   level: z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']).nullable(),
   phone: z.string().nullable(),
   isPhonePublic: z.boolean(),
-  stats: MemberStatsSchema,
+  stats: MemberStatsSchema.extend({
+    goals: z.number().int(),
+    assists: z.number().int(),
+    momCount: z.number().int(),
+    matchCount: z.number().int(),
+  }),
 });
 
 export const JoinRequestSchema = z.object({
