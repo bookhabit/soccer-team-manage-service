@@ -7,6 +7,7 @@ import { SessionsModule } from './features/sessions/sessions.module';
 import { RegionsModule } from './features/regions/regions.module';
 import { ClubModule } from './features/club/club.module';
 import { PostModule } from './features/post/post.module';
+import { MatchModule } from './features/match/match.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -20,6 +21,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     RegionsModule,
     ClubModule,
     PostModule,
+    MatchModule,
   ],
   providers: [
     // Guard 순서 보장: JWT 검증 → Roles 검사

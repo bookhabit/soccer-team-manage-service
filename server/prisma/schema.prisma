@@ -95,6 +95,9 @@ model User {
   clubJoinRequests  ClubJoinRequest[]
   posts             Post[]
   comments          Comment[]
+  matchAttendances  MatchAttendance[]
+  matchParticipants MatchParticipant[]
+  matchComments     MatchComment[]
 
   @@map("users")
 }
@@ -186,6 +189,7 @@ model Club {
   banRecords          ClubBanRecord[]
   dissolveVotes       ClubDissolveVote[]
   posts               Post[]
+  matches             Match[]
 
   @@map("clubs")
 }
@@ -313,4 +317,185 @@ model Comment {
   author    User     @relation(fields: [authorId], references: [id])
 
   @@map("comments")
+}
+
+// ─── Match ────────────────────────────────────────────────────────────────────
+
+enum MatchType {
+  LEAGUE
+  SELF
+}
+
+enum AttendanceResponse {
+  ATTEND
+  ABSENT
+  UNDECIDED
+}
+
+model Match {
+  id                String      @id @default(cuid())
+  clubId            String
+  type              MatchType
+  title             String
+  location          String
+  address           String?
+  startAt           DateTime
+  endAt             DateTime
+  voteDeadline      DateTime
+  opponentName      String?
+  opponentLevel     ClubLevel?
+  homeScore         Int?
+  awayScore         Int?
+  isRecordSubmitted Boolean     @default(false)
+  recordedBy        String?
+  recordedAt        DateTime?
+  isDeleted         Boolean     @default(false)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  club              Club                 @relation(fields: [clubId], references: [id])
+  attendances       MatchAttendance[]
+  participants      MatchParticipant[]
+  quarters          MatchQuarter[]
+  goals             MatchGoal[]
+  momVotes          MomVote[]
+  comments          MatchComment[]
+  videos            MatchVideo[]
+  opponentRating    OpponentRating?
+  recordHistories   MatchRecordHistory[]
+
+  @@index([clubId, startAt])
+  @@map("matches")
+}
+
+model MatchAttendance {
+  id        String             @id @default(cuid())
+  matchId   String
+  userId    String
+  response  AttendanceResponse @default(UNDECIDED)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  match     Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id])
+
+  @@unique([matchId, userId])
+  @@map("match_attendances")
+}
+
+model MatchParticipant {
+  id      String @id @default(cuid())
+  matchId String
+  userId  String
+
+  match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id])
+
+  @@unique([matchId, userId])
+  @@map("match_participants")
+}
+
+model MatchQuarter {
+  id            String   @id @default(cuid())
+  matchId       String
+  quarterNumber Int
+  formation     String
+  team          String?
+
+  match         Match                    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  assignments   MatchQuarterAssignment[]
+
+  @@unique([matchId, quarterNumber, team])
+  @@map("match_quarters")
+}
+
+model MatchQuarterAssignment {
+  id        String         @id @default(cuid())
+  quarterId String
+  userId    String
+  position  PlayerPosition
+
+  quarter   MatchQuarter   @relation(fields: [quarterId], references: [id], onDelete: Cascade)
+
+  @@unique([quarterId, userId])
+  @@map("match_quarter_assignments")
+}
+
+model MatchGoal {
+  id            String   @id @default(cuid())
+  matchId       String
+  scorerUserId  String
+  assistUserId  String?
+  quarterNumber Int?
+  team          String?
+  createdAt     DateTime @default(now())
+
+  match         Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("match_goals")
+}
+
+model MomVote {
+  id           String   @id @default(cuid())
+  matchId      String
+  voterId      String
+  targetUserId String
+  createdAt    DateTime @default(now())
+
+  match        Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, voterId])
+  @@map("mom_votes")
+}
+
+model MatchComment {
+  id        String   @id @default(cuid())
+  matchId   String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id])
+
+  @@map("match_comments")
+}
+
+model MatchVideo {
+  id           String   @id @default(cuid())
+  matchId      String
+  youtubeUrl   String
+  registeredBy String
+  createdAt    DateTime @default(now())
+
+  match        Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("match_videos")
+}
+
+model OpponentRating {
+  id            String   @id @default(cuid())
+  matchId       String   @unique
+  ratedByUserId String
+  score         Float
+  review        String?
+  mvpName       String?
+  createdAt     DateTime @default(now())
+
+  match         Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("opponent_ratings")
+}
+
+model MatchRecordHistory {
+  id         String   @id @default(cuid())
+  matchId    String
+  editedBy   String
+  editedAt   DateTime @default(now())
+  beforeData Json
+  afterData  Json
+
+  match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("match_record_histories")
 }

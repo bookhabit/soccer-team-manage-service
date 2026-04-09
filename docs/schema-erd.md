@@ -98,6 +98,21 @@ REJECTED REJECTED
 EXPIRED EXPIRED
         }
     
+
+
+        MatchType {
+            LEAGUE LEAGUE
+SELF SELF
+        }
+    
+
+
+        AttendanceResponse {
+            ATTEND ATTEND
+ABSENT ABSENT
+UNDECIDED UNDECIDED
+        }
+    
   "users" {
     String id "🗝️"
     String email "❓"
@@ -231,6 +246,108 @@ EXPIRED EXPIRED
     DateTime createdAt 
     }
   
+
+  "matches" {
+    String id "🗝️"
+    MatchType type 
+    String title 
+    String location 
+    String address "❓"
+    DateTime startAt 
+    DateTime endAt 
+    DateTime voteDeadline 
+    String opponentName "❓"
+    ClubLevel opponentLevel "❓"
+    Int homeScore "❓"
+    Int awayScore "❓"
+    Boolean isRecordSubmitted 
+    String recordedBy "❓"
+    DateTime recordedAt "❓"
+    Boolean isDeleted 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "match_attendances" {
+    String id "🗝️"
+    AttendanceResponse response 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "match_participants" {
+    String id "🗝️"
+    }
+  
+
+  "match_quarters" {
+    String id "🗝️"
+    Int quarterNumber 
+    String formation 
+    String team "❓"
+    }
+  
+
+  "match_quarter_assignments" {
+    String id "🗝️"
+    String userId 
+    PlayerPosition position 
+    }
+  
+
+  "match_goals" {
+    String id "🗝️"
+    String scorerUserId 
+    String assistUserId "❓"
+    Int quarterNumber "❓"
+    String team "❓"
+    DateTime createdAt 
+    }
+  
+
+  "mom_votes" {
+    String id "🗝️"
+    String voterId 
+    String targetUserId 
+    DateTime createdAt 
+    }
+  
+
+  "match_comments" {
+    String id "🗝️"
+    String content 
+    DateTime createdAt 
+    }
+  
+
+  "match_videos" {
+    String id "🗝️"
+    String youtubeUrl 
+    String registeredBy 
+    DateTime createdAt 
+    }
+  
+
+  "opponent_ratings" {
+    String id "🗝️"
+    String ratedByUserId 
+    Float score 
+    String review "❓"
+    String mvpName "❓"
+    DateTime createdAt 
+    }
+  
+
+  "match_record_histories" {
+    String id "🗝️"
+    String editedBy 
+    DateTime editedAt 
+    Json beforeData 
+    Json afterData 
+    }
+  
     "users" |o--|| "AuthProvider" : "enum:provider"
     "users" |o--|o "Gender" : "enum:gender"
     "users" |o--|o "PlayerPosition" : "enum:position"
@@ -258,4 +375,22 @@ EXPIRED EXPIRED
     "posts" }o--|| users : "author"
     "comments" }o--|| posts : "post"
     "comments" }o--|| users : "author"
+    "matches" |o--|| "MatchType" : "enum:type"
+    "matches" |o--|o "ClubLevel" : "enum:opponentLevel"
+    "matches" }o--|| clubs : "club"
+    "match_attendances" |o--|| "AttendanceResponse" : "enum:response"
+    "match_attendances" }o--|| matches : "match"
+    "match_attendances" }o--|| users : "user"
+    "match_participants" }o--|| matches : "match"
+    "match_participants" }o--|| users : "user"
+    "match_quarters" }o--|| matches : "match"
+    "match_quarter_assignments" |o--|| "PlayerPosition" : "enum:position"
+    "match_quarter_assignments" }o--|| match_quarters : "quarter"
+    "match_goals" }o--|| matches : "match"
+    "mom_votes" }o--|| matches : "match"
+    "match_comments" }o--|| matches : "match"
+    "match_comments" }o--|| users : "author"
+    "match_videos" }o--|| matches : "match"
+    "opponent_ratings" |o--|| matches : "match"
+    "match_record_histories" }o--|| matches : "match"
 ```
