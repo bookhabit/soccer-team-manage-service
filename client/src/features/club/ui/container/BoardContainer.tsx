@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { startTransition, useState } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
@@ -34,13 +34,19 @@ function BoardInner({ clubId }: BoardContainerProps) {
   const posts = data.pages.flatMap((p) => p.data);
   const isMember = myClub?.id === clubId;
 
+  // startTransition: 탭 전환을 비긴급 업데이트로 처리
+  // → Suspense fallback 없이 현재 UI를 유지하면서 백그라운드 fetch
+  const handleTabChange = (tab: PostType | undefined) => {
+    startTransition(() => setActiveTab(tab));
+  };
+
   return (
     <BoardView
       posts={posts}
       activeTab={activeTab}
       hasNextPage={hasNextPage ?? false}
       canWrite={isMember}
-      onTabChange={setActiveTab}
+      onTabChange={handleTabChange}
       onLoadMore={() => fetchNextPage()}
       onSelectPost={(postId) =>
         router.push(`/(app)/club/${clubId}/board/${postId}` as Href)
