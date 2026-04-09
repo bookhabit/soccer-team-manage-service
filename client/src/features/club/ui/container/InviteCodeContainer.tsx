@@ -1,6 +1,8 @@
 import React from 'react';
+import { View } from 'react-native';
 import { Share } from 'react-native';
-import { useToast } from '@ui';
+import { Skeleton, Spacing, ScreenLayout, useToast } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useInviteCode, useRenewInviteCode } from '../../data/hooks/useClub';
 import { InviteCodeView } from '../view/InviteCodeView';
 
@@ -8,18 +10,25 @@ interface InviteCodeContainerProps {
   clubId: string;
 }
 
-/**
- * 초대 코드 Container.
- * 코드 조회 + Share API로 공유 + 재발급.
- */
-export function InviteCodeContainer({ clubId }: InviteCodeContainerProps) {
+function InviteCodeSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ padding: 20 }}>
+        <Skeleton width="40%" height={24} />
+        <Spacing size={6} />
+        <Skeleton width="100%" height={100} borderRadius={16} />
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function InviteCodeContent({ clubId }: InviteCodeContainerProps) {
   const { toast } = useToast();
 
-  const { data: inviteCode, isLoading } = useInviteCode(clubId);
+  const { data: inviteCode } = useInviteCode(clubId);
   const { mutate: renew, isPending: isRenewing } = useRenewInviteCode(clubId);
 
   const handleCopy = async () => {
-    if (!inviteCode) return;
     try {
       await Share.share({ message: `FC Flow 초대 코드: ${inviteCode.code}` });
     } catch {
@@ -37,10 +46,17 @@ export function InviteCodeContainer({ clubId }: InviteCodeContainerProps) {
   return (
     <InviteCodeView
       inviteCode={inviteCode}
-      isLoading={isLoading}
       isRenewing={isRenewing}
       onCopy={handleCopy}
       onRenew={handleRenew}
     />
+  );
+}
+
+export function InviteCodeContainer({ clubId }: InviteCodeContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<InviteCodeSkeleton />}>
+      <InviteCodeContent clubId={clubId} />
+    </AsyncBoundary>
   );
 }

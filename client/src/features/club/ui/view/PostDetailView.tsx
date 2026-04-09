@@ -1,13 +1,12 @@
 import React from 'react';
 import { View, ScrollView, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
-import { TextBox, AvatarImage, Spacing, Skeleton, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
+import { TextBox, AvatarImage, Spacing, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
 import { CommentItem } from '../components/CommentItem';
 import type { Post, Comment } from '../../data/schemas/post.schema';
 
 interface PostDetailViewProps {
-  post: Post | undefined;
+  post: Post;
   comments: Comment[];
-  isLoading: boolean;
   commentInput: string;
   isSubmittingComment: boolean;
   isDeleteDialogOpen: boolean;
@@ -27,7 +26,6 @@ interface PostDetailViewProps {
 export function PostDetailView({
   post,
   comments,
-  isLoading,
   commentInput,
   isSubmittingComment,
   isDeleteDialogOpen,
@@ -40,18 +38,6 @@ export function PostDetailView({
   onCloseDeleteDialog,
   onDeletePost,
 }: PostDetailViewProps) {
-  if (isLoading || !post) {
-    return (
-      <ScreenLayout>
-        <View style={styles.loadingWrapper}>
-          <Skeleton width="70%" height={24} />
-          <Spacing size={3} />
-          <Skeleton width="100%" height={160} borderRadius={8} />
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   return (
     <ScreenLayout>
       <ScrollView contentContainerStyle={styles.content}>
@@ -141,9 +127,6 @@ export function PostDetailView({
 }
 
 const styles = StyleSheet.create({
-  loadingWrapper: {
-    padding: spacing[4],
-  },
   content: {
     padding: spacing[4],
     paddingBottom: spacing[10],

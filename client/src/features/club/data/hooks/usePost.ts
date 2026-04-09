@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import {
   getPosts,
   getPostDetail,
@@ -17,7 +17,7 @@ const DEFAULT_PAGE_SIZE = 20;
 // ─── 게시글 목록 ──────────────────────────────────────────────────────────────
 
 export function usePosts(clubId: string, type?: PostType) {
-  return useInfiniteQuery({
+  return useSuspenseInfiniteQuery({
     queryKey: clubQueryKeys.posts(clubId, type),
     queryFn: ({ pageParam }) =>
       getPosts(clubId, {
@@ -27,17 +27,15 @@ export function usePosts(clubId: string, type?: PostType) {
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    throwOnError: true,
   });
 }
 
 // ─── 게시글 상세 — 조회 시 Redis viewCount INCR 트리거 ───────────────────────
 
 export function usePostDetail(clubId: string, postId: string) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: clubQueryKeys.post(clubId, postId),
     queryFn: () => getPostDetail(clubId, postId),
-    throwOnError: true,
   });
 }
 
@@ -80,7 +78,7 @@ export function useDeletePost(clubId: string) {
 // ─── 댓글 ─────────────────────────────────────────────────────────────────────
 
 export function useComments(clubId: string, postId: string) {
-  return useInfiniteQuery({
+  return useSuspenseInfiniteQuery({
     queryKey: clubQueryKeys.comments(clubId, postId),
     queryFn: ({ pageParam }) =>
       getComments(clubId, postId, {

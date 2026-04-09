@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
-import { useToast } from '@ui';
+import { View } from 'react-native';
+import { Skeleton, ScreenLayout, useToast } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
+import { EmptyBoundary } from '@/src/shared/ui/server-state-handling/EmptyBoundary';
+import { TextBox } from '@ui';
+import { colors } from '@ui';
 import {
   useJoinRequests,
   useApproveJoinRequest,
@@ -11,19 +16,38 @@ interface JoinRequestsManageContainerProps {
   clubId: string;
 }
 
-/**
- * 가입 신청 관리 Container (주장·부주장 전용).
- */
-export function JoinRequestsManageContainer({ clubId }: JoinRequestsManageContainerProps) {
+function JoinRequestsSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ padding: 16, gap: 12 }}>
+        {[0, 1, 2].map((i) => (
+          <Skeleton key={i} width="100%" height={140} borderRadius={12} />
+        ))}
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function EmptyRequests() {
+  return (
+    <ScreenLayout>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <TextBox variant="body2" color={colors.grey400}>아직 가입 신청이 없습니다.</TextBox>
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function JoinRequestsManageContent({ clubId }: JoinRequestsManageContainerProps) {
   const [approvingId, setApprovingId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const { toast } = useToast();
 
-  const { data, isLoading, fetchNextPage, hasNextPage } = useJoinRequests(clubId);
+  const { data, fetchNextPage, hasNextPage } = useJoinRequests(clubId);
   const { mutate: approve } = useApproveJoinRequest(clubId);
   const { mutate: reject } = useRejectJoinRequest(clubId);
 
-  const requests = data?.pages.flatMap((p) => p.data) ?? [];
+  const requests = data.pages.flatMap((p) => p.data);
 
   const handleApprove = (requestId: string) => {
     setApprovingId(requestId);
@@ -44,15 +68,24 @@ export function JoinRequestsManageContainer({ clubId }: JoinRequestsManageContai
   };
 
   return (
-    <JoinRequestsManageView
-      requests={requests}
-      isLoading={isLoading}
-      hasNextPage={hasNextPage ?? false}
-      approvingId={approvingId}
-      rejectingId={rejectingId}
-      onApprove={handleApprove}
-      onReject={handleReject}
-      onLoadMore={() => fetchNextPage()}
-    />
+    <EmptyBoundary data={requests} fallback={<EmptyRequests />}>
+      <JoinRequestsManageView
+        requests={requests}
+        hasNextPage={hasNextPage ?? false}
+        approvingId={approvingId}
+        rejectingId={rejectingId}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onLoadMore={() => fetchNextPage()}
+      />
+    </EmptyBoundary>
+  );
+}
+
+export function JoinRequestsManageContainer({ clubId }: JoinRequestsManageContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<JoinRequestsSkeleton />}>
+      <JoinRequestsManageContent clubId={clubId} />
+    </AsyncBoundary>
   );
 }

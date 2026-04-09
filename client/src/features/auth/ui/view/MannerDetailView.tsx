@@ -29,17 +29,8 @@ function getMannerDescription(score: number): string {
 }
 
 export function MannerDetailView({ profile, isLoading }: MannerDetailViewProps) {
-  if (isLoading) {
-    return (
-      <ScreenLayout>
-        <View style={styles.content}>
-          <Skeleton width="60%" height={32} borderRadius={8} />
-          <Spacing size={4} />
-          <Skeleton width="100%" height={120} borderRadius={16} />
-        </View>
-      </ScreenLayout>
-    );
-  }
+  // useMyProfile uses enabled: !!accessToken → Suspense 불가 예외 케이스 (api.md 4.4)
+  if (isLoading) return <MannerSkeleton />;
 
   const score = profile?.mannerScore ?? 100;
 
@@ -76,6 +67,16 @@ export function MannerDetailView({ profile, isLoading }: MannerDetailViewProps) 
     </ScreenLayout>
   );
 }
+
+const MannerSkeleton = () => (
+  <ScreenLayout>
+    <View style={styles.content}>
+      <Skeleton width="60%" height={32} borderRadius={8} />
+      <Spacing size={4} />
+      <Skeleton width="100%" height={120} borderRadius={16} />
+    </View>
+  </ScreenLayout>
+);
 
 const styles = StyleSheet.create({
   content: {

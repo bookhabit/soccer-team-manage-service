@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextBox, Spacing, Skeleton, ScreenLayout, colors, spacing } from '@ui';
+import { TextBox, Spacing, ScreenLayout, colors, spacing } from '@ui';
 import { InviteCodeBox } from '../components/InviteCodeBox';
 import type { InviteCode } from '../../data/schemas/club.schema';
 
 interface InviteCodeViewProps {
-  inviteCode: InviteCode | undefined;
-  isLoading: boolean;
+  inviteCode: InviteCode;
   isRenewing: boolean;
   onCopy: () => void;
   onRenew: () => void;
@@ -17,7 +16,6 @@ interface InviteCodeViewProps {
  */
 export function InviteCodeView({
   inviteCode,
-  isLoading,
   isRenewing,
   onCopy,
   onRenew,
@@ -32,16 +30,12 @@ export function InviteCodeView({
         </TextBox>
         <Spacing size={6} />
 
-        {isLoading || !inviteCode ? (
-          <Skeleton width="100%" height={100} borderRadius={16} />
-        ) : (
-          <InviteCodeBox
-            inviteCode={inviteCode}
-            onCopy={onCopy}
-            onRenew={onRenew}
-            isRenewing={isRenewing}
-          />
-        )}
+        <InviteCodeBox
+          inviteCode={inviteCode}
+          onCopy={onCopy}
+          onRenew={onRenew}
+          isRenewing={isRenewing}
+        />
       </View>
     </ScreenLayout>
   );

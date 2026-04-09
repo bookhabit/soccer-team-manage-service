@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet } from 'react-native';
-import { TextBox, Button, Spacing, Skeleton, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
+import { ScrollView, StyleSheet } from 'react-native';
+import { TextBox, Button, Spacing, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
 import { FifaCard } from '../components/FifaCard';
 import type { MemberDetail, ClubRole } from '../../data/schemas/club.schema';
 
 interface MemberDetailViewProps {
-  member: MemberDetail | undefined;
-  isLoading: boolean;
+  member: MemberDetail;
   myRole: ClubRole | null;
   isKickDialogOpen: boolean;
   isKicking: boolean;
@@ -20,7 +19,6 @@ interface MemberDetailViewProps {
  */
 export function MemberDetailView({
   member,
-  isLoading,
   myRole,
   isKickDialogOpen,
   isKicking,
@@ -28,16 +26,6 @@ export function MemberDetailView({
   onOpenKickDialog,
   onCloseKickDialog,
 }: MemberDetailViewProps) {
-  if (isLoading || !member) {
-    return (
-      <ScreenLayout>
-        <View style={styles.loadingWrapper}>
-          <Skeleton width="100%" height={280} borderRadius={20} />
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   const canManage = myRole === 'CAPTAIN' || myRole === 'VICE_CAPTAIN';
   const isMemberKickable = member.role === 'MEMBER';
 
@@ -73,9 +61,6 @@ export function MemberDetailView({
 }
 
 const styles = StyleSheet.create({
-  loadingWrapper: {
-    padding: spacing[4],
-  },
   content: {
     padding: spacing[4],
     paddingBottom: spacing[10],

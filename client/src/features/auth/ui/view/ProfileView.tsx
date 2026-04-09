@@ -27,22 +27,12 @@ export function ProfileView({
   onSettingsPress,
   onLogout,
 }: ProfileViewProps) {
-  if (isLoading) {
-    return (
-      <ScreenLayout>
-        <View style={styles.content}>
-          <Skeleton width="100%" height={100} borderRadius={16} />
-          <Spacing size={4} />
-          <Skeleton width="100%" height={80} borderRadius={16} />
-        </View>
-      </ScreenLayout>
-    );
-  }
+  // useMyProfile uses enabled: !!accessToken → Suspense 불가 예외 케이스 (api.md 4.4)
+  if (isLoading) return <ProfileSkeleton />;
 
   return (
     <ScreenLayout>
       <ScrollView contentContainerStyle={styles.content}>
-        {/* 헤더 */}
         <View style={styles.header}>
           <TextBox variant="heading2" color={colors.grey900}>내 프로필</TextBox>
           <TouchableOpacity onPress={onSettingsPress}>
@@ -52,7 +42,6 @@ export function ProfileView({
 
         <Spacing size={4} />
 
-        {/* 플레이어 카드 */}
         <PlayerCard
           name={profile?.name ?? null}
           position={profile?.position ?? null}
@@ -62,14 +51,12 @@ export function ProfileView({
 
         <Spacing size={4} />
 
-        {/* 통계 요약 */}
         <View style={styles.statsCard}>
           <StatSummary stats={stats} />
         </View>
 
         <Spacing size={4} />
 
-        {/* 매너 온도 섹션 */}
         <TouchableOpacity style={styles.mannerCard} onPress={onMannerPress}>
           <View style={styles.mannerRow}>
             <View>
@@ -85,7 +72,6 @@ export function ProfileView({
 
         <Spacing size={6} />
 
-        {/* 액션 버튼들 */}
         <Button variant="secondary" onPress={onEditPress}>
           프로필 수정
         </Button>
@@ -97,6 +83,16 @@ export function ProfileView({
     </ScreenLayout>
   );
 }
+
+const ProfileSkeleton = () => (
+  <ScreenLayout>
+    <View style={styles.content}>
+      <Skeleton width="100%" height={100} borderRadius={16} />
+      <Spacing size={4} />
+      <Skeleton width="100%" height={80} borderRadius={16} />
+    </View>
+  </ScreenLayout>
+);
 
 const styles = StyleSheet.create({
   content: {

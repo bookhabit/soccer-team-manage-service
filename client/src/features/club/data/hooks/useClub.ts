@@ -1,4 +1,4 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import {
   createClub,
@@ -40,17 +40,16 @@ const DEFAULT_PAGE_SIZE = 20;
 // ─── 클럽 조회 ────────────────────────────────────────────────────────────────
 
 export function useMyClub() {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: clubQueryKeys.myClub,
     queryFn: getMyClub,
   });
 }
 
 export function useClubDetail(clubId: string) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: clubQueryKeys.detail(clubId),
     queryFn: () => getClubDetail(clubId),
-    throwOnError: true,
   });
 }
 
@@ -82,7 +81,7 @@ export function useUpdateClub(clubId: string) {
 // ─── 팀원 목록 ────────────────────────────────────────────────────────────────
 
 export function useClubMembers(clubId: string, position?: string) {
-  return useInfiniteQuery({
+  return useSuspenseInfiniteQuery({
     queryKey: clubQueryKeys.members(clubId),
     queryFn: ({ pageParam }) =>
       getClubMembers(clubId, {
@@ -92,17 +91,15 @@ export function useClubMembers(clubId: string, position?: string) {
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    throwOnError: true,
   });
 }
 
 // ─── 팀원 상세 ────────────────────────────────────────────────────────────────
 
 export function useMemberDetail(clubId: string, userId: string) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: clubQueryKeys.member(clubId, userId),
     queryFn: () => getMemberDetail(clubId, userId),
-    throwOnError: true,
   });
 }
 
@@ -171,7 +168,7 @@ export function useLeaveClub(clubId: string) {
 // ─── 가입 신청 ────────────────────────────────────────────────────────────────
 
 export function useJoinRequests(clubId: string) {
-  return useInfiniteQuery({
+  return useSuspenseInfiniteQuery({
     queryKey: clubQueryKeys.joinRequests(clubId),
     queryFn: ({ pageParam }) =>
       getJoinRequests(clubId, {
@@ -180,7 +177,6 @@ export function useJoinRequests(clubId: string) {
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
-    throwOnError: true,
   });
 }
 
@@ -232,7 +228,7 @@ export function useRejectJoinRequest(clubId: string) {
 // ─── 초대 코드 ────────────────────────────────────────────────────────────────
 
 export function useInviteCode(clubId: string) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: clubQueryKeys.inviteCode(clubId),
     queryFn: () => getInviteCode(clubId),
   });
@@ -258,7 +254,7 @@ export function useJoinByCode() {
 // ─── 해체 투표 ────────────────────────────────────────────────────────────────
 
 export function useDissolveVote(clubId: string) {
-  return useQuery({
+  return useSuspenseQuery({
     queryKey: clubQueryKeys.dissolveVote(clubId),
     queryFn: () => getDissolveVote(clubId),
   });
@@ -310,7 +306,7 @@ export function useClubSearch(params: { name?: string; regionId?: string; nearby
 }
 
 export function useRecommendedClubs() {
-  return useInfiniteQuery({
+  return useSuspenseInfiniteQuery({
     queryKey: clubQueryKeys.recommended,
     queryFn: ({ pageParam }) =>
       getRecommendedClubs({ cursor: pageParam as string | undefined }),

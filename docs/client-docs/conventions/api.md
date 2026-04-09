@@ -32,11 +32,11 @@
 // 예시: features/matches/services/match.service.ts
 export const matchService = {
   getList: async (filters: MatchFilters): Promise<Match[]> => {
-    const data = await http.get('/matches', filters);
+    const data = await http.get("/matches", filters);
     return matchListSchema.parse(data); // 런타임 검증 및 타입 추론
   },
   create: async (input: CreateMatchInput): Promise<Match> => {
-    const data = await http.post('/matches', input);
+    const data = await http.post("/matches", input);
     return matchSchema.parse(data);
   },
 };
@@ -64,25 +64,221 @@ export const matchService = {
 <QueryErrorBoundary fallback={<JobListErrorView />}>
   <Suspense fallback={<JobListLoadingView />}>
     <JobListContainer>
-       <EmptyBoundary data={items} fallback={<JobListEmptyView />}>
-         <JobListView items={items} />
-       </EmptyBoundary>
+      <EmptyBoundary data={items} fallback={<JobListEmptyView />}>
+        <JobListView items={items} />
+      </EmptyBoundary>
     </JobListContainer>
   </Suspense>
 </QueryErrorBoundary>
+```
+
+### 4.3 비동기 상태 핸들링 — 금지 패턴 vs 권장 패턴
+
+#### ❌ 금지: View 내부에서 상태 분기
+
+View 컴포넌트는 렌더링만 담당한다. 로딩·에러·빈 상태 분기를 View 내부에 작성하면 안 된다.
+
+```tsx
+// ❌ 금지 — 인라인 삼항 중첩
+function BoardView({ posts, isLoading }) {
+  return isLoading ? (
+    <Skeleton />
+  ) : posts.length === 0 ? (
+    <Empty />
+  ) : (
+    <FlatList />
+  );
+}
+
+// ❌ 금지 — early return으로 직접 분기
+function ClubTabView({ club, isLoading, isError }) {
+  if (isError)
+    return (
+      <View>
+        <Text>연결 실패</Text>
+      </View>
+    );
+  if (isLoading)
+    return (
+      <View>
+        <Skeleton />
+      </View>
+    );
+  if (!club)
+    return (
+      <View>
+        <Text>팀 없음</Text>
+      </View>
+    );
+  // ...
+}
+```
+
+#### ✅ 권장: 레이어별 책임 분리
+
+각 상태를 전담 컴포넌트에 위임한다.
+
+| 상태           | 처리 주체                           | 위치                 |
+| -------------- | ----------------------------------- | -------------------- |
+| 로딩           | `AsyncBoundary` (Suspense fallback) | Container 밖         |
+| 에러           | `AsyncBoundary` (ErrorBoundary)     | Container 밖         |
+| null / 빈 배열 | `EmptyBoundary`                     | Container 내부       |
+| 정상 데이터    | View                                | View만 받아서 렌더링 |
+
+```tsx
+// ✅ 권장 — Container
+function ClubTabContent() {
+  const { data: club } = useMyClub(); // useSuspenseQuery 사용
+
+  return (
+    <EmptyBoundary
+      data={club}
+      fallback={
+        <NoClubView
+          onCreateClub={() => router.push("/(app)/club/create" as Href)}
+          onSearchClub={() => router.push("/(app)/club/search" as Href)}
+          onJoinByCode={() => router.push("/(app)/club/invite-enter" as Href)}
+        />
+      }
+    >
+      <ClubTabView
+        club={club!}
+        onGoMembers={() =>
+          router.push(`/(app)/club/${club?.id}/members` as Href)
+        }
+        onGoBoard={() => router.push(`/(app)/club/${club?.id}/board` as Href)}
+        onGoSettings={() =>
+          router.push(`/(app)/club/${club?.id}/settings` as Href)
+        }
+        onGoJoinRequests={() =>
+          router.push(`/(app)/club/${club?.id}/join-requests` as Href)
+        }
+      />
+    </EmptyBoundary>
+  );
+}
+
+export function ClubTabContainer() {
+  return (
+    <AsyncBoundary loadingFallback={<ClubTabSkeleton />}>
+      <ClubTabContent />
+    </AsyncBoundary>
+  );
+}
+
+// ✅ 권장 — View (club은 항상 non-null로 보장됨)
+function ClubTabView({ club }: { club: ClubDetail }) {
+  return <ScreenLayout>...</ScreenLayout>;
+}
+```
+
+#### 핵심 규칙 요약
+
+```
+❌ View props에 isLoading, isError, isEmpty 금지
+❌ View 내부에서 null / undefined / length === 0 체크 금지
+✅ useQuery → useSuspenseQuery / useSuspenseInfiniteQuery 사용
+✅ 로딩·에러 → AsyncBoundary, null·빈배열 → EmptyBoundary
+✅ View는 항상 보장된 데이터만 받는다
+```
+
+### 4.4 Suspense가 부적합한 예외 케이스
+
+`enabled` 조건부 쿼리(검색, 사용자 입력 기반 쿼리 등)는 `useSuspenseQuery`를 사용할 수 없다.
+`enabled: false`일 때 Suspense는 영원히 fallback을 유지하기 때문이다.
+
+#### 예외 조건
+
+| 조건                  | 이유                                                             | 처리 방식                                      |
+| --------------------- | ---------------------------------------------------------------- | ---------------------------------------------- |
+| `enabled` 옵션 사용   | Suspense는 `enabled: false` 상태를 pending으로 간주 → 무한 로딩  | `useInfiniteQuery` 유지, `isLoading` prop 수신 |
+| 실시간 입력 기반 쿼리 | 입력 전/후 상태가 의미상 다름 (초기·로딩·빈결과 3가지 구분 필요) | View에서 상태 판별 변수로 분리                 |
+
+#### ✅ 예외 케이스 작성 규칙
+
+이 경우에도 View 내부의 분기 로직을 최소화하고 가독성을 유지하기 위해 아래 규칙을 따른다.
+
+**1) 상태 판별 변수를 View 최상단에 응집한다**
+
+인라인 삼항 중첩 대신, 상태를 나타내는 의미 있는 변수명으로 추출한다.
+
+```tsx
+// ❌ 금지 — 인라인 조건 중첩
+{
+  !isLoading && query.length > 0 && clubs.length === 0 && (
+    <TextBox>결과 없음</TextBox>
+  );
+}
+
+// ✅ 권장 — 상단에 응집
+const isInitial = !isLoading && query.length === 0;
+const isEmptyResult = !isLoading && query.length > 0 && clubs.length === 0;
+const showList = !isLoading && clubs.length > 0;
+```
+
+**2) 상태별 렌더링은 전용 컴포넌트로 분리한다**
+
+```tsx
+// ✅ View 내부 — 각 상태를 독립 컴포넌트로 위임
+export function ClubSearchView({ query, clubs, isLoading, ... }: ClubSearchViewProps) {
+  const isInitial = !isLoading && query.length === 0;
+  const isEmptyResult = !isLoading && query.length > 0 && clubs.length === 0;
+  const showList = !isLoading && clubs.length > 0;
+
+  return (
+    <ScreenLayout>
+      <SearchBar value={query} onChange={onQueryChange} />
+
+      {isLoading && <SearchSkeletonList />}
+      {isInitial && <SearchInitialView />}
+      {isEmptyResult && <SearchEmptyView query={query} />}
+      {showList && <FlatList data={clubs} ... />}
+    </ScreenLayout>
+  );
+}
+
+// 상태별 전용 컴포넌트 (파일 하단에 위치, export 불필요)
+const SearchInitialView = () => ( ... );
+const SearchEmptyView = ({ query }: { query: string }) => ( ... );
+const SearchSkeletonList = () => ( ... );
+```
+
+**3) Container는 isLoading을 그대로 View에 전달한다 (AsyncBoundary 생략)**
+
+```tsx
+// ✅ Container — AsyncBoundary 없이 직접 전달
+export function ClubSearchContainer() {
+  const [query, setQuery] = useState("");
+  const { data, isLoading, fetchNextPage, hasNextPage } = useClubSearch({
+    name: query || undefined,
+  });
+  const clubs = data?.pages.flatMap((p) => p.data) ?? [];
+
+  return (
+    <ClubSearchView
+      query={query}
+      clubs={clubs}
+      isLoading={isLoading}
+      hasNextPage={hasNextPage ?? false}
+      onQueryChange={setQuery}
+      onLoadMore={() => fetchNextPage()}
+      onSelectClub={(id) => router.push(`/(app)/club/${id}/join` as Href)}
+    />
+  );
+}
 ```
 
 ---
 
 ## 5️⃣ 에러 타입별 처리 가이드
 
-| **에러 종류** | **처리 위치** | **방법** |
-| --- | --- | --- |
-| **JS 런타임 에러** | `Global ErrorBoundary` | 전체화면 Fallback UI 표시 |
-| **Query 에러 (GET)** | `QueryErrorBoundary` | 인라인 에러 뷰 + 재시도 버튼 |
-| **Mutation 에러 (POST)** | 호출부 (onSuccess/onError) | 토스트 메시지 알림 또는 폼 필드 에러 표시 |
-| **401 인증 에러** | Axios Interceptor | 토큰 갱신 시도 또는 로그인 페이지 리다이렉트 |
-| **빈 데이터 (200 OK)** | `EmptyBoundary` | "데이터가 없습니다" 안내 문구 UI |
+| **에러 종류**            | **처리 위치**              | **방법**                                     |
+| ------------------------ | -------------------------- | -------------------------------------------- |
+| **JS 런타임 에러**       | `Global ErrorBoundary`     | 전체화면 Fallback UI 표시                    |
+| **Query 에러 (GET)**     | `QueryErrorBoundary`       | 인라인 에러 뷰 + 재시도 버튼                 |
+| **Mutation 에러 (POST)** | 호출부 (onSuccess/onError) | 토스트 메시지 알림 또는 폼 필드 에러 표시    |
+| **401 인증 에러**        | Axios Interceptor          | 토큰 갱신 시도 또는 로그인 페이지 리다이렉트 |
+| **빈 데이터 (200 OK)**   | `EmptyBoundary`            | "데이터가 없습니다" 안내 문구 UI             |
 
 ---
 
@@ -96,8 +292,9 @@ export const matchService = {
 
 ## 7️⃣ 개발 체크리스트
 
-- [ ]  API 응답에 대한 **Zod Schema**를 정의했는가?
-- [ ]  **Service** 레이어에서 스키마 파싱(`parse`)을 수행했는가?
-- [ ]  로딩 시 **Skeleton UI**(`LoadingView`)를 준비했는가?
-- [ ]  데이터가 없을 때의 **Empty UI**(`EmptyView`)를 준비했는가?
-- [ ]  에러 발생 시 사용자가 **재시도**할 수 있는 UI를 제공하는가?
+- [ ] API 응답에 대한 **Zod Schema**를 정의했는가?
+- [ ] **Service** 레이어에서 스키마 파싱(`parse`)을 수행했는가?
+- [ ] 로딩 시 **Skeleton UI**(`LoadingView`)를 준비했는가?
+- [ ] 데이터가 없을 때의 **Empty UI**(`EmptyView`)를 준비했는가?
+- [ ] 에러 발생 시 사용자가 **재시도**할 수 있는 UI를 제공하는가?
+- [ ] 비동기 상태 핸들링을 규칙대로 통일되게 수행했는가?

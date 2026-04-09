@@ -1,12 +1,11 @@
 import React from 'react';
-import { View, FlatList, StyleSheet } from 'react-native';
-import { TextBox, Spacing, Skeleton, ScreenLayout, colors, spacing } from '@ui';
+import { FlatList, StyleSheet } from 'react-native';
+import { Spacing, ScreenLayout, spacing } from '@ui';
 import { JoinRequestCard } from '../components/JoinRequestCard';
 import type { JoinRequest } from '../../data/schemas/club.schema';
 
 interface JoinRequestsManageViewProps {
   requests: JoinRequest[];
-  isLoading: boolean;
   hasNextPage: boolean;
   approvingId: string | null;
   rejectingId: string | null;
@@ -21,7 +20,6 @@ interface JoinRequestsManageViewProps {
  */
 export function JoinRequestsManageView({
   requests,
-  isLoading,
   hasNextPage,
   approvingId,
   rejectingId,
@@ -29,30 +27,6 @@ export function JoinRequestsManageView({
   onReject,
   onLoadMore,
 }: JoinRequestsManageViewProps) {
-  if (isLoading) {
-    return (
-      <ScreenLayout>
-        <View style={styles.skeletonList}>
-          {[0, 1, 2].map((i) => (
-            <Skeleton key={i} width="100%" height={140} borderRadius={12} />
-          ))}
-        </View>
-      </ScreenLayout>
-    );
-  }
-
-  const isEmpty = requests.length === 0;
-
-  if (isEmpty) {
-    return (
-      <ScreenLayout>
-        <View style={styles.emptyWrapper}>
-          <TextBox variant="body2" color={colors.grey400}>아직 가입 신청이 없습니다.</TextBox>
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   return (
     <ScreenLayout>
       <FlatList
@@ -77,15 +51,6 @@ export function JoinRequestsManageView({
 }
 
 const styles = StyleSheet.create({
-  skeletonList: {
-    padding: spacing[4],
-    gap: spacing[3],
-  },
-  emptyWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
   list: {
     padding: spacing[4],
   },

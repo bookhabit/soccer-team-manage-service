@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
-import { TextBox, Spacing, Skeleton, ScreenLayout, colors, spacing } from '@ui';
+import { TextBox, Spacing, ScreenLayout, colors, spacing } from '@ui';
+import { EmptyBoundary } from '@/src/shared/ui/server-state-handling/EmptyBoundary';
 import { PostListItem } from '../components/PostListItem';
 import type { PostListItem as PostListItemType, PostType } from '../../data/schemas/post.schema';
 
@@ -14,7 +15,6 @@ const TABS: { key: PostType | undefined; label: string }[] = [
 interface BoardViewProps {
   posts: PostListItemType[];
   activeTab: PostType | undefined;
-  isLoading: boolean;
   hasNextPage: boolean;
   canWrite: boolean;
   onTabChange: (tab: PostType | undefined) => void;
@@ -29,7 +29,6 @@ interface BoardViewProps {
 export function BoardView({
   posts,
   activeTab,
-  isLoading,
   hasNextPage,
   canWrite,
   onTabChange,
@@ -65,17 +64,14 @@ export function BoardView({
         ) : null}
       </View>
 
-      {isLoading ? (
-        <View style={styles.skeletonList}>
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} width="100%" height={72} borderRadius={8} />
-          ))}
-        </View>
-      ) : posts.length === 0 ? (
-        <View style={styles.emptyWrapper}>
-          <TextBox variant="body2" color={colors.grey400}>게시글이 없습니다.</TextBox>
-        </View>
-      ) : (
+      <EmptyBoundary
+        data={posts}
+        fallback={
+          <View style={styles.emptyWrapper}>
+            <TextBox variant="body2" color={colors.grey400}>게시글이 없습니다.</TextBox>
+          </View>
+        }
+      >
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
@@ -86,7 +82,7 @@ export function BoardView({
           onEndReachedThreshold={0.5}
           ItemSeparatorComponent={() => <Spacing size={0} />}
         />
-      )}
+      </EmptyBoundary>
     </ScreenLayout>
   );
 }
@@ -111,10 +107,6 @@ const styles = StyleSheet.create({
     marginLeft: 'auto',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-  },
-  skeletonList: {
-    padding: spacing[4],
-    gap: spacing[3],
   },
   emptyWrapper: {
     flex: 1,

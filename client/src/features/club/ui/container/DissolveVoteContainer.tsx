@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { useToast } from '@ui';
+import { View } from 'react-native';
+import { Skeleton, ScreenLayout, useToast } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import {
   useDissolveVote,
   useStartDissolveVote,
@@ -12,15 +14,21 @@ interface DissolveVoteContainerProps {
   clubId: string;
 }
 
-/**
- * 해체 투표 Container.
- * 주장은 투표 시작, 팀원은 동의·거절 응답.
- */
-export function DissolveVoteContainer({ clubId }: DissolveVoteContainerProps) {
+function DissolveVoteSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ padding: 20 }}>
+        <Skeleton width="100%" height={160} borderRadius={16} />
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function DissolveVoteContent({ clubId }: DissolveVoteContainerProps) {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: vote, isLoading } = useDissolveVote(clubId);
+  const { data: vote } = useDissolveVote(clubId);
   const { data: myClub } = useMyClub();
   const { mutate: startVote, isPending: isStarting } = useStartDissolveVote(clubId);
   const { mutate: respond, isPending: isResponding } = useRespondDissolveVote(clubId);
@@ -39,9 +47,7 @@ export function DissolveVoteContainer({ clubId }: DissolveVoteContainerProps) {
 
   const handleRespond = (agreed: boolean) => {
     respond(agreed, {
-      onSuccess: () => {
-        toast.info(agreed ? '동의하셨습니다.' : '반대하셨습니다.');
-      },
+      onSuccess: () => toast.info(agreed ? '동의하셨습니다.' : '반대하셨습니다.'),
       onError: () => toast.error('응답에 실패했습니다.'),
     });
   };
@@ -49,7 +55,6 @@ export function DissolveVoteContainer({ clubId }: DissolveVoteContainerProps) {
   return (
     <DissolveVoteView
       vote={vote}
-      isLoading={isLoading}
       isCaptain={isCaptain}
       isResponding={isResponding}
       isStarting={isStarting}
@@ -60,5 +65,13 @@ export function DissolveVoteContainer({ clubId }: DissolveVoteContainerProps) {
       onOpenConfirm={() => setIsConfirmOpen(true)}
       onCloseConfirm={() => setIsConfirmOpen(false)}
     />
+  );
+}
+
+export function DissolveVoteContainer({ clubId }: DissolveVoteContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<DissolveVoteSkeleton />}>
+      <DissolveVoteContent clubId={clubId} />
+    </AsyncBoundary>
   );
 }

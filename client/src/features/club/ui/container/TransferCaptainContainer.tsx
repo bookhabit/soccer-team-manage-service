@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
-import { TextBox, Spacing, ConfirmDialog, ScreenLayout, colors, spacing, useToast } from '@ui';
+import { TextBox, Spacing, ConfirmDialog, ScreenLayout, Skeleton, colors, spacing, useToast } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useClubMembers, useTransferCaptain } from '../../data/hooks/useClub';
 import { MemberCard } from '../components/MemberCard';
 import type { ClubMember } from '../../data/schemas/club.schema';
@@ -10,20 +11,32 @@ interface TransferCaptainContainerProps {
   clubId: string;
 }
 
-/**
- * 주장 권한 이전 Container.
- * 팀원 목록에서 선택 → 확인 다이얼로그 → 이전 처리.
- */
-export function TransferCaptainContainer({ clubId }: TransferCaptainContainerProps) {
+function TransferCaptainSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ padding: 16, gap: 12 }}>
+        {[0, 1, 2, 3].map((i) => (
+          <View key={i} style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+            <Skeleton width={44} height={44} borderRadius={22} />
+            <View style={{ flex: 1, gap: 8 }}>
+              <Skeleton width="50%" height={16} />
+              <Skeleton width="30%" height={12} />
+            </View>
+          </View>
+        ))}
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function TransferCaptainContent({ clubId }: TransferCaptainContainerProps) {
   const [selectedMember, setSelectedMember] = useState<ClubMember | null>(null);
   const { toast } = useToast();
 
-  const { data, isLoading, fetchNextPage, hasNextPage } = useClubMembers(clubId);
+  const { data, fetchNextPage, hasNextPage } = useClubMembers(clubId);
   const { mutate: transfer, isPending } = useTransferCaptain(clubId);
 
-  const members = (data?.pages.flatMap((p) => p.data) ?? []).filter(
-    (m) => m.role !== 'CAPTAIN',
-  );
+  const members = data.pages.flatMap((p) => p.data).filter((m) => m.role !== 'CAPTAIN');
 
   const handleConfirm = () => {
     if (!selectedMember) return;
@@ -57,11 +70,9 @@ export function TransferCaptainContainer({ clubId }: TransferCaptainContainerPro
         onEndReached={hasNextPage ? () => fetchNextPage() : undefined}
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
-          !isLoading ? (
-            <View style={styles.empty}>
-              <TextBox variant="body2" color={colors.grey400}>이전 가능한 팀원이 없습니다.</TextBox>
-            </View>
-          ) : null
+          <View style={styles.empty}>
+            <TextBox variant="body2" color={colors.grey400}>이전 가능한 팀원이 없습니다.</TextBox>
+          </View>
         }
         ItemSeparatorComponent={() => <Spacing size={0} />}
       />
@@ -77,6 +88,14 @@ export function TransferCaptainContainer({ clubId }: TransferCaptainContainerPro
         destructive
       />
     </ScreenLayout>
+  );
+}
+
+export function TransferCaptainContainer({ clubId }: TransferCaptainContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<TransferCaptainSkeleton />}>
+      <TransferCaptainContent clubId={clubId} />
+    </AsyncBoundary>
   );
 }
 

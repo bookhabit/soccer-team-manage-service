@@ -5,13 +5,11 @@ import type { Href } from 'expo-router';
 import {
   TextBox, ConfirmDialog, Spacing, ScreenLayout, colors, spacing, useToast,
 } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useMyClub, useLeaveClub } from '../../data/hooks/useClub';
 import type { LeaveReason } from '../../data/schemas/club.schema';
 
-/**
- * 클럽 설정 Container — 초대코드·권한이전·나가기·해체 진입점.
- */
-export function ClubSettingsContainer() {
+function ClubSettingsContent() {
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
   const [leaveReason] = useState<LeaveReason>('OTHER');
   const { toast } = useToast();
@@ -19,10 +17,8 @@ export function ClubSettingsContainer() {
   const { data: club } = useMyClub();
   const { mutate: leaveClub, isPending: isLeaving } = useLeaveClub(club?.id ?? '');
 
-  if (!club) return null;
-
-  const isCaptain = club.myRole === 'CAPTAIN';
-  const isCaptainOrVice = club.myRole === 'CAPTAIN' || club.myRole === 'VICE_CAPTAIN';
+  const isCaptain = club?.myRole === 'CAPTAIN';
+  const isCaptainOrVice = club?.myRole === 'CAPTAIN' || club?.myRole === 'VICE_CAPTAIN';
 
   const handleLeave = () => {
     leaveClub(leaveReason, {
@@ -34,45 +30,40 @@ export function ClubSettingsContainer() {
   return (
     <ScreenLayout>
       <ScrollView contentContainerStyle={styles.content}>
-        <TextBox variant="heading3" color={colors.grey900}>{club.name}</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>{club?.name}</TextBox>
         <Spacing size={5} />
 
-        {/* 초대 코드 */}
         {isCaptainOrVice ? (
           <SettingsRow
             label="초대 코드 관리"
-            onPress={() => router.push(`/(app)/club/${club.id}/invite` as Href)}
+            onPress={() => router.push(`/(app)/club/${club!.id}/invite` as Href)}
           />
         ) : null}
 
-        {/* 가입 신청 관리 */}
         {isCaptainOrVice ? (
           <SettingsRow
             label="가입 신청 관리"
-            onPress={() => router.push(`/(app)/club/${club.id}/join-requests` as Href)}
+            onPress={() => router.push(`/(app)/club/${club!.id}/join-requests` as Href)}
           />
         ) : null}
 
-        {/* 주장 권한 이전 */}
         {isCaptain ? (
           <SettingsRow
             label="주장 권한 이전"
-            onPress={() => router.push(`/(app)/club/${club.id}/transfer-captain` as Href)}
+            onPress={() => router.push(`/(app)/club/${club!.id}/transfer-captain` as Href)}
           />
         ) : null}
 
-        {/* 해체 투표 */}
         {isCaptain ? (
           <SettingsRow
             label="팀 해체"
-            onPress={() => router.push(`/(app)/club/${club.id}/settings/dissolve` as Href)}
+            onPress={() => router.push(`/(app)/club/${club!.id}/settings/dissolve` as Href)}
             danger
           />
         ) : null}
 
         <Spacing size={4} />
 
-        {/* 나가기 */}
         {!isCaptain ? (
           <SettingsRow
             label="팀 나가기"
@@ -93,6 +84,14 @@ export function ClubSettingsContainer() {
         destructive
       />
     </ScreenLayout>
+  );
+}
+
+export function ClubSettingsContainer() {
+  return (
+    <AsyncBoundary>
+      <ClubSettingsContent />
+    </AsyncBoundary>
   );
 }
 

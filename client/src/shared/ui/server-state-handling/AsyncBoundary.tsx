@@ -5,14 +5,15 @@ import LoadingFallback from './LoadingFallback';
 
 interface Props {
   children: ReactNode;
+  loadingFallback?: ReactNode;
 }
 
-export default function AsyncBoundary({ children }: Props) {
+export default function AsyncBoundary({ children, loadingFallback }: Props) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
         <ErrorBoundary onReset={reset}>
-          <Suspense fallback={<LoadingFallback />}>{children}</Suspense>
+          <Suspense fallback={loadingFallback ?? <LoadingFallback />}>{children}</Suspense>
         </ErrorBoundary>
       )}
     </QueryErrorResetBoundary>

@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextBox, Button, Spacing, Skeleton, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
+import { TextBox, Button, Spacing, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
 import type { DissolveVote } from '../../data/schemas/club.schema';
 
 interface DissolveVoteViewProps {
   vote: DissolveVote | undefined;
-  isLoading: boolean;
   isCaptain: boolean;
   isResponding: boolean;
   isStarting: boolean;
@@ -22,7 +21,6 @@ interface DissolveVoteViewProps {
  */
 export function DissolveVoteView({
   vote,
-  isLoading,
   isCaptain,
   isResponding,
   isStarting,
@@ -33,16 +31,6 @@ export function DissolveVoteView({
   onOpenConfirm,
   onCloseConfirm,
 }: DissolveVoteViewProps) {
-  if (isLoading) {
-    return (
-      <ScreenLayout>
-        <View style={styles.content}>
-          <Skeleton width="100%" height={160} borderRadius={16} />
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   return (
     <ScreenLayout>
       <View style={styles.content}>

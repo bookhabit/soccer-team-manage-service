@@ -1,12 +1,11 @@
 import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
-import { TextBox, Input, Spacing, Skeleton, ScreenLayout, colors, spacing } from '@ui';
+import { TextBox, Input, Spacing, ScreenLayout, colors, spacing } from '@ui';
 import { MemberCard } from '../components/MemberCard';
 import type { ClubMember } from '../../data/schemas/club.schema';
 
 interface MemberListViewProps {
   members: ClubMember[];
-  isLoading: boolean;
   hasNextPage: boolean;
   filter: string;
   onFilterChange: (v: string) => void;
@@ -20,31 +19,12 @@ interface MemberListViewProps {
  */
 export function MemberListView({
   members,
-  isLoading,
   hasNextPage,
   filter,
   onFilterChange,
   onLoadMore,
   onSelectMember,
 }: MemberListViewProps) {
-  if (isLoading) {
-    return (
-      <ScreenLayout>
-        <View style={styles.skeletonList}>
-          {[0, 1, 2, 3].map((i) => (
-            <View key={i} style={styles.skeletonRow}>
-              <Skeleton width={44} height={44} borderRadius={22} />
-              <View style={{ flex: 1, gap: 8 }}>
-                <Skeleton width="50%" height={16} />
-                <Skeleton width="30%" height={12} />
-              </View>
-            </View>
-          ))}
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   const isEmpty = members.length === 0;
 
   return (
@@ -85,15 +65,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
     borderBottomColor: colors.grey100,
-  },
-  skeletonList: {
-    padding: spacing[4],
-    gap: spacing[3],
-  },
-  skeletonRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing[3],
   },
   emptyWrapper: {
     flex: 1,

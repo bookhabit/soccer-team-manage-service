@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useToast } from '@ui';
+import { Skeleton, ScreenLayout, Spacing, useToast } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import {
   usePostDetail,
   useComments,
@@ -16,26 +18,33 @@ interface PostDetailContainerProps {
   postId: string;
 }
 
-/**
- * 게시글 상세 Container.
- * 게시글 조회(viewCount INCR 트리거) + 댓글 CRUD.
- */
-export function PostDetailContainer({ clubId, postId }: PostDetailContainerProps) {
+function PostDetailSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ padding: 16 }}>
+        <Skeleton width="70%" height={24} />
+        <Spacing size={3} />
+        <Skeleton width="100%" height={160} borderRadius={8} />
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function PostDetailContent({ clubId, postId }: PostDetailContainerProps) {
   const [commentInput, setCommentInput] = useState('');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: post, isLoading } = usePostDetail(clubId, postId);
+  const { data: post } = usePostDetail(clubId, postId);
   const { data: commentsData } = useComments(clubId, postId);
   const { data: myClub } = useMyClub();
   const { mutate: createComment, isPending: isSubmittingComment } = useCreateComment(clubId, postId);
   const { mutate: deleteComment } = useDeleteComment(clubId, postId);
   const { mutate: deletePost, isPending: isDeletingPost } = useDeletePost(clubId);
 
-  const comments = commentsData?.pages.flatMap((p) => p.data) ?? [];
+  const comments = commentsData.pages.flatMap((p) => p.data);
 
   const isCaptainOrVice = myClub?.myRole === 'CAPTAIN' || myClub?.myRole === 'VICE_CAPTAIN';
-  // NOTE: author 본인 여부는 서버 응답에 isMine 필드 추가 후 교체 — 현재는 관리자 권한으로만 허용
   const canDeletePost = isCaptainOrVice;
 
   const handleSubmitComment = () => {
@@ -71,7 +80,6 @@ export function PostDetailContainer({ clubId, postId }: PostDetailContainerProps
     <PostDetailView
       post={post}
       comments={comments}
-      isLoading={isLoading}
       commentInput={commentInput}
       isSubmittingComment={isSubmittingComment}
       isDeleteDialogOpen={isDeleteDialogOpen}
@@ -84,5 +92,13 @@ export function PostDetailContainer({ clubId, postId }: PostDetailContainerProps
       onCloseDeleteDialog={() => setIsDeleteDialogOpen(false)}
       onDeletePost={handleDeletePost}
     />
+  );
+}
+
+export function PostDetailContainer({ clubId, postId }: PostDetailContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<PostDetailSkeleton />}>
+      <PostDetailContent clubId={clubId} postId={postId} />
+    </AsyncBoundary>
   );
 }

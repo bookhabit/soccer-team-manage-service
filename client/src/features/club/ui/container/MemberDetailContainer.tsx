@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import { router } from 'expo-router';
-import { useToast } from '@ui';
+import { Skeleton, ScreenLayout, useToast } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useMemberDetail, useKickMember, useMyClub } from '../../data/hooks/useClub';
 import { MemberDetailView } from '../view/MemberDetailView';
 
@@ -9,15 +11,21 @@ interface MemberDetailContainerProps {
   userId: string;
 }
 
-/**
- * 팀원 상세 Container.
- * FIFA 카드 표시 + 권한에 따른 강퇴 기능 제공.
- */
-export function MemberDetailContainer({ clubId, userId }: MemberDetailContainerProps) {
+function MemberDetailSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ padding: 16 }}>
+        <Skeleton width="100%" height={280} borderRadius={20} />
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function MemberDetailContent({ clubId, userId }: MemberDetailContainerProps) {
   const [isKickDialogOpen, setIsKickDialogOpen] = useState(false);
   const { toast } = useToast();
 
-  const { data: member, isLoading } = useMemberDetail(clubId, userId);
+  const { data: member } = useMemberDetail(clubId, userId);
   const { data: myClub } = useMyClub();
   const { mutate: kick, isPending: isKicking } = useKickMember(clubId);
 
@@ -30,16 +38,13 @@ export function MemberDetailContainer({ clubId, userId }: MemberDetailContainerP
         setIsKickDialogOpen(false);
         router.back();
       },
-      onError: () => {
-        toast.error('강퇴에 실패했습니다.');
-      },
+      onError: () => toast.error('강퇴에 실패했습니다.'),
     });
   };
 
   return (
     <MemberDetailView
       member={member}
-      isLoading={isLoading}
       myRole={myRole}
       isKickDialogOpen={isKickDialogOpen}
       isKicking={isKicking}
@@ -47,5 +52,13 @@ export function MemberDetailContainer({ clubId, userId }: MemberDetailContainerP
       onOpenKickDialog={() => setIsKickDialogOpen(true)}
       onCloseKickDialog={() => setIsKickDialogOpen(false)}
     />
+  );
+}
+
+export function MemberDetailContainer({ clubId, userId }: MemberDetailContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<MemberDetailSkeleton />}>
+      <MemberDetailContent clubId={clubId} userId={userId} />
+    </AsyncBoundary>
   );
 }

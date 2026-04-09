@@ -1,18 +1,13 @@
 import React from 'react';
 import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
-import { TextBox, Button, Spacing, AvatarImage, Skeleton, ScreenLayout, colors, spacing } from '@ui';
+import { TextBox, Spacing, AvatarImage, ScreenLayout, colors, spacing } from '@ui';
 import { RecruitmentBadge } from '../components/RecruitmentBadge';
 import { ClubStatsBar } from '../components/ClubStatsBar';
 import type { ClubDetail } from '../../data/schemas/club.schema';
 import { LEVEL_LABEL } from '@/src/shared/constants/player.constants';
 
 interface ClubTabViewProps {
-  club: ClubDetail | null | undefined;
-  isLoading: boolean;
-  isError?: boolean;
-  onCreateClub: () => void;
-  onSearchClub: () => void;
-  onJoinByCode: () => void;
+  club: ClubDetail;
   onGoMembers: () => void;
   onGoBoard: () => void;
   onGoSettings: () => void;
@@ -20,79 +15,16 @@ interface ClubTabViewProps {
 }
 
 /**
- * 클럽 탭 홈 View.
- * - 로딩: Skeleton
- * - 미소속: NoClubView (생성·검색·코드 입력 CTA)
- * - 소속: 클럽 대시보드
+ * 클럽 탭 홈 View — 클럽 대시보드.
+ * 로딩: AsyncBoundary(skeleton), 미소속: EmptyBoundary(NoClubView), 에러: ErrorBoundary
  */
 export function ClubTabView({
   club,
-  isLoading,
-  isError,
-  onCreateClub,
-  onSearchClub,
-  onJoinByCode,
   onGoMembers,
   onGoBoard,
   onGoSettings,
   onGoJoinRequests,
 }: ClubTabViewProps) {
-  if (isError) {
-    return (
-      <ScreenLayout>
-        <View style={styles.noClubWrapper}>
-          <TextBox variant="heading2" color={colors.grey900} style={styles.center}>연결 실패</TextBox>
-          <Spacing size={2} />
-          <TextBox variant="body2" color={colors.grey500} style={styles.center}>
-            잠시 후 다시 시도해주세요
-          </TextBox>
-        </View>
-      </ScreenLayout>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <ScreenLayout>
-        <View style={styles.loadingWrapper}>
-          <Skeleton width="100%" height={120} borderRadius={16} />
-          <Spacing size={3} />
-          <Skeleton width="100%" height={80} borderRadius={16} />
-          <Spacing size={3} />
-          <Skeleton width="100%" height={80} borderRadius={16} />
-        </View>
-      </ScreenLayout>
-    );
-  }
-
-  const hasClub = club != null;
-
-  if (!hasClub) {
-    return (
-      <ScreenLayout>
-        <View style={styles.noClubWrapper}>
-          <TextBox variant="heading2" color={colors.grey900} style={styles.center}>⚽ 소속 팀이 없어요</TextBox>
-          <Spacing size={2} />
-          <TextBox variant="body2" color={colors.grey500} style={styles.center}>
-            팀을 만들거나 가입 신청을 해보세요
-          </TextBox>
-          <Spacing size={8} />
-          <Button variant="primary" size="large" fullWidth onPress={onCreateClub}>
-            팀 만들기
-          </Button>
-          <Spacing size={2} />
-          <Button variant="secondary" size="large" fullWidth onPress={onSearchClub}>
-            팀 찾아보기
-          </Button>
-          <Spacing size={2} />
-          <Button variant="ghost" size="medium" fullWidth onPress={onJoinByCode}>
-            초대 코드로 가입
-          </Button>
-        </View>
-      </ScreenLayout>
-    );
-  }
-
   const isCaptainOrVice = club.myRole === 'CAPTAIN' || club.myRole === 'VICE_CAPTAIN';
   const levelLabel = LEVEL_LABEL[club.level] ?? club.level;
 
@@ -101,7 +33,10 @@ export function ClubTabView({
       <ScrollView contentContainerStyle={styles.content}>
         {/* 클럽 헤더 */}
         <View style={styles.clubHeader}>
-          <AvatarImage source={club.logoUrl ? { uri: club.logoUrl } : null} size={64} />
+          <AvatarImage
+            source={club.logoUrl ? { uri: club.logoUrl } : null}
+            style={styles.avatar}
+          />
           <View style={styles.clubInfo}>
             <View style={styles.nameRow}>
               <TextBox variant="heading3" color={colors.grey900}>{club.name}</TextBox>
@@ -153,17 +88,6 @@ function MenuButton({ label, onPress }: { label: string; onPress: () => void }) 
 }
 
 const styles = StyleSheet.create({
-  loadingWrapper: {
-    padding: spacing[4],
-  },
-  noClubWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: spacing[6],
-  },
-  center: {
-    textAlign: 'center',
-  },
   content: {
     padding: spacing[4],
     paddingBottom: spacing[10],
@@ -172,6 +96,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing[3],
+  },
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
   },
   clubInfo: {
     flex: 1,

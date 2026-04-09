@@ -7,6 +7,7 @@
 - `docs/client-docs/conventions/code.md` — SRP, 클린 코드, 절대 금지 규칙
 - `docs/server-docs/conventions/api_standard.md` — 서버 코드 표준
 - `docs/server-docs/conventions/error_handling_filter.md` — 에러 처리 표준
+- `docs/client-docs/conventions/api.md` — API 연동 규칙 및 비동기 상태 핸들링
 
 ## 역할
 
@@ -44,6 +45,10 @@
 ### 5. 주석
 
 - [ ] 공통 컴포넌트·주요 함수에 JSDoc이 없는가?
+
+### 5. 비동기 상태 핸들링
+
+- `docs/client-docs/conventions/api.md` — API 연동 규칙 및 비동기 상태 핸들링 참고
 
 ---
 

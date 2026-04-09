@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
+import { Skeleton, ScreenLayout, spacing } from '@ui';
+import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { usePosts } from '../../data/hooks/usePost';
 import { useMyClub } from '../../data/hooks/useClub';
 import { BoardView } from '../view/BoardView';
@@ -10,24 +13,31 @@ interface BoardContainerProps {
   clubId: string;
 }
 
-/**
- * 클럽 게시판 Container.
- * 탭 필터 상태 관리 + 무한 스크롤.
- */
-export function BoardContainer({ clubId }: BoardContainerProps) {
+function BoardSkeleton() {
+  return (
+    <ScreenLayout>
+      <View style={{ height: 44, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' }} />
+      <View style={{ padding: spacing[4], gap: spacing[3] }}>
+        {[0, 1, 2, 3].map((i) => (
+          <Skeleton key={i} width="100%" height={72} borderRadius={8} />
+        ))}
+      </View>
+    </ScreenLayout>
+  );
+}
+
+function BoardInner({ clubId }: BoardContainerProps) {
   const [activeTab, setActiveTab] = useState<PostType | undefined>(undefined);
   const { data: myClub } = useMyClub();
+  const { data, fetchNextPage, hasNextPage } = usePosts(clubId, activeTab);
 
-  const { data, isLoading, fetchNextPage, hasNextPage } = usePosts(clubId, activeTab);
-
-  const posts = data?.pages.flatMap((p) => p.data) ?? [];
+  const posts = data.pages.flatMap((p) => p.data);
   const isMember = myClub?.id === clubId;
 
   return (
     <BoardView
       posts={posts}
       activeTab={activeTab}
-      isLoading={isLoading}
       hasNextPage={hasNextPage ?? false}
       canWrite={isMember}
       onTabChange={setActiveTab}
@@ -37,5 +47,13 @@ export function BoardContainer({ clubId }: BoardContainerProps) {
       }
       onWrite={() => router.push(`/(app)/club/${clubId}/board/write` as Href)}
     />
+  );
+}
+
+export function BoardContainer({ clubId }: BoardContainerProps) {
+  return (
+    <AsyncBoundary loadingFallback={<BoardSkeleton />}>
+      <BoardInner clubId={clubId} />
+    </AsyncBoundary>
   );
 }

@@ -16,8 +16,8 @@ interface ClubSearchViewProps {
 
 /**
  * 클럽 검색 View.
- * - 검색어 입력 → 결과 목록 표시
- * - 4-state: 로딩 / 빈 결과 / 결과 있음 / 초기(추천)
+ * - 검색은 `enabled` 조건부 쿼리를 사용하므로 Suspense 대신 isLoading 직접 수신 (예외 케이스)
+ * - 상태 판별은 View 최상단에 응집하고, 상태별 전용 컴포넌트로 렌더링
  */
 export function ClubSearchView({
   query,
@@ -28,8 +28,10 @@ export function ClubSearchView({
   onLoadMore,
   onSelectClub,
 }: ClubSearchViewProps) {
+  // 상태 판별 로직 (View 최상단에 응집)
+  const isInitial = !isLoading && query.length === 0;
   const isEmptyResult = !isLoading && query.length > 0 && clubs.length === 0;
-  const isInitial = !isLoading && query.length === 0 && clubs.length === 0;
+  const showList = !isLoading && clubs.length > 0;
 
   return (
     <ScreenLayout>
@@ -42,33 +44,10 @@ export function ClubSearchView({
         />
       </View>
 
-      {isLoading && (
-        <View style={styles.skeletonList}>
-          {[0, 1, 2].map((i) => (
-            <View key={i} style={styles.skeletonItem}>
-              <Skeleton width={48} height={48} borderRadius={24} />
-              <View style={{ flex: 1, gap: 8 }}>
-                <Skeleton width="60%" height={16} />
-                <Skeleton width="40%" height={12} />
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
-
-      {isEmptyResult && (
-        <View style={styles.emptyWrapper}>
-          <TextBox variant="body2" color={colors.grey400}>'{query}'에 해당하는 팀이 없습니다.</TextBox>
-        </View>
-      )}
-
-      {isInitial && (
-        <View style={styles.emptyWrapper}>
-          <TextBox variant="body2" color={colors.grey400}>팀 이름을 검색해보세요</TextBox>
-        </View>
-      )}
-
-      {!isLoading && clubs.length > 0 && (
+      {isLoading && <SearchSkeletonList />}
+      {isInitial && <SearchInitialView />}
+      {isEmptyResult && <SearchEmptyView query={query} />}
+      {showList && (
         <FlatList
           data={clubs}
           keyExtractor={(item) => item.id}
@@ -83,6 +62,34 @@ export function ClubSearchView({
     </ScreenLayout>
   );
 }
+
+const SearchInitialView = () => (
+  <View style={styles.emptyWrapper}>
+    <TextBox variant="body2" color={colors.grey400}>팀 이름을 검색해보세요</TextBox>
+  </View>
+);
+
+const SearchEmptyView = ({ query }: { query: string }) => (
+  <View style={styles.emptyWrapper}>
+    <TextBox variant="body2" color={colors.grey400}>
+      '{query}'에 해당하는 팀이 없습니다.
+    </TextBox>
+  </View>
+);
+
+const SearchSkeletonList = () => (
+  <View style={styles.skeletonList}>
+    {[0, 1, 2].map((i) => (
+      <View key={i} style={styles.skeletonItem}>
+        <Skeleton width={48} height={48} borderRadius={24} />
+        <View style={{ flex: 1, gap: 8 }}>
+          <Skeleton width="60%" height={16} />
+          <Skeleton width="40%" height={12} />
+        </View>
+      </View>
+    ))}
+  </View>
+);
 
 const styles = StyleSheet.create({
   searchBar: {
