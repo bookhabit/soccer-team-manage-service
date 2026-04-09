@@ -45,7 +45,8 @@ export interface ApiClient {
  * - 검증 실패 시 콘솔에 상세 에러를 출력하고 ZodError를 throw합니다.
  */
 function handleResponse<T>(res: AxiosResponse, schema?: z.ZodSchema): T {
-  const data = res.data;
+  // NestJS가 null을 반환할 때 빈 body("")로 오는 경우를 null로 정규화
+  const data = res.data === '' ? null : res.data;
 
   if (schema) {
     const result = schema.safeParse(data);

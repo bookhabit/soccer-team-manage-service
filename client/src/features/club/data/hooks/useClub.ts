@@ -43,7 +43,6 @@ export function useMyClub() {
   return useQuery({
     queryKey: clubQueryKeys.myClub,
     queryFn: getMyClub,
-    throwOnError: true,
   });
 }
 

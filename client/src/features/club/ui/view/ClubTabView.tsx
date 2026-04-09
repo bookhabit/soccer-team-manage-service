@@ -9,6 +9,7 @@ import { LEVEL_LABEL } from '@/src/shared/constants/player.constants';
 interface ClubTabViewProps {
   club: ClubDetail | null | undefined;
   isLoading: boolean;
+  isError?: boolean;
   onCreateClub: () => void;
   onSearchClub: () => void;
   onJoinByCode: () => void;
@@ -27,6 +28,7 @@ interface ClubTabViewProps {
 export function ClubTabView({
   club,
   isLoading,
+  isError,
   onCreateClub,
   onSearchClub,
   onJoinByCode,
@@ -35,6 +37,20 @@ export function ClubTabView({
   onGoSettings,
   onGoJoinRequests,
 }: ClubTabViewProps) {
+  if (isError) {
+    return (
+      <ScreenLayout>
+        <View style={styles.noClubWrapper}>
+          <TextBox variant="heading2" color={colors.grey900} style={styles.center}>연결 실패</TextBox>
+          <Spacing size={2} />
+          <TextBox variant="body2" color={colors.grey500} style={styles.center}>
+            잠시 후 다시 시도해주세요
+          </TextBox>
+        </View>
+      </ScreenLayout>
+    );
+  }
+
   if (isLoading) {
     return (
       <ScreenLayout>

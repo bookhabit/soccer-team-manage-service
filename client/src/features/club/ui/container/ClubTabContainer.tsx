@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React from 'react';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useMyClub } from '../../data/hooks/useClub';
@@ -9,12 +9,13 @@ import { ClubTabView } from '../view/ClubTabView';
  * useMyClub() 결과에 따라 미소속·대시보드 분기.
  */
 function ClubTabInner() {
-  const { data: club, isLoading } = useMyClub();
+  const { data: club, isLoading, isError } = useMyClub();
 
   return (
     <ClubTabView
       club={club}
       isLoading={isLoading}
+      isError={isError}
       onCreateClub={() => router.push('/(app)/club/create' as Href)}
       onSearchClub={() => router.push('/(app)/club/search' as Href)}
       onJoinByCode={() => router.push('/(app)/club/invite-enter' as Href)}
@@ -27,9 +28,5 @@ function ClubTabInner() {
 }
 
 export function ClubTabContainer() {
-  return (
-    <Suspense fallback={null}>
-      <ClubTabInner />
-    </Suspense>
-  );
+  return <ClubTabInner />;
 }

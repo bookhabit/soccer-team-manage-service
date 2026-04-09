@@ -24,7 +24,7 @@ import {
 
 @ApiTags('Posts')
 @ApiBearerAuth()
-@Controller('clubs/:clubId/posts')
+@Controller('api/v1/clubs/:clubId/posts')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
