@@ -4,6 +4,7 @@ import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import type { LoginInput } from '../../data/schemas/auth.schema';
 import { TextField, Button, TextBox, colors, spacing } from '@ui';
+import { router } from 'expo-router';
 
 interface LoginViewProps {
   control: Control<LoginInput>;
@@ -68,7 +69,11 @@ export function LoginView({
         )}
       />
 
-      {serverError && <TextBox variant="caption" color={colors.error} style={styles.serverError}>{serverError.message}</TextBox>}
+      {serverError && (
+        <TextBox variant="caption" color={colors.error} style={styles.serverError}>
+          {serverError.message}
+        </TextBox>
+      )}
 
       <View style={styles.submitWrapper}>
         <Button variant="primary" size="large" fullWidth loading={isPending} onPress={onSubmit}>
@@ -76,8 +81,24 @@ export function LoginView({
         </Button>
       </View>
 
+      {__DEV__ && (
+        <View style={styles.submitWrapper}>
+          <Button
+            variant="secondary"
+            size="large"
+            fullWidth
+            loading={isPending}
+            onPress={() => router.push('/test-login')}
+          >
+            테스트 로그인
+          </Button>
+        </View>
+      )}
+
       <TouchableOpacity onPress={onGoSignup} style={styles.link}>
-        <TextBox variant="body2" color={colors.blue500}>계정이 없으신가요? 회원가입</TextBox>
+        <TextBox variant="body2" color={colors.blue500}>
+          계정이 없으신가요? 회원가입
+        </TextBox>
       </TouchableOpacity>
     </View>
   );

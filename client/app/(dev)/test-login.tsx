@@ -96,7 +96,7 @@ export default function TestLoginScreen() {
 
     try {
       const res = await apiClient.publicApi.post<{ accessToken: string; refreshToken: string }>(
-        '/api/v1/sessions',
+        '/sessions',
         { email, password: PASSWORD },
       );
       setTokens(res.data.accessToken, res.data.refreshToken);
@@ -111,7 +111,7 @@ export default function TestLoginScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
       <ScrollView
-        contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10] }}
+        contentContainerStyle={{ padding: spacing[4], paddingBottom: spacing[10], gap: spacing[4] }}
         keyboardShouldPersistTaps="handled"
       >
         {/* 헤더 */}
@@ -152,6 +152,7 @@ export default function TestLoginScreen() {
                     variant="primary"
                     onPress={() => handleLogin(account.email)}
                     disabled={loadingEmail !== null}
+                    size="large"
                   >
                     <Flex direction="column" align="flex-start" style={{ flex: 1 }}>
                       <Flex
