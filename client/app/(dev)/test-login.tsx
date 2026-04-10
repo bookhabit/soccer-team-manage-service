@@ -10,6 +10,36 @@ import { useAuthStore } from '@/src/shared/store/useAuthStore';
 
 const SECTIONS = [
   {
+    title: 'Match 기능 테스트',
+    accounts: [
+      {
+        label: '마무리FC 주장',
+        description: '경기 생성·라인업·기록 입력 등 관리자 기능 전체 검증',
+        email: 'captain@mamurifc.test',
+      },
+      {
+        label: '마무리FC 부주장',
+        description: '부주장 권한 (관리자 기능 동일하게 접근 가능)',
+        email: 'vice@mamurifc.test',
+      },
+      {
+        label: '마무리FC 일반 멤버',
+        description: '투표·MOM 투표 등 멤버 기능, 관리자 버튼 비노출 확인',
+        email: 'member1@mamurifc.test',
+      },
+      {
+        label: '카동FC 주장',
+        description: '별도 클럽 경기 목록 독립성 확인',
+        email: 'captain@kadongfc.test',
+      },
+      {
+        label: '클럽 미소속 유저',
+        description: '클럽 미소속 시 경기 탭 접근 차단 확인',
+        email: 'newbie@test.com',
+      },
+    ],
+  },
+  {
     title: 'Club 기능 테스트',
     accounts: [
       {
@@ -119,13 +149,17 @@ export default function TestLoginScreen() {
               return (
                 <React.Fragment key={account.email}>
                   <Button
-                    variant="outline"
-                    onClick={() => handleLogin(account.email)}
+                    variant="primary"
+                    onPress={() => handleLogin(account.email)}
                     disabled={loadingEmail !== null}
-                    style={{ marginBottom: spacing[2] }}
                   >
                     <Flex direction="column" align="flex-start" style={{ flex: 1 }}>
-                      <Flex direction="row" align="center" justify="space-between" style={{ width: '100%' }}>
+                      <Flex
+                        direction="row"
+                        align="center"
+                        justify="space-between"
+                        style={{ width: '100%' }}
+                      >
                         <TextBox variant="body2Bold" color={colors.grey900}>
                           {account.label}
                         </TextBox>
@@ -149,7 +183,7 @@ export default function TestLoginScreen() {
 
         {/* 안내 */}
         <TextBox variant="caption" color={colors.grey400} style={{ textAlign: 'center' }}>
-          seed 실행: cd server {'&&'} npm run seed:club
+          seed 실행: cd server {'&&'} npm run seed:club {'&&'} npm run seed:match
         </TextBox>
       </ScrollView>
     </SafeAreaView>
