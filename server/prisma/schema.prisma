@@ -14,291 +14,326 @@ datasource db {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
+// 선수 포지션
 enum PlayerPosition {
-  FW
-  MF
-  DF
-  GK
+  FW // 공격수 (Forward)
+  MF // 미드필더 (Midfielder)
+  DF // 수비수 (Defender)
+  GK // 골키퍼 (Goalkeeper)
 }
 
+// 로그인 방식
 enum AuthProvider {
-  LOCAL
-  KAKAO
-  GOOGLE
-  APPLE
+  LOCAL  // 이메일 + 비밀번호
+  KAKAO  // 카카오 소셜
+  GOOGLE // 구글 소셜
+  APPLE  // 애플 소셜
 }
 
+// 주발
 enum PlayerFoot {
-  LEFT
-  RIGHT
-  BOTH
+  LEFT  // 왼발
+  RIGHT // 오른발
+  BOTH  // 양발
 }
 
+// 실력 수준 (유저 개인)
 enum PlayerLevel {
-  BEGINNER
-  AMATEUR
-  SEMI_PRO
-  PRO
+  BEGINNER // 초급
+  AMATEUR  // 아마추어
+  SEMI_PRO // 세미프로
+  PRO      // 프로
 }
 
+// 성별
 enum Gender {
-  MALE
-  FEMALE
+  MALE   // 남성
+  FEMALE // 여성
 }
 
+// 유저 계정 상태
 enum UserStatus {
-  ACTIVE
-  RESTRICTED
-  DELETED
+  ACTIVE     // 정상
+  RESTRICTED // 이용 제한 (신고 등)
+  DELETED    // 탈퇴 (PII null 처리됨)
 }
 
 // ─── Models ───────────────────────────────────────────────────────────────────
 
+// 앱의 핵심 엔터티. 이메일/소셜 로그인 모두 이 모델을 사용.
 model User {
   id                String          @id @default(cuid())
 
-  // 인증 (LOCAL 전용 — 소셜 전환 시 삭제)
+  // ── 인증 정보 (LOCAL 전용 — 소셜 전환 시 null 처리) ──
   email             String?         @unique
   passwordHash      String?
 
-  // 소셜 로그인 (현재는 null — 이후 KAKAO/GOOGLE/APPLE 지원)
+  // ── 소셜 로그인 (현재는 null — 이후 KAKAO/GOOGLE/APPLE 지원 예정) ──
   provider          AuthProvider    @default(LOCAL)
-  providerId        String?
+  providerId        String?         // 소셜 제공자의 고유 ID
 
-  // 프로필 (PII 필드 — 탈퇴 시 null 처리)
+  // ── 프로필 (PII 필드 — 탈퇴 시 모두 null 처리) ──
   name              String?
   birthYear         Int?
   gender            Gender?
-  avatarUrl         String?
+  avatarUrl         String?         // 프로필 이미지 URL
 
-  // 축구 정보
-  position          PlayerPosition?
-  foot              PlayerFoot?
-  years             Int?
-  level             PlayerLevel?
+  // ── 축구 프로필 ──
+  position          PlayerPosition? // 주 포지션
+  foot              PlayerFoot?     // 주발
+  years             Int?            // 축구 경력 (년수)
+  level             PlayerLevel?    // 실력 수준
 
-  // 선호 지역
-  preferredRegionId String?
+  // ── 선호 지역 ──
+  preferredRegionId String?         // FK → Region
 
-  // 매너 & 상태
-  mannerScore       Float           @default(100)
-  isOnboarded       Boolean         @default(false)
+  // ── 매너 & 계정 상태 ──
+  mannerScore       Float           @default(100)  // 매너 점수 (기본 100점)
+  isOnboarded       Boolean         @default(false) // 온보딩 완료 여부
   status            UserStatus      @default(ACTIVE)
-  deletedAt         DateTime?
+  deletedAt         DateTime?       // 탈퇴 일시 (null이면 활성 계정)
 
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
-  sessions          Session[]
-  preferredRegion   Region?         @relation(fields: [preferredRegionId], references: [id])
-  clubMemberships   ClubMember[]
-  clubJoinRequests  ClubJoinRequest[]
-  posts             Post[]
-  comments          Comment[]
-  matchAttendances  MatchAttendance[]
-  matchParticipants MatchParticipant[]
-  matchComments     MatchComment[]
+  // ── Relations ──
+  sessions          Session[]           // 리프레시 토큰 세션 (유저당 1개)
+  preferredRegion   Region?             @relation(fields: [preferredRegionId], references: [id])
+  clubMemberships   ClubMember[]        // 소속 클럽 멤버십
+  clubJoinRequests  ClubJoinRequest[]   // 가입 신청 이력
+  posts             Post[]              // 작성한 게시글
+  comments          Comment[]           // 작성한 댓글
+  matchAttendances  MatchAttendance[]   // 출석 투표 응답
+  matchParticipants MatchParticipant[]  // 실제 경기 참가 기록
+  matchComments     MatchComment[]      // 경기 코멘트
 
   @@map("users")
 }
 
+// 리프레시 토큰 저장소. 유저당 1개 세션만 허용 (중복 로그인 시 덮어씀).
 model Session {
   id               String   @id @default(cuid())
   userId           String
-  refreshTokenHash String
+  refreshTokenHash String   // bcrypt 해시된 리프레시 토큰
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId])
+  @@unique([userId]) // 유저당 세션 1개 강제
   @@map("sessions")
 }
 
+// 행정구역 마스터 데이터. 시도 + 시군구 조합으로 지역을 표현.
 model Region {
   id      String @id @default(cuid())
-  name    String         // 시도 (서울특별시)
-  sigungu String         // 시군구 (강남구)
-  code    String @unique // 행정구역 코드
+  name    String         // 시도 (예: 서울특별시)
+  sigungu String         // 시군구 (예: 강남구)
+  code    String @unique // 행정구역 코드 (예: 11680)
 
-  users   User[]
-  clubs   Club[]
+  // ── Relations ──
+  users   User[] // 이 지역을 선호 지역으로 설정한 유저들
+  clubs   Club[] // 이 지역에 소속된 클럽들
 
   @@map("regions")
 }
 
 // ─── Club ─────────────────────────────────────────────────────────────────────
 
+// 클럽 실력 수준
 enum ClubLevel {
-  BEGINNER
-  AMATEUR
-  SEMI_PRO
-  PRO
+  BEGINNER // 초급
+  AMATEUR  // 아마추어
+  SEMI_PRO // 세미프로
+  PRO      // 프로
 }
 
+// 클럽 모집 상태
 enum RecruitmentStatus {
-  OPEN
-  CLOSED
+  OPEN   // 모집 중
+  CLOSED // 모집 마감
 }
 
+// 클럽 내 역할
 enum ClubRole {
-  CAPTAIN
-  VICE_CAPTAIN
-  MEMBER
+  CAPTAIN      // 주장 — 모든 관리 권한
+  VICE_CAPTAIN // 부주장 — 대부분의 관리 권한
+  MEMBER       // 일반 멤버
 }
 
+// 가입 신청 처리 상태
 enum JoinRequestStatus {
-  PENDING
-  APPROVED
-  REJECTED
+  PENDING  // 검토 대기 중
+  APPROVED // 승인됨
+  REJECTED // 거절됨
 }
 
+// 게시글 유형
 enum PostType {
-  NOTICE
-  GENERAL
-  INQUIRY
+  NOTICE  // 공지사항 (운영진만 작성)
+  GENERAL // 일반 게시글
+  INQUIRY // 문의
 }
 
+// 해산 투표 진행 상태
 enum DissolveVoteStatus {
-  IN_PROGRESS
-  APPROVED
-  REJECTED
-  EXPIRED
+  IN_PROGRESS // 투표 진행 중
+  APPROVED    // 해산 가결 (과반 찬성)
+  REJECTED    // 해산 부결
+  EXPIRED     // 투표 기간 만료
 }
 
+// 아마추어 축구 클럽. 경기·게시판·멤버 관리의 중심 엔터티.
 model Club {
   id                  String            @id @default(cuid())
-  name                String
-  regionId            String
-  level               ClubLevel
-  maxMemberCount      Int               // 2–50
-  currentMemberCount  Int               @default(1)
-  mannerScoreAvg      Float             @default(100)
-  recruitmentStatus   RecruitmentStatus @default(OPEN)
-  logoUrl             String?
-  description         String?
-  isDeleted           Boolean           @default(false)
-  deletedAt           DateTime?
+  name                String            // 클럽명 (고유값은 아님 — 중복 가능)
+  regionId            String            // FK → Region (소재지)
+  level               ClubLevel         // 클럽 실력 수준
+  maxMemberCount      Int               // 최대 인원 (2~50명)
+  currentMemberCount  Int               @default(1)        // 현재 인원 (멤버 변동 시 동기화)
+  mannerScoreAvg      Float             @default(100)      // 멤버 매너 점수 평균
+  recruitmentStatus   RecruitmentStatus @default(OPEN)     // 모집 상태
+  logoUrl             String?           // 클럽 로고 이미지 URL
+  description         String?           // 클럽 소개
+  isDeleted           Boolean           @default(false)    // 소프트 삭제 여부
+  deletedAt           DateTime?         // 해산 일시
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
 
+  // ── Relations ──
   region              Region            @relation(fields: [regionId], references: [id])
-  members             ClubMember[]
-  joinRequests        ClubJoinRequest[]
-  inviteCodes         ClubInviteCode[]
-  banRecords          ClubBanRecord[]
-  dissolveVotes       ClubDissolveVote[]
-  posts               Post[]
-  matches             Match[]
+  members             ClubMember[]      // 소속 멤버 목록
+  joinRequests        ClubJoinRequest[] // 가입 신청 목록
+  inviteCodes         ClubInviteCode[]  // 발급된 초대 코드 목록
+  banRecords          ClubBanRecord[]   // 강퇴 이력
+  dissolveVotes       ClubDissolveVote[] // 해산 투표 이력
+  posts               Post[]            // 클럽 게시판 글
+  matches             Match[]           // 경기 목록
 
   @@map("clubs")
 }
 
+// 클럽-유저 다대다 중간 테이블. 멤버십 정보와 능력치를 함께 보관.
 model ClubMember {
   id            String    @id @default(cuid())
-  clubId        String
-  userId        String
-  role          ClubRole  @default(MEMBER)
-  jerseyNumber  Int?
-  // 능력치
-  speed         Int?
-  shoot         Int?
-  pass          Int?
-  dribble       Int?
-  defense       Int?
-  physical      Int?
-  isStatsPublic Boolean   @default(true)
-  isPhonePublic Boolean   @default(false)
-  joinedAt      DateTime  @default(now())
+  clubId        String    // FK → Club
+  userId        String    // FK → User
+  role          ClubRole  @default(MEMBER) // 역할 (주장/부주장/멤버)
+  jerseyNumber  Int?      // 등번호 (클럽 내 중복 불가)
 
+  // ── 능력치 (운영진이 입력, null이면 미평가) ──
+  speed         Int?      // 스피드
+  shoot         Int?      // 슈팅
+  pass          Int?      // 패스
+  dribble       Int?      // 드리블
+  defense       Int?      // 수비
+  physical      Int?      // 피지컬
+
+  isStatsPublic Boolean   @default(true)  // 능력치 공개 여부
+  isPhonePublic Boolean   @default(false) // 연락처 공개 여부
+  joinedAt      DateTime  @default(now()) // 가입 일시
+
+  // ── Relations ──
   club          Club      @relation(fields: [clubId], references: [id])
   user          User      @relation(fields: [userId], references: [id])
 
-  @@unique([clubId, userId])
-  @@unique([clubId, jerseyNumber])
+  @@unique([clubId, userId])       // 같은 클럽에 중복 가입 불가
+  @@unique([clubId, jerseyNumber]) // 클럽 내 등번호 중복 불가
   @@map("club_members")
 }
 
+// 클럽 가입 신청. 초대 코드 없이 검색으로 신청할 때 생성됨.
 model ClubJoinRequest {
   id        String            @id @default(cuid())
-  clubId    String
-  userId    String
-  message   String?
+  clubId    String            // FK → Club
+  userId    String            // FK → User (신청자)
+  message   String?           // 가입 신청 메시지
   status    JoinRequestStatus @default(PENDING)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
+  // ── Relations ──
   club      Club              @relation(fields: [clubId], references: [id])
   user      User              @relation(fields: [userId], references: [id])
 
-  @@unique([clubId, userId])
+  @@unique([clubId, userId]) // 동일 클럽에 중복 신청 불가
   @@map("club_join_requests")
 }
 
+// 초대 코드. 운영진이 발급하며, expiresAt 이후 만료됨.
 model ClubInviteCode {
   id        String   @id @default(cuid())
-  clubId    String
-  code      String   @unique
-  expiresAt DateTime
-  createdBy String
+  clubId    String   // FK → Club
+  code      String   @unique // 초대 코드 (예: MAMU-1234)
+  expiresAt DateTime          // 만료 일시 (쿼리 시 now()와 비교)
+  createdBy String            // 발급한 운영진 userId (FK 없음 — 탈퇴 후 보존)
   createdAt DateTime @default(now())
 
+  // ── Relations ──
   club      Club     @relation(fields: [clubId], references: [id])
 
   @@map("club_invite_codes")
 }
 
+// 강퇴 이력. 재가입 차단 판단에 사용.
 model ClubBanRecord {
   id        String   @id @default(cuid())
-  clubId    String
-  userId    String
-  bannedBy  String
+  clubId    String   // FK → Club
+  userId    String   // 강퇴된 유저 userId (FK 없음 — 탈퇴 후 보존)
+  bannedBy  String   // 강퇴한 운영진 userId (FK 없음)
   bannedAt  DateTime @default(now())
 
+  // ── Relations ──
   club      Club     @relation(fields: [clubId], references: [id])
 
   @@map("club_ban_records")
 }
 
+// 클럽 해산 투표. 과반 찬성 시 클럽 소프트 삭제.
 model ClubDissolveVote {
   id          String             @id @default(cuid())
-  clubId      String
-  initiatedBy String
+  clubId      String             // FK → Club
+  initiatedBy String             // 투표 발의자 userId (FK 없음)
   status      DissolveVoteStatus @default(IN_PROGRESS)
-  expiresAt   DateTime
+  expiresAt   DateTime           // 투표 마감 일시
   createdAt   DateTime           @default(now())
 
+  // ── Relations ──
   club        Club               @relation(fields: [clubId], references: [id])
-  responses   ClubDissolveVoteResponse[]
+  responses   ClubDissolveVoteResponse[] // 멤버별 투표 응답
 
   @@map("club_dissolve_votes")
 }
 
+// 해산 투표 개별 응답. 멤버당 1표.
 model ClubDissolveVoteResponse {
   id      String  @id @default(cuid())
-  voteId  String
-  userId  String
-  agreed  Boolean
+  voteId  String  // FK → ClubDissolveVote
+  userId  String  // 투표한 멤버 userId
+  agreed  Boolean // true = 찬성, false = 반대
 
+  // ── Relations ──
   vote    ClubDissolveVote @relation(fields: [voteId], references: [id], onDelete: Cascade)
 
-  @@unique([voteId, userId])
+  @@unique([voteId, userId]) // 멤버당 1표
   @@map("club_dissolve_vote_responses")
 }
 
+// 클럽 게시판 글. 공지/일반/문의 세 유형.
 model Post {
   id           String   @id @default(cuid())
-  clubId       String
-  authorId     String
+  clubId       String   // FK → Club
+  authorId     String   // FK → User (작성자)
   type         PostType @default(GENERAL)
   title        String
   content      String
-  isPinned     Boolean  @default(false)
+  isPinned     Boolean  @default(false) // 상단 고정 여부
   viewCount    Int      @default(0)
-  commentCount Int      @default(0)
+  commentCount Int      @default(0)     // 댓글 수 캐시 (Comment 생성/삭제 시 동기화)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // ── Relations ──
   club         Club     @relation(fields: [clubId], references: [id])
   author       User     @relation(fields: [authorId], references: [id])
   comments     Comment[]
@@ -306,14 +341,16 @@ model Post {
   @@map("posts")
 }
 
+// 게시글 댓글.
 model Comment {
   id        String   @id @default(cuid())
-  postId    String
-  authorId  String
+  postId    String   // FK → Post
+  authorId  String   // FK → User
   content   String
   createdAt DateTime @default(now())
 
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  // ── Relations ──
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade) // 글 삭제 시 댓글도 삭제
   author    User     @relation(fields: [authorId], references: [id])
 
   @@map("comments")
@@ -321,180 +358,212 @@ model Comment {
 
 // ─── Match ────────────────────────────────────────────────────────────────────
 
+// 경기 유형
 enum MatchType {
-  LEAGUE
-  SELF
+  LEAGUE // 리그 경기 (상대 클럽 존재)
+  SELF   // 자체 훈련/연습 경기
 }
 
+// 출석 투표 응답
 enum AttendanceResponse {
-  ATTEND
-  ABSENT
-  UNDECIDED
+  ATTEND    // 참석
+  ABSENT    // 불참
+  UNDECIDED // 미결정 (기본값)
 }
 
+// 경기 도메인의 중심 엔터티. 출석 투표·기록·포지션 배정 등 모든 경기 데이터의 루트.
 model Match {
   id                String      @id @default(cuid())
-  clubId            String
-  type              MatchType
-  title             String
-  location          String
-  address           String?
-  startAt           DateTime
-  endAt             DateTime
-  voteDeadline      DateTime
-  opponentName      String?
-  opponentLevel     ClubLevel?
-  homeScore         Int?
-  awayScore         Int?
-  isRecordSubmitted Boolean     @default(false)
-  recordedBy        String?
-  recordedAt        DateTime?
-  isDeleted         Boolean     @default(false)
+  clubId            String      // FK → Club
+
+  // ── 경기 기본 정보 ──
+  type              MatchType   // LEAGUE(상대팀 있음) or SELF(자체 경기)
+  title             String      // 경기 제목 (예: "vs 카동FC 정기전")
+  location          String      // 경기장 이름
+  address           String?     // 상세 주소
+  startAt           DateTime    // 경기 시작 일시
+  endAt             DateTime    // 경기 종료 일시
+  voteDeadline      DateTime    // 출석 투표 마감 일시
+
+  // ── 상대팀 정보 (LEAGUE일 때만 유효) ──
+  opponentName      String?     // 상대 클럽명
+  opponentLevel     ClubLevel?  // 상대 클럽 수준
+
+  // ── 경기 결과 (기록 제출 후 채워짐) ──
+  homeScore         Int?        // 홈(자팀) 득점
+  awayScore         Int?        // 어웨이(상대) 득점
+  isRecordSubmitted Boolean     @default(false) // 기록 입력 완료 여부
+  recordedBy        String?     // 기록 입력한 운영진 userId (FK 없음)
+  recordedAt        DateTime?   // 기록 입력 일시
+
+  // ── 상태 ──
+  isDeleted         Boolean     @default(false) // 소프트 삭제
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
 
+  // ── Relations ──
   club              Club                 @relation(fields: [clubId], references: [id])
-  attendances       MatchAttendance[]
-  participants      MatchParticipant[]
-  quarters          MatchQuarter[]
-  goals             MatchGoal[]
-  momVotes          MomVote[]
-  comments          MatchComment[]
-  videos            MatchVideo[]
-  opponentRating    OpponentRating?
-  recordHistories   MatchRecordHistory[]
+  attendances       MatchAttendance[]    // 출석 투표 응답
+  participants      MatchParticipant[]   // 실제 경기 참가자 (기록 입력 시 확정)
+  quarters          MatchQuarter[]       // 쿼터별 포지션 배정
+  goals             MatchGoal[]          // 득점 기록
+  momVotes          MomVote[]            // MOM 투표
+  comments          MatchComment[]       // 경기 코멘트
+  videos            MatchVideo[]         // 하이라이트 영상 링크
+  opponentRating    OpponentRating?      // 상대팀 매너 평가 (경기당 1개)
+  recordHistories   MatchRecordHistory[] // 기록 수정 이력
 
-  @@index([clubId, startAt])
+  @@index([clubId, startAt]) // 클럽별 날짜순 목록 조회 최적화
   @@map("matches")
 }
 
+// 출석 투표 응답. voteDeadline 전까지 변경 가능.
 model MatchAttendance {
   id        String             @id @default(cuid())
-  matchId   String
-  userId    String
-  response  AttendanceResponse @default(UNDECIDED)
+  matchId   String             // FK → Match
+  userId    String             // FK → User
+  response  AttendanceResponse @default(UNDECIDED) // 참석/불참/미결정
   createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  updatedAt DateTime           @updatedAt          // 응답 변경 시 업데이트
 
+  // ── Relations ──
   match     Match              @relation(fields: [matchId], references: [id], onDelete: Cascade)
   user      User               @relation(fields: [userId], references: [id])
 
-  @@unique([matchId, userId])
+  @@unique([matchId, userId]) // 멤버당 경기 1개 투표
   @@map("match_attendances")
 }
 
+// 실제 경기 참가자. 출석 투표(ATTEND)와 별개로 운영진이 최종 확정.
 model MatchParticipant {
   id      String @id @default(cuid())
-  matchId String
-  userId  String
+  matchId String // FK → Match
+  userId  String // FK → User
 
+  // ── Relations ──
   match   Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
   user    User   @relation(fields: [userId], references: [id])
 
-  @@unique([matchId, userId])
+  @@unique([matchId, userId]) // 중복 참가 불가
   @@map("match_participants")
 }
 
+// 쿼터별 포진 설정. 팀 분리(홈/어웨이)도 team 필드로 지원.
 model MatchQuarter {
   id            String   @id @default(cuid())
-  matchId       String
-  quarterNumber Int
-  formation     String
-  team          String?
+  matchId       String   // FK → Match
+  quarterNumber Int      // 쿼터 번호 (1, 2, 3 ...)
+  formation     String   // 포메이션 문자열 (예: "4-3-3")
+  team          String?  // 팀 구분 (자체 경기 시 "A"/"B", 리그는 null)
 
+  // ── Relations ──
   match         Match                    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  assignments   MatchQuarterAssignment[]
+  assignments   MatchQuarterAssignment[] // 이 쿼터의 포지션 배정 목록
 
-  @@unique([matchId, quarterNumber, team])
+  @@unique([matchId, quarterNumber, team]) // 같은 쿼터+팀 중복 불가
   @@map("match_quarters")
 }
 
+// 쿼터 내 선수 포지션 배정.
 model MatchQuarterAssignment {
   id        String         @id @default(cuid())
-  quarterId String
-  userId    String
-  position  PlayerPosition
+  quarterId String         // FK → MatchQuarter
+  userId    String         // 배정된 선수 userId
+  position  PlayerPosition // 해당 쿼터에서의 포지션
 
+  // ── Relations ──
   quarter   MatchQuarter   @relation(fields: [quarterId], references: [id], onDelete: Cascade)
 
-  @@unique([quarterId, userId])
+  @@unique([quarterId, userId]) // 한 쿼터에 선수 중복 배정 불가
   @@map("match_quarter_assignments")
 }
 
+// 득점 기록. scorerUserId/assistUserId는 FK 없는 문자열 (탈퇴 유저 기록 보존).
 model MatchGoal {
   id            String   @id @default(cuid())
-  matchId       String
-  scorerUserId  String
-  assistUserId  String?
-  quarterNumber Int?
-  team          String?
+  matchId       String   // FK → Match
+  scorerUserId  String   // 득점자 userId (FK 없음 — 탈퇴 후에도 기록 유지)
+  assistUserId  String?  // 어시스트 userId (없으면 null)
+  quarterNumber Int?     // 몇 쿼터 득점인지 (null이면 쿼터 미분류)
+  team          String?  // 자체 경기 팀 구분 (A/B), 리그는 null
   createdAt     DateTime @default(now())
 
+  // ── Relations ──
   match         Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("match_goals")
 }
 
+// MOM(Man of the Match) 투표. 경기당 멤버 1표. 자신에게 투표 불가(서비스 레이어 제한).
 model MomVote {
   id           String   @id @default(cuid())
-  matchId      String
-  voterId      String
-  targetUserId String
+  matchId      String   // FK → Match
+  voterId      String   // 투표한 유저 userId
+  targetUserId String   // 투표 대상 유저 userId (FK 없음 — 탈퇴 후 보존)
   createdAt    DateTime @default(now())
 
+  // ── Relations ──
   match        Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
-  @@unique([matchId, voterId])
+  @@unique([matchId, voterId]) // 경기당 1표
   @@map("mom_votes")
 }
 
+// 경기 후 남기는 코멘트 (자유 형식 소감).
 model MatchComment {
   id        String   @id @default(cuid())
-  matchId   String
-  authorId  String
+  matchId   String   // FK → Match
+  authorId  String   // FK → User
   content   String
   createdAt DateTime @default(now())
 
+  // ── Relations ──
   match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
   author    User     @relation(fields: [authorId], references: [id])
 
   @@map("match_comments")
 }
 
+// 경기 하이라이트 유튜브 링크. registeredBy는 FK 없는 문자열.
 model MatchVideo {
   id           String   @id @default(cuid())
-  matchId      String
-  youtubeUrl   String
-  registeredBy String
+  matchId      String   // FK → Match
+  youtubeUrl   String   // 유튜브 영상 URL
+  registeredBy String   // 등록한 유저 userId (FK 없음)
   createdAt    DateTime @default(now())
 
+  // ── Relations ──
   match        Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("match_videos")
 }
 
+// 상대팀 매너 평가. 경기당 1회, 운영진만 제출 가능.
 model OpponentRating {
   id            String   @id @default(cuid())
-  matchId       String   @unique
-  ratedByUserId String
-  score         Float
-  review        String?
-  mvpName       String?
+  matchId       String   @unique // FK → Match (경기당 1개 — @unique)
+  ratedByUserId String           // 평가한 운영진 userId (FK 없음)
+  score         Float            // 매너 점수 (예: 1.0 ~ 5.0)
+  review        String?          // 텍스트 후기
+  mvpName       String?          // 상대팀 MVP 이름 (자유 입력)
   createdAt     DateTime @default(now())
 
+  // ── Relations ──
   match         Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("opponent_ratings")
 }
 
+// 기록 수정 이력. 기록 변경 시 before/after 스냅샷을 JSON으로 보관.
 model MatchRecordHistory {
   id         String   @id @default(cuid())
-  matchId    String
-  editedBy   String
+  matchId    String   // FK → Match
+  editedBy   String   // 수정한 운영진 userId (FK 없음)
   editedAt   DateTime @default(now())
-  beforeData Json
-  afterData  Json
+  beforeData Json     // 수정 전 데이터 스냅샷
+  afterData  Json     // 수정 후 데이터 스냅샷
 
+  // ── Relations ──
   match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("match_record_histories")
