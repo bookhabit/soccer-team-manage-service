@@ -61,10 +61,12 @@ export const DfImage: React.FC<DfImageProps> = ({
   thumbnailSource,
   ...props
 }) => {
-  const [status, setStatus] = useState<'loading' | 'loaded' | 'error' | 'idle'>('idle');
+  // 1. 초기 상태를 바로 loading으로 하거나, source 존재 여부에 따라 결정
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error' | 'idle'>(
+    source ? 'loading' : 'idle',
+  );
   const [objectUrl, setObjectUrl] = useState<string | null>(null);
 
-  // File 객체 → objectURL 변환 (언마운트 시 해제)
   useEffect(() => {
     if (source instanceof File) {
       const url = URL.createObjectURL(source);
@@ -72,50 +74,56 @@ export const DfImage: React.FC<DfImageProps> = ({
       setStatus('loading');
       return () => URL.revokeObjectURL(url);
     }
+
+    // source가 변경될 때마다 상태 업데이트
     setObjectUrl(null);
     setStatus(source ? 'loading' : 'idle');
-    return undefined;
   }, [source]);
 
   const resolvedSource = objectUrl ? { uri: objectUrl } : (source as ExpoImageProps['source']);
 
-  const imageStyle: StyleProp<ImageStyle> = aspectRatio ? [style, { aspectRatio }] : style;
-  const containerHeight = aspectRatio
+  const flattenStyle = StyleSheet.flatten(style);
+  const hasHeight = flattenStyle?.height !== undefined;
+
+  // 2. width가 고정되어 있다면 '100%'를 해제해야 아바타 레이아웃이 안 깨짐
+  const containerWidth: ViewStyle = flattenStyle?.width
+    ? { width: flattenStyle.width }
+    : { width: '100%' as const }; // 'as const'를 붙여 리터럴 타입임을 명시
+
+  const containerHeight: ViewStyle = aspectRatio
     ? { aspectRatio }
-    : (style as ViewStyle)?.height
+    : hasHeight
       ? {}
       : { minHeight: 200 };
 
   return (
-    <View style={[styles.container, containerStyle, containerHeight]}>
-      {/* 로딩 스켈레톤 */}
+    <View style={[styles.container, containerStyle, containerWidth, containerHeight]}>
+      {/* 3. 로딩 중이거나 source가 아예 없을 때(idle) placeholder 표시 여부 결정 */}
+      {(status === 'loading' || status === 'idle') && showPlaceholder && !source && (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: colors.grey100 }]} />
+      )}
+
       {status === 'loading' && showPlaceholder && <SkeletonOverlay />}
 
-      {/* 에러 상태 */}
+      {/* 에러 상태 - 아바타 크기일 땐 문구 숨기기 가이드 추가 */}
       {status === 'error' && (
         <View style={[StyleSheet.absoluteFill, styles.errorContainer]}>
           {errorComponent ?? (
-            <View style={styles.errorContent}>
-              <TextBox variant="body2" color={colors.error}>
-                이미지를 불러올 수 없습니다
-              </TextBox>
-            </View>
+            <TextBox variant="caption" color={colors.error}>
+              !
+            </TextBox>
           )}
         </View>
       )}
 
-      {/* 이미지 */}
-      {status !== 'error' && resolvedSource && (
+      {/* 이미지 렌더링: source가 있을 때만 실행 */}
+      {resolvedSource && (
         <ExpoImage
           source={resolvedSource}
-          style={imageStyle}
+          style={[style, status === 'loading' && { opacity: 0 }]} // 로딩 중엔 숨김
           onLoadStart={() => setStatus('loading')}
           onLoad={() => setStatus('loaded')}
           onError={() => setStatus('error')}
-          cachePolicy="memory-disk"
-          transition={300}
-          placeholder={thumbnailSource ? { uri: thumbnailSource } : undefined}
-          placeholderContentFit="cover"
           {...props}
         />
       )}
@@ -134,6 +142,22 @@ export const AvatarImage: React.FC<AvatarImageProps> = ({ size = 48, style, ...p
     {...props}
     style={[{ width: size, height: size, borderRadius: size / 2 }, style]}
     contentFit="cover"
+    errorComponent={
+      <View
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          backgroundColor: colors.grey200,
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <TextBox variant="caption" color={colors.grey400}>
+          No Img
+        </TextBox>
+      </View>
+    }
   />
 );
 

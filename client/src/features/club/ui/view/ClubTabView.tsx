@@ -33,29 +33,34 @@ export function ClubTabView({
       <ScrollView contentContainerStyle={styles.content}>
         {/* 클럽 헤더 */}
         <View style={styles.clubHeader}>
-          <AvatarImage
-            source={club.logoUrl ? { uri: club.logoUrl } : null}
-            style={styles.avatar}
-          />
+          <AvatarImage source={club.logoUrl ? { uri: club.logoUrl } : null} style={styles.avatar} />
           <View style={styles.clubInfo}>
             <View style={styles.nameRow}>
-              <TextBox variant="heading3" color={colors.grey900}>{club.name}</TextBox>
+              <TextBox variant="heading3" color={colors.grey900}>
+                {club.name}
+              </TextBox>
               <RecruitmentBadge status={club.recruitmentStatus} />
             </View>
             <TextBox variant="body2" color={colors.grey500}>
               {club.regionName} · {levelLabel} · {club.currentMemberCount}/{club.maxMemberCount}명
             </TextBox>
-            <TextBox variant="caption" color={colors.grey500}>⭐ {club.mannerScoreAvg.toFixed(1)}</TextBox>
+            <TextBox variant="caption" color={colors.grey500}>
+              ⭐ {club.mannerScoreAvg.toFixed(1)}
+            </TextBox>
           </View>
           <TouchableOpacity onPress={onGoSettings}>
-            <TextBox variant="body2" color={colors.grey400}>설정</TextBox>
+            <TextBox variant="body2" color={colors.grey400}>
+              설정
+            </TextBox>
           </TouchableOpacity>
         </View>
 
         {club.description ? (
           <>
             <Spacing size={3} />
-            <TextBox variant="body2" color={colors.grey700}>{club.description}</TextBox>
+            <TextBox variant="body2" color={colors.grey700}>
+              {club.description}
+            </TextBox>
           </>
         ) : null}
 
@@ -70,9 +75,7 @@ export function ClubTabView({
         <View style={styles.menuGrid}>
           <MenuButton label="팀원" onPress={onGoMembers} />
           <MenuButton label="게시판" onPress={onGoBoard} />
-          {isCaptainOrVice ? (
-            <MenuButton label="가입 신청" onPress={onGoJoinRequests} />
-          ) : null}
+          {isCaptainOrVice ? <MenuButton label="가입 신청" onPress={onGoJoinRequests} /> : null}
         </View>
       </ScrollView>
     </ScreenLayout>
@@ -82,7 +85,9 @@ export function ClubTabView({
 function MenuButton({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <TouchableOpacity style={styles.menuBtn} onPress={onPress} activeOpacity={0.7}>
-      <TextBox variant="body2Bold" color={colors.grey900}>{label}</TextBox>
+      <TextBox variant="body2Bold" color={colors.grey900}>
+        {label}
+      </TextBox>
     </TouchableOpacity>
   );
 }
