@@ -32,6 +32,12 @@ export default function AppLayout() {
 
       {/* 클럽 서브 페이지 (탭바 위로 push) */}
       <Stack.Screen name="club" />
+
+      {/* 경기 투표 서브 페이지 */}
+      <Stack.Screen name="vote" />
+
+      {/* 경기 기록 목록 */}
+      <Stack.Screen name="match-records" />
     </Stack>
   );
 }

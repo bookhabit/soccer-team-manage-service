@@ -29,14 +29,14 @@ export const MatchSummarySchema = z.object({
   homeScore: z.number().int().nullable(),
   awayScore: z.number().int().nullable(),
   isRecordSubmitted: z.boolean(),
-  myResponse: AttendanceResponseSchema.nullable(),
-  attendCount: z.number().int(),
-  absentCount: z.number().int(),
+  myResponse: AttendanceResponseSchema.nullable().default(null),
+  attendCount: z.number().int().default(0),
+  absentCount: z.number().int().default(0),
 });
 
 export const MatchDetailSchema = MatchSummarySchema.extend({
-  undecidedCount: z.number().int(),
-  recordedAt: z.string().nullable(),
+  undecidedCount: z.number().int().default(0),
+  recordedAt: z.string().nullable().default(null),
 });
 
 export const MatchPageSchema = z.object({
@@ -132,8 +132,8 @@ export const RecordHistorySchema = z.object({
 
 export const CreateMatchSchema = z.object({
   type: MatchTypeSchema,
-  title: z.string().min(1).max(100),
-  location: z.string().min(1).max(100),
+  title: z.string().min(1, '제목을 입력해주세요.').max(100),
+  location: z.string().min(1, '장소를 입력해주세요.').max(100),
   address: z.string().max(200).optional(),
   startAt: z.string().min(1, '시작 시간을 선택해주세요.'),
   endAt: z.string().min(1, '종료 시간을 선택해주세요.'),

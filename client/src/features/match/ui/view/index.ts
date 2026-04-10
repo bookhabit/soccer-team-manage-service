@@ -1,2 +1,7 @@
-// match ui/view exports
-export {};
+export { VoteListView } from './VoteListView';
+export { MatchFormView } from './MatchFormView';
+export { MatchProgressView } from './MatchProgressView';
+export { LineupView } from './LineupView';
+export { RecordFormView } from './RecordFormView';
+export { MatchDetailView } from './MatchDetailView';
+export { MatchRecordListView } from './MatchRecordListView';
