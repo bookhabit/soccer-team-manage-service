@@ -30,7 +30,7 @@ export function ScreenLayout({
 
   if (!hasSlots) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top', 'bottom']}>
+      <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
         {children}
       </SafeAreaView>
     );
