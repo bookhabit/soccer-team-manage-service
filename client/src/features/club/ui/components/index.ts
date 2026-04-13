@@ -1,4 +1,5 @@
 export { RecruitmentBadge } from './RecruitmentBadge';
+export { RegionPicker } from './RegionPicker';
 export { ClubPreviewCard } from './ClubPreviewCard';
 export { MemberCard } from './MemberCard';
 export { JoinRequestCard } from './JoinRequestCard';

@@ -3,11 +3,20 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { Controller } from 'react-hook-form';
 import type { Control, FieldErrors } from 'react-hook-form';
 import {
-  TextBox, TextField, TextArea, Select, Button, Spacing,
-  BottomCTASingle, ScreenLayout, colors, spacing,
+  TextBox,
+  TextField,
+  TextArea,
+  Select,
+  Spacing,
+  BottomCTASingle,
+  ScreenLayout,
+  colors,
+  spacing,
 } from '@ui';
 import type { CreateClubInput } from '../../data/schemas/club.schema';
 import { LEVEL_OPTIONS } from '@/src/shared/constants/player.constants';
+import { RegionPicker } from '../components';
+import type { Region } from '@/src/shared/services/region.service';
 
 const STEP_TITLES = ['기본 정보', '팀 설정', '소개'];
 const MAX_STEPS = 3;
@@ -20,7 +29,7 @@ interface ClubCreateViewProps {
   onNext: () => void;
   onBack: () => void;
   onSubmit: () => void;
-  regionOptions: { value: string; label: string }[];
+  regions: Region[];
 }
 
 /**
@@ -34,12 +43,21 @@ export function ClubCreateView({
   onNext,
   onBack,
   onSubmit,
-  regionOptions,
+  regions,
 }: ClubCreateViewProps) {
   const isLastStep = step === MAX_STEPS;
 
   return (
-    <ScreenLayout>
+    <ScreenLayout
+      bottomSlot={
+        <BottomCTASingle
+          label={isLastStep ? '팀 만들기' : '다음'}
+          onClick={isLastStep ? onSubmit : onNext}
+          loading={isPending}
+          safeArea
+        />
+      }
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* 진행 표시 */}
         <View style={styles.stepIndicator}>
@@ -59,7 +77,9 @@ export function ClubCreateView({
 
         {step === 1 && (
           <>
-            <TextBox variant="heading3" color={colors.grey900}>팀 이름을 입력해주세요</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              팀 이름을 입력해주세요
+            </TextBox>
             <Spacing size={4} />
             <Controller
               control={control}
@@ -80,9 +100,9 @@ export function ClubCreateView({
               control={control}
               name="regionId"
               render={({ field: { onChange, value } }) => (
-                <Select
+                <RegionPicker
                   label="활동 지역"
-                  options={regionOptions}
+                  regions={regions}
                   value={value}
                   onChange={onChange}
                   errorMessage={errors.regionId?.message}
@@ -94,7 +114,9 @@ export function ClubCreateView({
 
         {step === 2 && (
           <>
-            <TextBox variant="heading3" color={colors.grey900}>팀 설정을 완료해주세요</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              팀 설정을 완료해주세요
+            </TextBox>
             <Spacing size={4} />
             <Controller
               control={control}
@@ -129,7 +151,9 @@ export function ClubCreateView({
 
         {step === 3 && (
           <>
-            <TextBox variant="heading3" color={colors.grey900}>팀을 소개해주세요</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              팀을 소개해주세요
+            </TextBox>
             <Spacing size={4} />
             <Controller
               control={control}
@@ -150,13 +174,6 @@ export function ClubCreateView({
 
         <Spacing size={20} />
       </ScrollView>
-
-      <BottomCTASingle
-        label={isLastStep ? '팀 만들기' : '다음'}
-        onClick={isLastStep ? onSubmit : onNext}
-        loading={isPending}
-        safeArea
-      />
     </ScreenLayout>
   );
 }

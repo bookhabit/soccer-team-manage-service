@@ -6,19 +6,8 @@ import { useToast } from '@ui';
 import { useCreateClub } from '../../data/hooks/useClub';
 import { CreateClubInputSchema } from '../../data/schemas/club.schema';
 import { ClubCreateView } from '../view/ClubCreateView';
+import { useRegions } from '@/src/shared/hooks/useRegions';
 import type { CreateClubInput } from '../../data/schemas/club.schema';
-
-// TODO: 지역 목록은 별도 API 연동 시 교체
-const REGION_OPTIONS = [
-  { value: 'seoul', label: '서울' },
-  { value: 'busan', label: '부산' },
-  { value: 'incheon', label: '인천' },
-  { value: 'daegu', label: '대구' },
-  { value: 'daejeon', label: '대전' },
-  { value: 'gwangju', label: '광주' },
-  { value: 'ulsan', label: '울산' },
-  { value: 'gyeonggi', label: '경기' },
-];
 
 const FIELDS_BY_STEP: (keyof CreateClubInput)[][] = [
   ['name', 'regionId'],
@@ -33,6 +22,7 @@ export function ClubCreateContainer() {
   const [step, setStep] = useState(1);
   const { mutate, isPending } = useCreateClub();
   const { toast } = useToast();
+  const { data: regions = [], isLoading: isRegionsLoading } = useRegions();
 
   const {
     control,
@@ -65,6 +55,7 @@ export function ClubCreateContainer() {
   };
 
   const onSubmit = handleSubmit((data) => {
+    console.log('팀 생성 dto:', data);
     mutate(data, {
       onSuccess: () => {
         toast.success('팀이 생성되었습니다!');
@@ -81,11 +72,11 @@ export function ClubCreateContainer() {
       step={step}
       control={control}
       errors={errors}
-      isPending={isPending}
+      isPending={isPending || isRegionsLoading}
       onNext={handleNext}
       onBack={handleBack}
       onSubmit={onSubmit}
-      regionOptions={REGION_OPTIONS}
+      regions={regions}
     />
   );
 }
