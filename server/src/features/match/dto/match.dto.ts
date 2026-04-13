@@ -14,7 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { AttendanceResponse, ClubLevel, MatchType, PlayerPosition } from '@prisma/client';
+import { AttendanceResponse, ClubLevel, FormationSlot, MatchType } from '@prisma/client';
 import { PartialType } from '@nestjs/swagger';
 
 // ─── Match ────────────────────────────────────────────────────────────────────
@@ -81,9 +81,9 @@ export class AssignmentItemDto {
   @IsString()
   userId!: string;
 
-  @ApiProperty({ enum: PlayerPosition })
-  @IsEnum(PlayerPosition)
-  position!: PlayerPosition;
+  @ApiProperty({ enum: FormationSlot, description: '포메이션 슬롯 (예: LCM, RWB, ST, GK)' })
+  @IsEnum(FormationSlot)
+  position!: FormationSlot;
 }
 
 export class SaveQuarterDto {

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AttendanceResponse, ClubLevel, MatchType, PlayerPosition } from '@prisma/client';
+import { AttendanceResponse, ClubLevel, FormationSlot, MatchType } from '@prisma/client';
 
 // ─── 경기 요약 (목록·생성·수정 공통) ──────────────────────────────────────────
 
@@ -125,8 +125,8 @@ export class LineupAssignmentResponseDto {
   @ApiProperty({ example: 'clx1234userId' })
   userId!: string;
 
-  @ApiProperty({ enum: PlayerPosition, example: PlayerPosition.FW })
-  position!: PlayerPosition;
+  @ApiProperty({ enum: FormationSlot, example: FormationSlot.ST, description: '포메이션 슬롯 (예: LCM, RWB, ST, GK)' })
+  position!: FormationSlot;
 }
 
 export class QuarterResponseDto {

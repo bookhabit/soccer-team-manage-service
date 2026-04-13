@@ -10,6 +10,37 @@ GK GK
     
 
 
+        FormationSlot {
+            GK GK
+LB LB
+LCB LCB
+CB CB
+RCB RCB
+RB RB
+LWB LWB
+RWB RWB
+LDM LDM
+CDM CDM
+RDM RDM
+LM LM
+LCM LCM
+CM CM
+RCM RCM
+RM RM
+LAM LAM
+CAM CAM
+RAM RAM
+LW LW
+RW RW
+LF LF
+RF RF
+LS LS
+RS RS
+ST ST
+        }
+    
+
+
         AuthProvider {
             LOCAL LOCAL
 KAKAO KAKAO
@@ -293,7 +324,7 @@ UNDECIDED UNDECIDED
   "match_quarter_assignments" {
     String id "🗝️"
     String userId 
-    PlayerPosition position 
+    FormationSlot position 
     }
   
 
@@ -384,7 +415,7 @@ UNDECIDED UNDECIDED
     "match_participants" }o--|| matches : "match"
     "match_participants" }o--|| users : "user"
     "match_quarters" }o--|| matches : "match"
-    "match_quarter_assignments" |o--|| "PlayerPosition" : "enum:position"
+    "match_quarter_assignments" |o--|| "FormationSlot" : "enum:position"
     "match_quarter_assignments" }o--|| match_quarters : "quarter"
     "match_goals" }o--|| matches : "match"
     "mom_votes" }o--|| matches : "match"

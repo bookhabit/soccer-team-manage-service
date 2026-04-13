@@ -1,8 +1,8 @@
 import {
   PrismaClient,
   AttendanceResponse,
+  FormationSlot,
   MatchType,
-  PlayerPosition,
   ClubLevel,
 } from '@prisma/client';
 
@@ -398,10 +398,10 @@ async function seedLineup() {
   });
 
   const assignments = [
-    { quarterId, userId: USER.MEMBER2, position: PlayerPosition.GK },
-    { quarterId, userId: USER.CAPTAIN, position: PlayerPosition.MF },
-    { quarterId, userId: USER.VICE, position: PlayerPosition.DF },
-    { quarterId, userId: USER.MEMBER1, position: PlayerPosition.FW },
+    { quarterId, userId: USER.MEMBER2, position: FormationSlot.GK },
+    { quarterId, userId: USER.CAPTAIN, position: FormationSlot.LCM },
+    { quarterId, userId: USER.VICE, position: FormationSlot.LCB },
+    { quarterId, userId: USER.MEMBER1, position: FormationSlot.ST },
   ];
 
   for (const a of assignments) {

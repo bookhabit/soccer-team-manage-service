@@ -14,12 +14,52 @@ datasource db {
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-// 선수 포지션
+// 선수 포지션 카테고리 — 유저 프로필용 (넓은 분류)
 enum PlayerPosition {
   FW // 공격수 (Forward)
   MF // 미드필더 (Midfielder)
   DF // 수비수 (Defender)
   GK // 골키퍼 (Goalkeeper)
+}
+
+// 포메이션 슬롯 — MatchQuarterAssignment 전용 (포메이션별 구체적 포지션)
+enum FormationSlot {
+  GK   // 골키퍼
+
+  // ── 수비 ──────────────────────────────────────────
+  LB   // 왼쪽 풀백 (Left Back)
+  LCB  // 왼쪽 센터백 (Left Center Back)
+  CB   // 센터백 (Center Back)
+  RCB  // 오른쪽 센터백 (Right Center Back)
+  RB   // 오른쪽 풀백 (Right Back)
+  LWB  // 왼쪽 윙백 (Left Wing Back)
+  RWB  // 오른쪽 윙백 (Right Wing Back)
+
+  // ── 수비형 미드필더 ───────────────────────────────
+  LDM  // 왼쪽 수비형 미드필더 (Left Defensive Mid)
+  CDM  // 센터 수비형 미드필더 (Center Defensive Mid)
+  RDM  // 오른쪽 수비형 미드필더 (Right Defensive Mid)
+
+  // ── 중앙 미드필더 ─────────────────────────────────
+  LM   // 왼쪽 미드필더 (Left Mid)
+  LCM  // 왼쪽 센터 미드필더 (Left Center Mid)
+  CM   // 센터 미드필더 (Center Mid)
+  RCM  // 오른쪽 센터 미드필더 (Right Center Mid)
+  RM   // 오른쪽 미드필더 (Right Mid)
+
+  // ── 공격형 미드필더 ───────────────────────────────
+  LAM  // 왼쪽 공격형 미드필더 (Left Attacking Mid)
+  CAM  // 센터 공격형 미드필더 (Center Attacking Mid)
+  RAM  // 오른쪽 공격형 미드필더 (Right Attacking Mid)
+
+  // ── 공격 ──────────────────────────────────────────
+  LW   // 왼쪽 윙 (Left Wing)
+  RW   // 오른쪽 윙 (Right Wing)
+  LF   // 왼쪽 포워드 (Left Forward)
+  RF   // 오른쪽 포워드 (Right Forward)
+  LS   // 왼쪽 스트라이커 (Left Striker)
+  RS   // 오른쪽 스트라이커 (Right Striker)
+  ST   // 센터 스트라이커 (Striker / Center Forward)
 }
 
 // 로그인 방식
@@ -466,13 +506,13 @@ model MatchQuarter {
 
 // 쿼터 내 선수 포지션 배정.
 model MatchQuarterAssignment {
-  id        String         @id @default(cuid())
-  quarterId String         // FK → MatchQuarter
-  userId    String         // 배정된 선수 userId
-  position  PlayerPosition // 해당 쿼터에서의 포지션
+  id        String        @id @default(cuid())
+  quarterId String        // FK → MatchQuarter
+  userId    String        // 배정된 선수 userId
+  position  FormationSlot // 포메이션 내 구체적 슬롯 (예: LCM, RWB, ST)
 
   // ── Relations ──
-  quarter   MatchQuarter   @relation(fields: [quarterId], references: [id], onDelete: Cascade)
+  quarter   MatchQuarter  @relation(fields: [quarterId], references: [id], onDelete: Cascade)
 
   @@unique([quarterId, userId]) // 한 쿼터에 선수 중복 배정 불가
   @@map("match_quarter_assignments")
