@@ -3,8 +3,16 @@ import { View, ScrollView, StyleSheet } from 'react-native';
 import { Controller } from 'react-hook-form';
 import type { Control, FieldErrors } from 'react-hook-form';
 import {
-  TextBox, TextField, TextArea, Select, Switch, Spacing,
-  BottomCTASingle, ScreenLayout, colors, spacing,
+  TextBox,
+  TextField,
+  TextArea,
+  Select,
+  Switch,
+  Spacing,
+  BottomCTASingle,
+  ScreenLayout,
+  colors,
+  spacing,
 } from '@ui';
 import type { CreatePostInput } from '../../data/schemas/post.schema';
 
@@ -33,7 +41,16 @@ export function PostWriteView({
   onSubmit,
 }: PostWriteViewProps) {
   return (
-    <ScreenLayout>
+    <ScreenLayout
+      bottomSlot={
+        <BottomCTASingle
+          label={isEdit ? '수정 완료' : '게시글 등록'}
+          onClick={onSubmit}
+          loading={isPending}
+          safeArea
+        />
+      }
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <Controller
           control={control}
@@ -86,7 +103,9 @@ export function PostWriteView({
         <Spacing size={5} />
 
         <View style={styles.toggleRow}>
-          <TextBox variant="body2" color={colors.grey700}>공지 고정</TextBox>
+          <TextBox variant="body2" color={colors.grey700}>
+            공지 고정
+          </TextBox>
           <Controller
             control={control}
             name="isPinned"
@@ -100,8 +119,12 @@ export function PostWriteView({
 
         <View style={styles.toggleRow}>
           <View>
-            <TextBox variant="body2" color={colors.grey700}>팀원 알림 전송</TextBox>
-            <TextBox variant="caption" color={colors.grey500}>등록 시 팀원에게 푸시 알림을 보냅니다</TextBox>
+            <TextBox variant="body2" color={colors.grey700}>
+              팀원 알림 전송
+            </TextBox>
+            <TextBox variant="caption" color={colors.grey500}>
+              등록 시 팀원에게 푸시 알림을 보냅니다
+            </TextBox>
           </View>
           <Controller
             control={control}
@@ -114,13 +137,6 @@ export function PostWriteView({
 
         <Spacing size={20} />
       </ScrollView>
-
-      <BottomCTASingle
-        label={isEdit ? '수정 완료' : '게시글 등록'}
-        onClick={onSubmit}
-        loading={isPending}
-        safeArea
-      />
     </ScreenLayout>
   );
 }

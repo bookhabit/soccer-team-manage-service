@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, View, TouchableOpacity, Modal, Platform, StyleSheet } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import DateTimePicker, {
-  DateTimePickerAndroid,
-} from '@react-native-community/datetimepicker';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import {
   ScreenLayout,
   BottomCTASingle,
@@ -80,9 +78,13 @@ function IOSPickerModal({
       <View style={styles.modalOverlay}>
         <View style={styles.modalSheet}>
           <View style={styles.modalHeader}>
-            <TextBox variant="body2Bold" color={colors.grey900}>{label}</TextBox>
+            <TextBox variant="body2Bold" color={colors.grey900}>
+              {label}
+            </TextBox>
             <TouchableOpacity onPress={onDone}>
-              <TextBox variant="body2Bold" color={colors.blue500}>완료</TextBox>
+              <TextBox variant="body2Bold" color={colors.blue500}>
+                완료
+              </TextBox>
             </TouchableOpacity>
           </View>
           <DateTimePicker
@@ -136,8 +138,7 @@ export function MatchFormView({
 
   const openPicker = (field: DateField, currentIso: string) => {
     const current = currentIso ? new Date(currentIso) : new Date();
-    const minimumDate =
-      field !== 'startAt' && startAt ? new Date(startAt) : undefined;
+    const minimumDate = field !== 'startAt' && startAt ? new Date(startAt) : undefined;
 
     if (Platform.OS === 'android') {
       DateTimePickerAndroid.open({
@@ -178,12 +179,25 @@ export function MatchFormView({
   };
 
   return (
-    <ScreenLayout>
+    <ScreenLayout
+      bottomSlot={
+        <BottomCTASingle
+          safeArea
+          label={submitLabel}
+          onClick={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+        />
+      }
+    >
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.formHeader}>
-          <TextBox variant="heading3" color={colors.grey900}>{submitLabel}</TextBox>
+          <TextBox variant="heading3" color={colors.grey900}>
+            {submitLabel}
+          </TextBox>
           <TouchableOpacity onPress={onCancel} hitSlop={8}>
-            <TextBox variant="body2" color={colors.grey500}>취소</TextBox>
+            <TextBox variant="body2" color={colors.grey500}>
+              취소
+            </TextBox>
           </TouchableOpacity>
         </View>
         <Spacing size={4} />
@@ -325,13 +339,6 @@ export function MatchFormView({
           onDone={handleIOSDone}
         />
       )}
-
-      <BottomCTASingle
-        safeArea
-        label={submitLabel}
-        onClick={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-      />
     </ScreenLayout>
   );
 }
@@ -352,20 +359,21 @@ function DatePickerField({
   const isEmpty = !value;
   return (
     <View>
-      <TextBox variant="body2Bold" color={colors.grey700}>{label}</TextBox>
+      <TextBox variant="body2Bold" color={colors.grey700}>
+        {label}
+      </TextBox>
       <Spacing size={1} />
       <TouchableOpacity
         style={[styles.dateField, error ? styles.dateFieldError : null]}
         onPress={onPress}
         activeOpacity={0.7}
       >
-        <TextBox
-          variant="body2"
-          color={isEmpty ? colors.grey400 : colors.grey900}
-        >
+        <TextBox variant="body2" color={isEmpty ? colors.grey400 : colors.grey900}>
           {isEmpty ? '날짜를 선택해주세요' : formatDateDisplay(value)}
         </TextBox>
-        <TextBox variant="body2" color={colors.grey400}>▼</TextBox>
+        <TextBox variant="body2" color={colors.grey400}>
+          ▼
+        </TextBox>
       </TouchableOpacity>
       {error ? (
         <TextBox variant="caption" color={colors.error} style={styles.errorText}>

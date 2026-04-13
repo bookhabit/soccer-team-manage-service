@@ -2,9 +2,7 @@ import React from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Controller } from 'react-hook-form';
 import type { Control, FieldErrors } from 'react-hook-form';
-import {
-  TextBox, TextArea, BottomCTASingle, Spacing, ScreenLayout, colors, spacing,
-} from '@ui';
+import { TextBox, TextArea, BottomCTASingle, Spacing, ScreenLayout, colors, spacing } from '@ui';
 import type { JoinRequestInput } from '../../data/schemas/club.schema';
 import type { ClubDetail } from '../../data/schemas/club.schema';
 import { LEVEL_LABEL } from '@/src/shared/constants/player.constants';
@@ -33,12 +31,18 @@ export function JoinRequestView({
   const levelLabel = LEVEL_LABEL[club.level] ?? club.level;
 
   return (
-    <ScreenLayout>
+    <ScreenLayout
+      bottomSlot={
+        <BottomCTASingle label="가입 신청" onClick={onSubmit} loading={isPending} safeArea />
+      }
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {/* 클럽 요약 */}
         <View style={styles.clubSummary}>
           <View style={styles.nameRow}>
-            <TextBox variant="heading3" color={colors.grey900}>{club.name}</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              {club.name}
+            </TextBox>
             <RecruitmentBadge status={club.recruitmentStatus} />
           </View>
           <TextBox variant="body2" color={colors.grey500}>
@@ -48,7 +52,9 @@ export function JoinRequestView({
 
         <Spacing size={5} />
 
-        <TextBox variant="body2Bold" color={colors.grey700}>가입 메시지 (선택)</TextBox>
+        <TextBox variant="body2Bold" color={colors.grey700}>
+          가입 메시지 (선택)
+        </TextBox>
         <Spacing size={2} />
         <Controller
           control={control}
@@ -66,13 +72,6 @@ export function JoinRequestView({
 
         <Spacing size={20} />
       </ScrollView>
-
-      <BottomCTASingle
-        label="가입 신청"
-        onClick={onSubmit}
-        loading={isPending}
-        safeArea
-      />
     </ScreenLayout>
   );
 }

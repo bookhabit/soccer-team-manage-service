@@ -60,15 +60,28 @@ export function RecordFormView({
   const { fields, append, remove } = useFieldArray({ control, name: 'goals' });
 
   return (
-    <ScreenLayout>
+    <ScreenLayout
+      bottomSlot={
+        <BottomCTASingle
+          safeArea
+          label="기록 저장"
+          onClick={handleSubmit(onSubmit)}
+          loading={isSubmitting}
+        />
+      }
+    >
       <ScrollView contentContainerStyle={styles.content}>
-        <TextBox variant="heading3" color={colors.grey900}>경기 기록 입력</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          경기 기록 입력
+        </TextBox>
         <Spacing size={4} />
 
         {/* 스코어 */}
         <View style={styles.scoreRow}>
           <View style={styles.scoreInput}>
-            <TextBox variant="body2Bold" color={colors.grey700}>우리팀</TextBox>
+            <TextBox variant="body2Bold" color={colors.grey700}>
+              우리팀
+            </TextBox>
             <Controller
               control={control}
               name="homeScore"
@@ -78,27 +91,36 @@ export function RecordFormView({
                     style={styles.counterBtn}
                     onPress={() => onChange(Math.max(0, value - 1))}
                   >
-                    <TextBox variant="heading3" color={colors.grey700}>−</TextBox>
+                    <TextBox variant="heading3" color={colors.grey700}>
+                      −
+                    </TextBox>
                   </TouchableOpacity>
-                  <TextBox variant="heading2" color={colors.grey900}>{value}</TextBox>
-                  <TouchableOpacity
-                    style={styles.counterBtn}
-                    onPress={() => onChange(value + 1)}
-                  >
-                    <TextBox variant="heading3" color={colors.grey700}>+</TextBox>
+                  <TextBox variant="heading2" color={colors.grey900}>
+                    {value}
+                  </TextBox>
+                  <TouchableOpacity style={styles.counterBtn} onPress={() => onChange(value + 1)}>
+                    <TextBox variant="heading3" color={colors.grey700}>
+                      +
+                    </TextBox>
                   </TouchableOpacity>
                 </View>
               )}
             />
             {errors.homeScore ? (
-              <TextBox variant="caption" color={colors.error}>{errors.homeScore.message}</TextBox>
+              <TextBox variant="caption" color={colors.error}>
+                {errors.homeScore.message}
+              </TextBox>
             ) : null}
           </View>
 
-          <TextBox variant="heading2" color={colors.grey400}>:</TextBox>
+          <TextBox variant="heading2" color={colors.grey400}>
+            :
+          </TextBox>
 
           <View style={styles.scoreInput}>
-            <TextBox variant="body2Bold" color={colors.grey700}>상대팀</TextBox>
+            <TextBox variant="body2Bold" color={colors.grey700}>
+              상대팀
+            </TextBox>
             <Controller
               control={control}
               name="awayScore"
@@ -108,14 +130,17 @@ export function RecordFormView({
                     style={styles.counterBtn}
                     onPress={() => onChange(Math.max(0, value - 1))}
                   >
-                    <TextBox variant="heading3" color={colors.grey700}>−</TextBox>
+                    <TextBox variant="heading3" color={colors.grey700}>
+                      −
+                    </TextBox>
                   </TouchableOpacity>
-                  <TextBox variant="heading2" color={colors.grey900}>{value}</TextBox>
-                  <TouchableOpacity
-                    style={styles.counterBtn}
-                    onPress={() => onChange(value + 1)}
-                  >
-                    <TextBox variant="heading3" color={colors.grey700}>+</TextBox>
+                  <TextBox variant="heading2" color={colors.grey900}>
+                    {value}
+                  </TextBox>
+                  <TouchableOpacity style={styles.counterBtn} onPress={() => onChange(value + 1)}>
+                    <TextBox variant="heading3" color={colors.grey700}>
+                      +
+                    </TextBox>
                   </TouchableOpacity>
                 </View>
               )}
@@ -127,22 +152,30 @@ export function RecordFormView({
 
         {/* 득점 목록 */}
         <View style={styles.goalsHeader}>
-          <TextBox variant="body2Bold" color={colors.grey900}>득점 기록 ({fields.length})</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey900}>
+            득점 기록 ({fields.length})
+          </TextBox>
           <Button
             variant="ghost"
             onPress={() =>
               append({ scorerUserId: '', assistUserId: undefined, quarterNumber: undefined })
             }
-          >+ 득점 추가</Button>
+          >
+            + 득점 추가
+          </Button>
         </View>
         <Spacing size={2} />
 
         {fields.map((field, idx) => (
           <View key={field.id} style={styles.goalItem}>
             <View style={styles.goalItemHeader}>
-              <TextBox variant="captionBold" color={colors.grey700}>득점 {idx + 1}</TextBox>
+              <TextBox variant="captionBold" color={colors.grey700}>
+                득점 {idx + 1}
+              </TextBox>
               <TouchableOpacity onPress={() => remove(idx)}>
-                <TextBox variant="caption" color={colors.error}>삭제</TextBox>
+                <TextBox variant="caption" color={colors.error}>
+                  삭제
+                </TextBox>
               </TouchableOpacity>
             </View>
 
@@ -155,9 +188,7 @@ export function RecordFormView({
                   options={playerOptions}
                   value={value}
                   onChange={onChange}
-                  errorMessage={
-                    errors.goals?.[idx]?.scorerUserId?.message
-                  }
+                  errorMessage={errors.goals?.[idx]?.scorerUserId?.message}
                 />
               )}
             />
@@ -194,13 +225,6 @@ export function RecordFormView({
 
         <Spacing size={20} />
       </ScrollView>
-
-      <BottomCTASingle
-        safeArea
-        label="기록 저장"
-        onClick={handleSubmit(onSubmit)}
-        loading={isSubmitting}
-      />
     </ScreenLayout>
   );
 }
