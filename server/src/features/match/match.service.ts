@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { ClubRole, MatchType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ClubMembershipService } from '../../common/services/club-membership.service';
 import { ErrorCode } from '../../common/constants/error-codes';
 import type {
   CreateMatchDto,
@@ -43,34 +44,12 @@ const MATCH_SUMMARY_SELECT = {
 
 @Injectable()
 export class MatchService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly membership: ClubMembershipService,
+  ) {}
 
   // ─── 내부 헬퍼 ─────────────────────────────────────────────────────────────
-
-  private async assertMember(clubId: string, userId: string) {
-    const member = await this.prisma.clubMember.findUnique({
-      where: { clubId_userId: { clubId, userId } },
-      select: { role: true },
-    });
-    if (!member) {
-      throw new ForbiddenException({
-        code: ErrorCode.CLUB_NO_PERMISSION,
-        message: '해당 클럽의 팀원이 아닙니다.',
-      });
-    }
-    return member;
-  }
-
-  private async assertAdmin(clubId: string, userId: string) {
-    const member = await this.assertMember(clubId, userId);
-    if (member.role === ClubRole.MEMBER) {
-      throw new ForbiddenException({
-        code: ErrorCode.MATCH_002,
-        message: '관리자(주장·부주장)만 이 작업을 수행할 수 있습니다.',
-      });
-    }
-    return member;
-  }
 
   private async findMatch(clubId: string, matchId: string) {
     const match = await this.prisma.match.findFirst({
@@ -88,7 +67,7 @@ export class MatchService {
   // ─── 경기 CRUD ─────────────────────────────────────────────────────────────
 
   async createMatch(clubId: string, userId: string, dto: CreateMatchDto) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     return this.prisma.match.create({
       data: {
         clubId,
@@ -107,7 +86,7 @@ export class MatchService {
   }
 
   async getMatches(clubId: string, userId: string, query: GetMatchesQueryDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     const limit = query.limit ?? CURSOR_DEFAULT_LIMIT;
     const where = {
       clubId,
@@ -146,7 +125,7 @@ export class MatchService {
   }
 
   async getMatchDetail(clubId: string, matchId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     const match = await this.prisma.match.findFirst({
       where: { id: matchId, clubId, isDeleted: false },
       select: {
@@ -181,7 +160,7 @@ export class MatchService {
   }
 
   async updateMatch(clubId: string, matchId: string, userId: string, dto: UpdateMatchDto) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     const match = await this.findMatch(clubId, matchId);
     if (new Date() > match.voteDeadline) {
       throw new UnprocessableEntityException({
@@ -207,7 +186,7 @@ export class MatchService {
   }
 
   async deleteMatch(clubId: string, matchId: string, userId: string) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     await this.findMatch(clubId, matchId);
     await this.prisma.match.update({
       where: { id: matchId },
@@ -218,7 +197,7 @@ export class MatchService {
   // ─── 투표 응답 ─────────────────────────────────────────────────────────────
 
   async submitAttendance(clubId: string, matchId: string, userId: string, dto: SubmitAttendanceDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     const match = await this.findMatch(clubId, matchId);
     if (new Date() > match.voteDeadline) {
       throw new UnprocessableEntityException({
@@ -235,7 +214,7 @@ export class MatchService {
   }
 
   async getAttendances(clubId: string, matchId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
     return this.prisma.matchAttendance.findMany({
       where: { matchId },
@@ -250,7 +229,7 @@ export class MatchService {
   // ─── 포지션 배정 ───────────────────────────────────────────────────────────
 
   async getLineup(clubId: string, matchId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
     return this.prisma.matchQuarter.findMany({
       where: { matchId },
@@ -271,7 +250,7 @@ export class MatchService {
   }
 
   async saveLineup(clubId: string, matchId: string, userId: string, dto: SaveLineupDto) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     await this.findMatch(clubId, matchId);
 
     // 참여 선수 검증
@@ -330,9 +309,9 @@ export class MatchService {
   }
 
   async addParticipant(clubId: string, matchId: string, userId: string, targetId: string) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     await this.findMatch(clubId, matchId);
-    await this.assertMember(clubId, targetId);
+    await this.membership.assertMember(clubId,targetId);
 
     return this.prisma.matchParticipant.upsert({
       where: { matchId_userId: { matchId, userId: targetId } },
@@ -343,7 +322,7 @@ export class MatchService {
   }
 
   async removeParticipant(clubId: string, matchId: string, userId: string, targetId: string) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     await this.findMatch(clubId, matchId);
     await this.prisma.matchParticipant.deleteMany({
       where: { matchId, userId: targetId },
@@ -353,7 +332,7 @@ export class MatchService {
   // ─── 경기 기록 ─────────────────────────────────────────────────────────────
 
   async submitRecord(clubId: string, matchId: string, userId: string, dto: SubmitRecordDto) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     const match = await this.findMatch(clubId, matchId);
 
     if (new Date() <= match.endAt) {
@@ -396,7 +375,7 @@ export class MatchService {
   }
 
   async updateRecord(clubId: string, matchId: string, userId: string, dto: UpdateRecordDto) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     const match = await this.findMatch(clubId, matchId);
 
     // 변경 이력 저장용 현재 데이터
@@ -450,7 +429,7 @@ export class MatchService {
   }
 
   async getRecordHistories(clubId: string, matchId: string, userId: string) {
-    await this.assertAdmin(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
     await this.findMatch(clubId, matchId);
     return this.prisma.matchRecordHistory.findMany({
       where: { matchId },
@@ -468,7 +447,7 @@ export class MatchService {
   // ─── MOM 투표 ─────────────────────────────────────────────────────────────
 
   async submitMomVote(clubId: string, matchId: string, userId: string, dto: SubmitMomVoteDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     const match = await this.findMatch(clubId, matchId);
 
     if (!match.isRecordSubmitted) {
@@ -505,7 +484,7 @@ export class MatchService {
   }
 
   async getMomResult(clubId: string, matchId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
 
     const votes = await this.prisma.momVote.findMany({
@@ -535,7 +514,7 @@ export class MatchService {
   // ─── 댓글 ─────────────────────────────────────────────────────────────────
 
   async getComments(clubId: string, matchId: string, userId: string, query: GetCommentsQueryDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
     const limit = query.limit ?? CURSOR_DEFAULT_LIMIT;
 
@@ -561,7 +540,7 @@ export class MatchService {
   }
 
   async createComment(clubId: string, matchId: string, userId: string, dto: CreateCommentDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
     return this.prisma.matchComment.create({
       data: { matchId, authorId: userId, content: dto.content },
@@ -576,7 +555,7 @@ export class MatchService {
   }
 
   async deleteComment(clubId: string, matchId: string, commentId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
 
     const comment = await this.prisma.matchComment.findUnique({
@@ -602,7 +581,7 @@ export class MatchService {
   // ─── 영상 ─────────────────────────────────────────────────────────────────
 
   async registerVideo(clubId: string, matchId: string, userId: string, dto: RegisterVideoDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
     return this.prisma.matchVideo.create({
       data: { matchId, youtubeUrl: dto.youtubeUrl, registeredBy: userId },
@@ -611,7 +590,7 @@ export class MatchService {
   }
 
   async deleteVideo(clubId: string, matchId: string, videoId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     await this.findMatch(clubId, matchId);
 
     const video = await this.prisma.matchVideo.findUnique({
@@ -642,7 +621,7 @@ export class MatchService {
     userId: string,
     dto: SubmitOpponentRatingDto,
   ) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
     const match = await this.findMatch(clubId, matchId);
 
     if (match.type !== MatchType.LEAGUE) {

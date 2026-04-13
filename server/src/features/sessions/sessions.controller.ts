@@ -18,7 +18,7 @@ import { RefreshDto } from './dto/refresh.dto';
 import { AccessTokenResponseDto } from './dto/session-response.dto';
 
 @ApiTags('Sessions')
-@Controller('api/v1/sessions')
+@Controller('sessions')
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 

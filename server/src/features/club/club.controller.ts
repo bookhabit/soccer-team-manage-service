@@ -32,7 +32,7 @@ import {
 
 @ApiTags('Clubs')
 @ApiBearerAuth()
-@Controller('api/v1/clubs')
+@Controller('clubs')
 export class ClubController {
   constructor(private readonly clubService: ClubService) {}
 

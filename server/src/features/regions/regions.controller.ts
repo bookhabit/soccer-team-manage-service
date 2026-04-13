@@ -4,7 +4,7 @@ import { Public } from '../../common/decorators/public.decorator';
 import { RegionsService } from './regions.service';
 
 @ApiTags('Regions')
-@Controller('api/v1/regions')
+@Controller('regions')
 export class RegionsController {
   constructor(private readonly regionsService: RegionsService) {}
 

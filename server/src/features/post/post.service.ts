@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ClubRole, PostType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ClubMembershipService } from '../../common/services/club-membership.service';
 import { ErrorCode } from '../../common/constants/error-codes';
 import type { CreatePostDto } from './dto/create-post.dto';
 import type { CreateCommentDto } from './dto/create-comment.dto';
@@ -20,21 +21,10 @@ const POST_AUTHOR_SELECT = {
 
 @Injectable()
 export class PostService {
-  constructor(private readonly prisma: PrismaService) {}
-
-  private async assertMember(clubId: string, userId: string) {
-    const member = await this.prisma.clubMember.findUnique({
-      where: { clubId_userId: { clubId, userId } },
-      select: { role: true },
-    });
-    if (!member) {
-      throw new ForbiddenException({
-        code: ErrorCode.CLUB_NO_PERMISSION,
-        message: '해당 클럽의 팀원이 아닙니다.',
-      });
-    }
-    return member;
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly membership: ClubMembershipService,
+  ) {}
 
   // ─── 게시글 목록 ──────────────────────────────────────────────────────────
 
@@ -43,7 +33,7 @@ export class PostService {
     userId: string,
     params: { type?: PostType; cursor?: string; limit?: number },
   ) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
 
     const limit = params.limit ?? CURSOR_DEFAULT_LIMIT;
     const since = new Date();
@@ -92,7 +82,7 @@ export class PostService {
   // ─── 게시글 상세 (조회수 Redis INCR — 현재는 직접 DB 업데이트로 대체) ─────
 
   async getPostDetail(clubId: string, postId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
 
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
@@ -139,7 +129,7 @@ export class PostService {
   // ─── 게시글 작성 ──────────────────────────────────────────────────────────
 
   async createPost(clubId: string, authorId: string, dto: CreatePostDto) {
-    const member = await this.assertMember(clubId, authorId);
+    const member = await this.membership.assertMember(clubId,authorId);
 
     // 공지사항은 관리자만
     if (
@@ -192,7 +182,7 @@ export class PostService {
     userId: string,
     dto: Partial<CreatePostDto>,
   ) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
 
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
@@ -237,7 +227,7 @@ export class PostService {
   // ─── 게시글 삭제 ──────────────────────────────────────────────────────────
 
   async deletePost(clubId: string, postId: string, userId: string) {
-    const member = await this.assertMember(clubId, userId);
+    const member = await this.membership.assertMember(clubId,userId);
 
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
@@ -269,7 +259,7 @@ export class PostService {
     userId: string,
     params: { cursor?: string; limit?: number },
   ) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId,userId);
 
     const limit = params.limit ?? CURSOR_DEFAULT_LIMIT;
     const comments = await this.prisma.comment.findMany({
@@ -301,7 +291,7 @@ export class PostService {
   // ─── 댓글 작성 ────────────────────────────────────────────────────────────
 
   async createComment(clubId: string, postId: string, authorId: string, dto: CreateCommentDto) {
-    await this.assertMember(clubId, authorId);
+    await this.membership.assertMember(clubId,authorId);
 
     const post = await this.prisma.post.findUnique({
       where: { id: postId },
@@ -340,7 +330,7 @@ export class PostService {
   // ─── 댓글 삭제 ────────────────────────────────────────────────────────────
 
   async deleteComment(clubId: string, postId: string, commentId: string, userId: string) {
-    const member = await this.assertMember(clubId, userId);
+    const member = await this.membership.assertMember(clubId,userId);
 
     const comment = await this.prisma.comment.findUnique({
       where: { id: commentId },

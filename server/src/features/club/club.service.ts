@@ -8,6 +8,7 @@ import {
 import { randomBytes } from 'crypto';
 import { ClubRole, DissolveVoteStatus, JoinRequestStatus, RecruitmentStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ClubMembershipService } from '../../common/services/club-membership.service';
 import { ErrorCode } from '../../common/constants/error-codes';
 import type { CreateClubDto } from './dto/create-club.dto';
 import type { CreateJoinRequestDto } from './dto/create-join-request.dto';
@@ -40,45 +41,12 @@ const CLUB_SELECT = {
 
 @Injectable()
 export class ClubService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly membership: ClubMembershipService,
+  ) {}
 
   // ─── 내부 헬퍼 ─────────────────────────────────────────────────────────────
-
-  private async assertMember(clubId: string, userId: string) {
-    const member = await this.prisma.clubMember.findUnique({
-      where: { clubId_userId: { clubId, userId } },
-      select: { role: true },
-    });
-    if (!member) {
-      throw new ForbiddenException({
-        code: ErrorCode.CLUB_NO_PERMISSION,
-        message: '해당 클럽의 팀원이 아닙니다.',
-      });
-    }
-    return member;
-  }
-
-  private async assertCaptainOrVice(clubId: string, userId: string) {
-    const member = await this.assertMember(clubId, userId);
-    if (member.role !== ClubRole.CAPTAIN && member.role !== ClubRole.VICE_CAPTAIN) {
-      throw new ForbiddenException({
-        code: ErrorCode.CLUB_NO_PERMISSION,
-        message: '주장 또는 부주장만 수행할 수 있습니다.',
-      });
-    }
-    return member;
-  }
-
-  private async assertCaptain(clubId: string, userId: string) {
-    const member = await this.assertMember(clubId, userId);
-    if (member.role !== ClubRole.CAPTAIN) {
-      throw new ForbiddenException({
-        code: ErrorCode.CLUB_NO_PERMISSION,
-        message: '주장만 수행할 수 있습니다.',
-      });
-    }
-    return member;
-  }
 
   private async recalcMannerScoreAvg(clubId: string) {
     const result = await this.prisma.clubMember.aggregate({
@@ -207,7 +175,7 @@ export class ClubService {
     userId: string,
     params: { cursor?: string; limit?: number; position?: string },
   ) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId, userId);
 
     const limit = params.limit ?? CURSOR_DEFAULT_LIMIT;
     const members = await this.prisma.clubMember.findMany({
@@ -257,7 +225,7 @@ export class ClubService {
   // ─── 팀원 강퇴 ─────────────────────────────────────────────────────────────
 
   async kickMember(clubId: string, kickerId: string, targetUserId: string) {
-    await this.assertCaptainOrVice(clubId, kickerId);
+    await this.membership.assertCaptainOrVice(clubId,kickerId);
 
     const target = await this.prisma.clubMember.findUnique({
       where: { clubId_userId: { clubId, userId: targetUserId } },
@@ -293,7 +261,7 @@ export class ClubService {
   // ─── 클럽 탈퇴 ─────────────────────────────────────────────────────────────
 
   async leaveClub(clubId: string, userId: string, _dto: LeaveClubDto) {
-    const member = await this.assertMember(clubId, userId);
+    const member = await this.membership.assertMember(clubId, userId);
 
     if (member.role === ClubRole.CAPTAIN) {
       throw new ForbiddenException({
@@ -327,7 +295,7 @@ export class ClubService {
   // ─── 역할 변경 ─────────────────────────────────────────────────────────────
 
   async changeRole(clubId: string, captainId: string, targetUserId: string, dto: ChangeRoleDto) {
-    await this.assertCaptain(clubId, captainId);
+    await this.membership.assertCaptain(clubId,captainId);
 
     await this.prisma.clubMember.update({
       where: { clubId_userId: { clubId, userId: targetUserId } },
@@ -338,7 +306,7 @@ export class ClubService {
   // ─── 주장 권한 이전 ────────────────────────────────────────────────────────
 
   async transferCaptain(clubId: string, captainId: string, dto: TransferCaptainDto) {
-    await this.assertCaptain(clubId, captainId);
+    await this.membership.assertCaptain(clubId,captainId);
 
     await this.prisma.$transaction([
       this.prisma.clubMember.update({
@@ -360,7 +328,7 @@ export class ClubService {
     targetUserId: string,
     dto: UpdateMemberStatsDto,
   ) {
-    const requester = await this.assertMember(clubId, requesterId);
+    const requester = await this.membership.assertMember(clubId, requesterId);
 
     // 본인이 아니면 Captain/Vice만 가능
     const isSelf = requesterId === targetUserId;
@@ -451,7 +419,7 @@ export class ClubService {
     requesterId: string,
     params: { cursor?: string; limit?: number },
   ) {
-    await this.assertCaptainOrVice(clubId, requesterId);
+    await this.membership.assertCaptainOrVice(clubId,requesterId);
 
     const limit = params.limit ?? CURSOR_DEFAULT_LIMIT;
     const requests = await this.prisma.clubJoinRequest.findMany({
@@ -488,7 +456,7 @@ export class ClubService {
   }
 
   async approveJoinRequest(clubId: string, requesterId: string, requestId: string) {
-    await this.assertCaptainOrVice(clubId, requesterId);
+    await this.membership.assertCaptainOrVice(clubId,requesterId);
 
     const request = await this.prisma.clubJoinRequest.findUnique({
       where: { id: requestId },
@@ -532,7 +500,7 @@ export class ClubService {
   }
 
   async rejectJoinRequest(clubId: string, requesterId: string, requestId: string) {
-    await this.assertCaptainOrVice(clubId, requesterId);
+    await this.membership.assertCaptainOrVice(clubId,requesterId);
 
     const request = await this.prisma.clubJoinRequest.findUnique({
       where: { id: requestId },
@@ -551,7 +519,7 @@ export class ClubService {
   // ─── 초대 코드 ─────────────────────────────────────────────────────────────
 
   async getInviteCode(clubId: string, userId: string) {
-    await this.assertCaptainOrVice(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
 
     const code = await this.prisma.clubInviteCode.findFirst({
       where: { clubId },
@@ -570,7 +538,7 @@ export class ClubService {
   }
 
   async renewInviteCode(clubId: string, userId: string) {
-    await this.assertCaptainOrVice(clubId, userId);
+    await this.membership.assertCaptainOrVice(clubId,userId);
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + INVITE_CODE_EXPIRE_DAYS);
@@ -615,7 +583,7 @@ export class ClubService {
   // ─── 해체 투표 ─────────────────────────────────────────────────────────────
 
   async getDissolveVote(clubId: string, userId: string) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId, userId);
 
     const vote = await this.prisma.clubDissolveVote.findFirst({
       where: { clubId, status: DissolveVoteStatus.IN_PROGRESS },
@@ -640,7 +608,7 @@ export class ClubService {
   }
 
   async startDissolveVote(clubId: string, captainId: string) {
-    await this.assertCaptain(clubId, captainId);
+    await this.membership.assertCaptain(clubId,captainId);
 
     // 이미 진행 중인 투표 확인
     const existing = await this.prisma.clubDissolveVote.findFirst({
@@ -691,7 +659,7 @@ export class ClubService {
   }
 
   async respondDissolveVote(clubId: string, userId: string, dto: RespondDissolveVoteDto) {
-    await this.assertMember(clubId, userId);
+    await this.membership.assertMember(clubId, userId);
 
     const vote = await this.prisma.clubDissolveVote.findFirst({
       where: { clubId, status: DissolveVoteStatus.IN_PROGRESS },

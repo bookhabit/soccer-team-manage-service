@@ -17,7 +17,7 @@ import { WithdrawDto } from './dto/withdraw.dto';
 import { SignupResponseDto, UserProfileResponseDto } from './dto/user-response.dto';
 
 @ApiTags('Users')
-@Controller('api/v1/users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

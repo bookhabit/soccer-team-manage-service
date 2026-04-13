@@ -26,6 +26,8 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  app.setGlobalPrefix('api/v1');
+
   // httpOnly Cookie를 읽기 위해 cookie-parser 필수
   app.use(cookieParser());
 

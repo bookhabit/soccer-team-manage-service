@@ -31,7 +31,7 @@ import {
 
 @ApiTags('Matches')
 @ApiBearerAuth()
-@Controller('api/v1/clubs/:clubId/matches')
+@Controller('clubs/:clubId/matches')
 export class MatchController {
   constructor(private readonly matchService: MatchService) {}
 
