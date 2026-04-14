@@ -49,9 +49,15 @@ export function MatchCreateView({
   submitLabel = '등록하기',
 }: MatchCreateViewProps) {
   return (
-    <ScreenLayout bottomSlot={<BottomCTASingle label={submitLabel} onClick={onSubmit} loading={isPending} safeArea />}>
+    <ScreenLayout
+      bottomSlot={
+        <BottomCTASingle label={submitLabel} onClick={onSubmit} loading={isPending} safeArea />
+      }
+    >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <TextBox variant="heading3" color={colors.grey900}>경기 정보</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          경기 정보
+        </TextBox>
         <Spacing size={4} />
 
         {/* 날짜 */}
@@ -101,7 +107,9 @@ export function MatchCreateView({
         />
         <Spacing size={5} />
 
-        <TextBox variant="heading3" color={colors.grey900}>장소</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          장소
+        </TextBox>
         <Spacing size={4} />
 
         <Controller
@@ -151,7 +159,9 @@ export function MatchCreateView({
         />
         <Spacing size={5} />
 
-        <TextBox variant="heading3" color={colors.grey900}>경기 조건</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          경기 조건
+        </TextBox>
         <Spacing size={4} />
 
         <Controller
@@ -204,7 +214,7 @@ export function MatchCreateView({
           name="fee"
           render={({ field: { onChange, value } }) => (
             <TextField
-              title="참가비 (원)"
+              title="구장비 (원)"
               placeholder="0 입력 시 무료"
               value={value != null ? String(value) : ''}
               onChangeText={(v) => onChange(Number(v) || 0)}
@@ -215,7 +225,9 @@ export function MatchCreateView({
         />
         <Spacing size={5} />
 
-        <TextBox variant="heading3" color={colors.grey900}>담당자 정보</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          담당자 정보
+        </TextBox>
         <Spacing size={4} />
 
         <Controller

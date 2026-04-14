@@ -74,7 +74,9 @@ export function MatchDetailView({
             size={48}
           />
           <View style={styles.clubInfo}>
-            <TextBox variant="body1Bold" color={colors.grey900}>{post.clubName}</TextBox>
+            <TextBox variant="body1Bold" color={colors.grey900}>
+              {post.clubName}
+            </TextBox>
             <TextBox variant="caption" color={colors.grey500}>
               {LEVEL_LABEL[post.clubLevel] ?? post.clubLevel}
             </TextBox>
@@ -100,7 +102,7 @@ export function MatchDetailView({
           <InfoRow label="인원" value={`${post.playerCount}명`} />
           <InfoRow label="성별" value={GENDER_LABEL[post.gender] ?? post.gender} />
           <InfoRow label="레벨" value={LEVEL_LABEL[post.level] ?? post.level} />
-          <InfoRow label="참가비" value={feeLabel} />
+          <InfoRow label="구장비" value={feeLabel} />
         </Section>
 
         {/* 연락처 (수락 후 공개) */}
@@ -146,8 +148,12 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.infoRow}>
-      <TextBox variant="body2" color={colors.grey500} style={styles.infoLabel}>{label}</TextBox>
-      <TextBox variant="body2" color={colors.grey900} style={styles.infoValue}>{value}</TextBox>
+      <TextBox variant="body2" color={colors.grey500} style={styles.infoLabel}>
+        {label}
+      </TextBox>
+      <TextBox variant="body2" color={colors.grey900} style={styles.infoValue}>
+        {value}
+      </TextBox>
     </View>
   );
 }

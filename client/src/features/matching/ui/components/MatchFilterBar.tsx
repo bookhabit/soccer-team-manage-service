@@ -36,7 +36,11 @@ export function MatchFilterBar({ filters, onChange }: MatchFilterBarProps) {
   return (
     <View style={styles.wrapper}>
       {/* 레벨 */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+      >
         {LEVEL_CHIPS.map((chip) => {
           const isActive = filters.level === chip.value;
           return (
@@ -50,8 +54,12 @@ export function MatchFilterBar({ filters, onChange }: MatchFilterBarProps) {
         })}
       </ScrollView>
 
-      {/* 성별 + 참가비 */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
+      {/* 성별 + 구장비 */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+      >
         {GENDER_CHIPS.map((chip) => {
           const isActive = filters.gender === chip.value;
           return (

@@ -658,7 +658,7 @@ model MatchPost {
   playerCount  Int             // 인원 (5~11)
   gender       MatchGender     // 성별 조건
   level        ClubLevel       // 실력 수준
-  fee          Int             @default(0)  // 참가비 원(KRW), 0=무료
+  fee          Int             @default(0)  // 구장비 원(KRW), 0=무료
 
   // ── 연락처 ──
   contactName  String          // 담당자 이름
