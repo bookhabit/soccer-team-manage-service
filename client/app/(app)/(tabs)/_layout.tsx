@@ -65,6 +65,20 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="matching"
+        options={{
+          title: '매칭',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              name="football-outline"
+              focusedName="football"
+              color={color}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="vote"
         options={{
           title: '투표',
