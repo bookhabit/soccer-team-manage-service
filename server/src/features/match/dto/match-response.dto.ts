@@ -16,6 +16,9 @@ export class MatchSummaryResponseDto {
   @ApiProperty({ example: '서울 월드컵경기장' })
   location!: string;
 
+  @ApiPropertyOptional({ example: '서울특별시 마포구 월드컵로 240', nullable: true })
+  address!: string | null;
+
   @ApiProperty({ example: '2026-04-15T10:00:00.000Z' })
   startAt!: Date;
 

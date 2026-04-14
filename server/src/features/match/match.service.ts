@@ -32,6 +32,7 @@ const MATCH_SUMMARY_SELECT = {
   type: true,
   title: true,
   location: true,
+  address: true,
   startAt: true,
   endAt: true,
   voteDeadline: true,

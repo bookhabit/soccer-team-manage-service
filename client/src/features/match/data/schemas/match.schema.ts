@@ -39,6 +39,7 @@ export const MatchSummarySchema = z.object({
   type: MatchTypeSchema,
   title: z.string(),
   location: z.string(),
+  address: z.string().nullable().default(null),
   startAt: z.string(),
   endAt: z.string(),
   voteDeadline: z.string(),
