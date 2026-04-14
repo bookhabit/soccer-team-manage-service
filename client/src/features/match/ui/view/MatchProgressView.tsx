@@ -11,7 +11,6 @@ import type { AttendanceResponse } from '../../data/schemas/match.schema';
 interface MatchProgressViewProps {
   match: MatchDetail;
   attendances: Attendance[];
-  lineupQuarter?: Quarter | null;
   totalMembers: number;
   isCaptainOrVice: boolean;
   myResponse: AttendanceResponse | null;
@@ -36,7 +35,6 @@ const LEVEL_LABEL: Record<string, string> = {
 export function MatchProgressView({
   match,
   attendances,
-  lineupQuarter,
   totalMembers,
   isCaptainOrVice,
   myResponse,
@@ -81,32 +79,44 @@ export function MatchProgressView({
         {/* 경기 헤더 */}
         <View style={styles.matchHeader}>
           <View style={styles.titleRow}>
-            <TextBox variant="heading3" color={colors.grey900}>{match.title}</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              {match.title}
+            </TextBox>
             {status === 'DURING' && (
               <View style={styles.duringBadge}>
-                <TextBox variant="captionBold" color={colors.orange500}>진행 중</TextBox>
+                <TextBox variant="captionBold" color={colors.orange500}>
+                  진행 중
+                </TextBox>
               </View>
             )}
           </View>
           {match.opponentName ? (
             <TextBox variant="body2" color={colors.grey700}>
               vs {match.opponentName}
-              {match.opponentLevel ? ` (${LEVEL_LABEL[match.opponentLevel] ?? match.opponentLevel})` : ''}
+              {match.opponentLevel
+                ? ` (${LEVEL_LABEL[match.opponentLevel] ?? match.opponentLevel})`
+                : ''}
             </TextBox>
           ) : null}
           <TextBox variant="body2" color={colors.grey500}>
             {dateLabel} {timeLabel}
           </TextBox>
-          <TextBox variant="caption" color={colors.grey500}>{match.location}</TextBox>
+          <TextBox variant="caption" color={colors.grey500}>
+            {match.location}
+          </TextBox>
           {match.address ? (
-            <TextBox variant="caption" color={colors.grey400}>{match.address}</TextBox>
+            <TextBox variant="caption" color={colors.grey400}>
+              {match.address}
+            </TextBox>
           ) : null}
         </View>
 
         <View style={styles.divider} />
 
         {/* 투표 현황 */}
-        <TextBox variant="body2Bold" color={colors.grey900}>투표 현황</TextBox>
+        <TextBox variant="body2Bold" color={colors.grey900}>
+          투표 현황
+        </TextBox>
         <Spacing size={2} />
         <AttendanceSummary
           attendCount={match.attendCount}
@@ -115,14 +125,18 @@ export function MatchProgressView({
           total={totalMembers}
         />
         <Spacing size={2} />
-        <TextBox variant="caption" color={colors.grey500}>마감: {deadlineLabel}</TextBox>
+        <TextBox variant="caption" color={colors.grey500}>
+          마감: {deadlineLabel}
+        </TextBox>
 
         {/* 내 응답 + 투표 버튼 (BEFORE 상태, 마감 전) */}
         {status === 'BEFORE' && !isDeadlinePassed ? (
           <>
             <Spacing size={3} />
             <View style={styles.myResponseRow}>
-              <TextBox variant="body2" color={colors.grey700}>내 응답:</TextBox>
+              <TextBox variant="body2" color={colors.grey700}>
+                내 응답:
+              </TextBox>
               <AttendanceChip response={myResponse} />
             </View>
             <Spacing size={3} />
@@ -133,7 +147,9 @@ export function MatchProgressView({
                   onPress={onAttend}
                   loading={isSubmittingAttendance}
                   fullWidth
-                >참석</Button>
+                >
+                  참석
+                </Button>
               </View>
               <View style={styles.voteBtn}>
                 <Button
@@ -141,7 +157,9 @@ export function MatchProgressView({
                   onPress={onUndecided}
                   loading={isSubmittingAttendance}
                   fullWidth
-                >미정</Button>
+                >
+                  미정
+                </Button>
               </View>
               <View style={styles.voteBtn}>
                 <Button
@@ -149,24 +167,32 @@ export function MatchProgressView({
                   onPress={onAbsent}
                   loading={isSubmittingAttendance}
                   fullWidth
-                >불참</Button>
+                >
+                  불참
+                </Button>
               </View>
             </View>
           </>
         ) : status === 'BEFORE' && isDeadlinePassed ? (
           <>
             <Spacing size={3} />
-            <TextBox variant="caption" color={colors.grey400}>투표가 마감되었습니다.</TextBox>
+            <TextBox variant="caption" color={colors.grey400}>
+              투표가 마감되었습니다.
+            </TextBox>
           </>
         ) : null}
 
         <View style={styles.divider} />
 
         {/* 참석자 목록 */}
-        <TextBox variant="body2Bold" color={colors.grey900}>참석 선수 ({attending.length})</TextBox>
+        <TextBox variant="body2Bold" color={colors.grey900}>
+          참석 선수 ({attending.length})
+        </TextBox>
         <Spacing size={2} />
         {attending.length === 0 ? (
-          <TextBox variant="body2" color={colors.grey400}>참석 선수가 없습니다.</TextBox>
+          <TextBox variant="body2" color={colors.grey400}>
+            참석 선수가 없습니다.
+          </TextBox>
         ) : (
           <View style={styles.memberRow}>
             {attending.map((a) => (
@@ -187,7 +213,9 @@ export function MatchProgressView({
         {absent.length > 0 ? (
           <>
             <Spacing size={3} />
-            <TextBox variant="body2Bold" color={colors.grey900}>불참 선수 ({absent.length})</TextBox>
+            <TextBox variant="body2Bold" color={colors.grey900}>
+              불참 선수 ({absent.length})
+            </TextBox>
             <Spacing size={2} />
             <View style={styles.memberRow}>
               {absent.map((a) => (
@@ -205,26 +233,13 @@ export function MatchProgressView({
           </>
         ) : null}
 
-        {/* 포메이션 미리보기 */}
-        {lineupQuarter ? (
-          <>
-            <View style={styles.divider} />
-            <TextBox variant="body2Bold" color={colors.grey900}>포메이션 미리보기</TextBox>
-            <Spacing size={2} />
-            <FormationField
-              formation={lineupQuarter.formation}
-              assignments={lineupQuarter.assignments}
-              participantNames={participantNames}
-              team={lineupQuarter.team}
-            />
-          </>
-        ) : null}
-
         {/* 관리자 액션 — 종료된 경기에서는 포지션 배정 불가 */}
         {isCaptainOrVice && status !== 'AFTER' ? (
           <>
             <View style={styles.divider} />
-            <Button variant="secondary" onPress={onGoLineup}>포지션 배정</Button>
+            <Button variant="secondary" onPress={onGoLineup}>
+              포지션 배정
+            </Button>
           </>
         ) : null}
 
@@ -233,9 +248,13 @@ export function MatchProgressView({
           <>
             <View style={styles.divider} />
             {isCaptainOrVice && !match.isRecordSubmitted ? (
-              <Button variant="primary" onPress={onGoRecord}>경기 기록 입력</Button>
+              <Button variant="primary" onPress={onGoRecord}>
+                경기 기록 입력
+              </Button>
             ) : match.isRecordSubmitted ? (
-              <Button variant="secondary" onPress={onGoMomVote}>MOM 투표</Button>
+              <Button variant="secondary" onPress={onGoMomVote}>
+                MOM 투표
+              </Button>
             ) : null}
           </>
         ) : null}

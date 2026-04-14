@@ -39,11 +39,12 @@ function MatchDetailContent({ matchId }: MatchDetailContainerProps) {
   const { data: match } = useMatchDetail(clubId, matchId);
   const { data: attendances } = useAttendances(clubId, matchId);
   const { data: lineup } = useLineup(clubId, matchId);
-  const { mutate: submitAttendance, isPending: isSubmittingAttendance } =
-    useSubmitAttendance(clubId, matchId);
+  const { mutate: submitAttendance, isPending: isSubmittingAttendance } = useSubmitAttendance(
+    clubId,
+    matchId,
+  );
 
-  const isCaptainOrVice =
-    club?.myRole === 'CAPTAIN' || club?.myRole === 'VICE_CAPTAIN';
+  const isCaptainOrVice = club?.myRole === 'CAPTAIN' || club?.myRole === 'VICE_CAPTAIN';
   const totalMembers = club?.currentMemberCount ?? 0;
 
   const myResponse = match.myResponse;
@@ -66,7 +67,6 @@ function MatchDetailContent({ matchId }: MatchDetailContainerProps) {
     <MatchProgressView
       match={match}
       attendances={attendances}
-      lineupQuarter={firstQuarter}
       totalMembers={totalMembers}
       isCaptainOrVice={isCaptainOrVice}
       myResponse={myResponse}

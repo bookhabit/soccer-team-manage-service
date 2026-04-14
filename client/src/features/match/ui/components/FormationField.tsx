@@ -8,6 +8,8 @@ type Assignment = { userId: string; position: FormationSlot };
 interface FormationFieldProps {
   formation: string;
   assignments: Assignment[];
+  /** 포메이션에 정의된 11개 슬롯 목록 — 전달 시 빈 슬롯도 표시 */
+  formationSlots?: FormationSlot[];
   participantNames?: Record<string, string>;
   team?: string | null;
 }
@@ -25,14 +27,29 @@ const POSITION_ROW: Record<FormationSlot, number> = {
 export function FormationField({
   formation,
   assignments,
+  formationSlots,
   participantNames = {},
   team,
 }: FormationFieldProps) {
-  const rows: Assignment[][] = [[], [], [], []];
-
+  // formationSlots가 있으면 빈 슬롯 포함 11개 전체, 없으면 배정된 선수만 표시
+  const assignedBySlot: Partial<Record<FormationSlot, string>> = {};
   for (const a of assignments) {
-    const row = POSITION_ROW[a.position] ?? 2;
-    rows[row].push(a);
+    assignedBySlot[a.position] = a.userId;
+  }
+
+  type SlotItem = { slot: FormationSlot; userId?: string };
+  const rows: SlotItem[][] = [[], [], [], []];
+
+  if (formationSlots) {
+    for (const slot of formationSlots) {
+      const row = POSITION_ROW[slot] ?? 2;
+      rows[row].push({ slot, userId: assignedBySlot[slot] });
+    }
+  } else {
+    for (const a of assignments) {
+      const row = POSITION_ROW[a.position] ?? 2;
+      rows[row].push({ slot: a.position, userId: a.userId });
+    }
   }
 
   return (
@@ -47,15 +64,17 @@ export function FormationField({
         </TextBox>
       )}
 
-      {[...rows].reverse().map((rowAssignments, rIdx) => (
+      {[...rows].reverse().map((rowSlots, rIdx) => (
         <View key={rIdx} style={styles.row}>
-          {rowAssignments.map((a) => (
-            <View key={a.userId} style={styles.playerSlot}>
-              <View style={styles.avatar}>
-                <TextBox variant="caption" color={colors.background}>{a.position}</TextBox>
+          {rowSlots.map(({ slot, userId }) => (
+            <View key={slot} style={styles.playerSlot}>
+              <View style={[styles.avatar, !userId && styles.avatarEmpty]}>
+                <TextBox variant="caption" color={userId ? colors.background : colors.grey400}>
+                  {slot}
+                </TextBox>
               </View>
-              <TextBox variant="caption" color={colors.grey700} numberOfLines={1}>
-                {participantNames[a.userId] ?? '선수'}
+              <TextBox variant="caption" color={userId ? colors.grey700 : colors.grey300} numberOfLines={1}>
+                {userId ? (participantNames[userId] ?? '선수') : '-'}
               </TextBox>
             </View>
           ))}
@@ -92,5 +111,11 @@ const styles = StyleSheet.create({
     backgroundColor: colors.green500,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  avatarEmpty: {
+    backgroundColor: colors.green100,
+    borderWidth: 1,
+    borderColor: colors.green300,
+    borderStyle: 'dashed',
   },
 });

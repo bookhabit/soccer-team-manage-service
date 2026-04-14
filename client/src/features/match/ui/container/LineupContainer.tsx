@@ -10,8 +10,17 @@ import {
   useSaveLineup,
 } from '../../data/hooks/useMatch';
 import { LineupView } from '../view/LineupView';
-import type { Quarter } from '../../data/schemas/match.schema';
+import type { Quarter, FormationSlot } from '../../data/schemas/match.schema';
 import type { SaveLineupInput } from '../../data/schemas/match.schema';
+
+const FORMATION_SLOTS: Record<string, FormationSlot[]> = {
+  '4-3-3':   ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LCM', 'CM', 'RCM', 'LW', 'ST', 'RW'],
+  '4-4-2':   ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LM', 'LCM', 'RCM', 'RM', 'LS', 'RS'],
+  '3-5-2':   ['GK', 'LCB', 'CB', 'RCB', 'LWB', 'LCM', 'CM', 'RCM', 'RWB', 'LS', 'RS'],
+  '4-2-3-1': ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LDM', 'RDM', 'LAM', 'CAM', 'RAM', 'ST'],
+  '5-3-2':   ['GK', 'LB', 'LCB', 'CB', 'RCB', 'RB', 'LCM', 'CM', 'RCM', 'LS', 'RS'],
+};
+const DEFAULT_SLOTS: FormationSlot[] = ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LCM', 'CM', 'RCM', 'LW', 'ST', 'RW'];
 
 interface LineupContainerProps {
   matchId: string;
@@ -77,21 +86,51 @@ function LineupContent({ matchId }: LineupContainerProps) {
 
   const handleRandomize = () => {
     const attending = attendances.filter((a) => a.response === 'ATTEND');
-    const positions: Array<'GK' | 'DF' | 'MF' | 'FW'> = ['GK', 'DF', 'DF', 'DF', 'MF', 'MF', 'MF', 'FW', 'FW', 'FW', 'FW'];
+    const currentQ = localQuarters.find((q) => q.quarterNumber === activeQuarter);
+    const formationSlots = currentQ
+      ? FORMATION_SLOTS[currentQ.formation] ?? DEFAULT_SLOTS
+      : DEFAULT_SLOTS;
     const shuffled = [...attending].sort(() => Math.random() - 0.5);
     setLocalQuarters((prev) =>
       prev.map((q) =>
         q.quarterNumber === activeQuarter
           ? {
               ...q,
-              assignments: shuffled.slice(0, positions.length).map((a, i) => ({
+              assignments: shuffled.slice(0, formationSlots.length).map((a, i) => ({
                 userId: a.userId,
-                position: positions[i],
+                position: formationSlots[i],
               })),
             }
           : q,
       ),
     );
+  };
+
+  const handleAddQuarter = () => {
+    const nextNum = localQuarters.length > 0
+      ? Math.max(...localQuarters.map((q) => q.quarterNumber)) + 1
+      : 1;
+    const prevFormation = localQuarters[localQuarters.length - 1]?.formation ?? '4-3-3';
+    const newQuarter: Quarter = {
+      id: `q${nextNum}`,
+      quarterNumber: nextNum,
+      formation: prevFormation,
+      team: null,
+      assignments: [],
+    };
+    setLocalQuarters((prev) => [...prev, newQuarter]);
+    setActiveQuarter(nextNum);
+  };
+
+  const handleRemoveQuarter = (quarterNumber: number) => {
+    setLocalQuarters((prev) => prev.filter((q) => q.quarterNumber !== quarterNumber));
+    // 삭제된 쿼터가 현재 활성이면 이전 쿼터로 이동
+    if (activeQuarter === quarterNumber) {
+      const remaining = localQuarters.filter((q) => q.quarterNumber !== quarterNumber);
+      if (remaining.length > 0) {
+        setActiveQuarter(remaining[remaining.length - 1].quarterNumber);
+      }
+    }
   };
 
   const handleSave = (dto: SaveLineupInput) => {
@@ -112,6 +151,8 @@ function LineupContent({ matchId }: LineupContainerProps) {
       onQuarterSelect={setActiveQuarter}
       onAssignPosition={handleAssignPosition}
       onFormationChange={handleFormationChange}
+      onAddQuarter={handleAddQuarter}
+      onRemoveQuarter={handleRemoveQuarter}
       onSave={handleSave}
       onRandomize={handleRandomize}
     />

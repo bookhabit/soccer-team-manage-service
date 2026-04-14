@@ -3,7 +3,7 @@ import { ScrollView, View, StyleSheet } from 'react-native';
 import { TextBox, Button, ScreenLayout, Spacing, Select, colors, spacing } from '@ui';
 import { FormationField } from '../components/FormationField';
 import { QuarterTab } from '../components/QuarterTab';
-import type { Quarter, Attendance } from '../../data/schemas/match.schema';
+import type { Quarter, Attendance, FormationSlot } from '../../data/schemas/match.schema';
 import type { SaveLineupInput } from '../../data/schemas/match.schema';
 
 const FORMATION_OPTIONS = [
@@ -14,12 +14,14 @@ const FORMATION_OPTIONS = [
   { label: '5-3-2', value: '5-3-2' },
 ];
 
-const POSITION_OPTIONS = [
-  { label: 'GK', value: 'GK' },
-  { label: 'DF', value: 'DF' },
-  { label: 'MF', value: 'MF' },
-  { label: 'FW', value: 'FW' },
-];
+/** 포메이션별 11개 FormationSlot 슬롯 정의 */
+const FORMATION_SLOTS: Record<string, FormationSlot[]> = {
+  '4-3-3':   ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LCM', 'CM', 'RCM', 'LW', 'ST', 'RW'],
+  '4-4-2':   ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LM', 'LCM', 'RCM', 'RM', 'LS', 'RS'],
+  '3-5-2':   ['GK', 'LCB', 'CB', 'RCB', 'LWB', 'LCM', 'CM', 'RCM', 'RWB', 'LS', 'RS'],
+  '4-2-3-1': ['GK', 'LB', 'LCB', 'RCB', 'RB', 'LDM', 'RDM', 'LAM', 'CAM', 'RAM', 'ST'],
+  '5-3-2':   ['GK', 'LB', 'LCB', 'CB', 'RCB', 'RB', 'LCM', 'CM', 'RCM', 'LS', 'RS'],
+};
 
 interface LineupViewProps {
   quarters: Quarter[];
@@ -31,6 +33,8 @@ interface LineupViewProps {
   onQuarterSelect: (q: number) => void;
   onAssignPosition: (quarterId: string, userId: string, position: string) => void;
   onFormationChange: (quarterId: string, formation: string) => void;
+  onAddQuarter: () => void;
+  onRemoveQuarter: (quarterNumber: number) => void;
   onSave: (dto: SaveLineupInput) => void;
   onRandomize: () => void;
 }
@@ -45,6 +49,8 @@ export function LineupView({
   onQuarterSelect,
   onAssignPosition,
   onFormationChange,
+  onAddQuarter,
+  onRemoveQuarter,
   onSave,
   onRandomize,
 }: LineupViewProps) {
@@ -53,7 +59,17 @@ export function LineupView({
     : [1, 2];
 
   const currentQuarter = quarters.find((q) => q.quarterNumber === activeQuarter);
-  const attending = attendances.filter((a) => a.response === 'ATTEND');
+
+  // 참석 인원만 표시 (ATTEND만, ABSENT·UNDECIDED 제외)
+  const attendingPlayers = attendances.filter((a) => a.response === 'ATTEND');
+
+  // 현재 포메이션에 해당하는 슬롯 목록
+  const formationSlots = currentQuarter
+    ? (FORMATION_SLOTS[currentQuarter.formation] ?? [])
+    : [];
+
+  // 슬롯 선택 옵션 (현재 포메이션 슬롯만)
+  const slotOptions = formationSlots.map((s) => ({ label: s, value: s }));
 
   return (
     <ScreenLayout>
@@ -62,6 +78,8 @@ export function LineupView({
         quarters={quarterNumbers}
         activeQuarter={activeQuarter}
         onSelect={onQuarterSelect}
+        onAdd={onAddQuarter}
+        onRemove={onRemoveQuarter}
       />
 
       <ScrollView contentContainerStyle={styles.content}>
@@ -76,37 +94,47 @@ export function LineupView({
             />
             <Spacing size={4} />
 
-            {/* 포메이션 시각화 */}
+            {/* 포메이션 시각화 — 11개 빈 슬롯 포함 */}
             <FormationField
               formation={currentQuarter.formation}
               assignments={currentQuarter.assignments}
+              formationSlots={formationSlots}
               participantNames={participantNames}
               team={currentQuarter.team}
             />
             <Spacing size={4} />
 
-            {/* 선수 배정 목록 */}
-            <TextBox variant="body2Bold" color={colors.grey900}>선수 배정</TextBox>
+            {/* 선수 배정 — 참석자(ATTEND)만 */}
+            <TextBox variant="body2Bold" color={colors.grey900}>
+              선수 배정 ({attendingPlayers.length}명 참석)
+            </TextBox>
             <Spacing size={2} />
-            {attending.map((a) => {
-              const assignment = currentQuarter.assignments.find(
-                (asgn) => asgn.userId === a.userId,
-              );
-              return (
-                <View key={a.userId} style={styles.playerRow}>
-                  <TextBox variant="body2" color={colors.grey900} style={styles.playerName}>
-                    {a.user.name ?? '선수'}
-                  </TextBox>
-                  <Select
-                    options={POSITION_OPTIONS}
-                    value={assignment?.position ?? ''}
-                    onChange={(pos) =>
-                      pos && onAssignPosition(currentQuarter.id, a.userId, pos)
-                    }
-                  />
-                </View>
-              );
-            })}
+
+            {attendingPlayers.length === 0 ? (
+              <TextBox variant="body2" color={colors.grey400}>참석 선수가 없습니다.</TextBox>
+            ) : (
+              attendingPlayers.map((a) => {
+                const assignment = currentQuarter.assignments.find(
+                  (asgn) => asgn.userId === a.userId,
+                );
+                return (
+                  <View key={a.userId} style={styles.playerRow}>
+                    <TextBox variant="body2" color={colors.grey900} style={styles.playerName}>
+                      {a.user.name ?? '선수'}
+                    </TextBox>
+                    <View style={styles.slotSelect}>
+                      <Select
+                        options={[{ label: '포지션 선택', value: '' }, ...slotOptions]}
+                        value={assignment?.position ?? ''}
+                        onChange={(pos) =>
+                          pos && onAssignPosition(currentQuarter.id, a.userId, pos)
+                        }
+                      />
+                    </View>
+                  </View>
+                );
+              })
+            )}
           </>
         ) : (
           <TextBox variant="body2" color={colors.grey400}>
@@ -121,25 +149,25 @@ export function LineupView({
             <Button variant="secondary" onPress={onRandomize} fullWidth>랜덤 배치</Button>
           </View>
           <View style={styles.actionBtn}>
-          <Button
-            variant="primary"
-            onPress={() => {
-              const dto: SaveLineupInput = {
-                quarters: quarters.map((q) => ({
-                  quarterNumber: q.quarterNumber,
-                  formation: q.formation,
-                  team: q.team ?? undefined,
-                  assignments: q.assignments.map((a) => ({
-                    userId: a.userId,
-                    position: a.position,
+            <Button
+              variant="primary"
+              onPress={() => {
+                const dto: SaveLineupInput = {
+                  quarters: quarters.map((q) => ({
+                    quarterNumber: q.quarterNumber,
+                    formation: q.formation,
+                    team: q.team ?? undefined,
+                    assignments: q.assignments.map((a) => ({
+                      userId: a.userId,
+                      position: a.position,
+                    })),
                   })),
-                })),
-              };
-              onSave(dto);
-            }}
-            loading={isSaving}
-            fullWidth
-          >저장</Button>
+                };
+                onSave(dto);
+              }}
+              loading={isSaving}
+              fullWidth
+            >저장</Button>
           </View>
         </View>
 
@@ -163,6 +191,9 @@ const styles = StyleSheet.create({
   },
   playerName: {
     flex: 1,
+  },
+  slotSelect: {
+    width: 140,
   },
   actions: {
     flexDirection: 'row',

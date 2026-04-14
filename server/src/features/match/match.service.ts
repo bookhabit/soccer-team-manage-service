@@ -253,23 +253,23 @@ export class MatchService {
     await this.membership.assertCaptainOrVice(clubId,userId);
     await this.findMatch(clubId, matchId);
 
-    // 참여 선수 검증
-    const participantIds = new Set(
-      (await this.prisma.matchParticipant.findMany({
-        where: { matchId },
-        select: { userId: true },
-      })).map((p) => p.userId),
-    );
-
+    // 배정된 유저 전체 수집
+    const allAssignedIds = new Set<string>();
     for (const quarter of dto.quarters) {
       for (const assignment of quarter.assignments) {
-        if (!participantIds.has(assignment.userId)) {
-          throw new NotFoundException({
-            code: ErrorCode.MATCH_010,
-            message: `참여 선수 목록에 없는 유저입니다: ${assignment.userId}`,
-          });
-        }
+        allAssignedIds.add(assignment.userId);
       }
+    }
+
+    // 클럽 멤버 검증 + matchParticipant 자동 등록
+    // (attendance 투표만 하고 별도 participant 등록 없이도 라인업 배정 가능)
+    for (const uid of allAssignedIds) {
+      await this.membership.assertMember(clubId, uid);
+      await this.prisma.matchParticipant.upsert({
+        where: { matchId_userId: { matchId, userId: uid } },
+        create: { matchId, userId: uid },
+        update: {},
+      });
     }
 
     return this.prisma.$transaction(async (tx) => {

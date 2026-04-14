@@ -30,7 +30,7 @@ function InviteCodeContent({ clubId }: InviteCodeContainerProps) {
 
   const handleCopy = async () => {
     try {
-      await Share.share({ message: `FC Flow 초대 코드: ${inviteCode.code}` });
+      await Share.share({ message: inviteCode.code });
     } catch {
       toast.error('공유에 실패했습니다.');
     }
