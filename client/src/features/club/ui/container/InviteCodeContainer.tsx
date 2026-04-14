@@ -1,6 +1,6 @@
 import React from 'react';
-import { View } from 'react-native';
-import { Share } from 'react-native';
+import { View, Share } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 import { Skeleton, Spacing, ScreenLayout, useToast } from '@ui';
 import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useInviteCode, useRenewInviteCode } from '../../data/hooks/useClub';
@@ -29,6 +29,11 @@ function InviteCodeContent({ clubId }: InviteCodeContainerProps) {
   const { mutate: renew, isPending: isRenewing } = useRenewInviteCode(clubId);
 
   const handleCopy = async () => {
+    await Clipboard.setStringAsync(inviteCode.code);
+    toast.success('코드가 복사되었습니다.');
+  };
+
+  const handleShare = async () => {
     try {
       await Share.share({ message: inviteCode.code });
     } catch {
@@ -48,6 +53,7 @@ function InviteCodeContent({ clubId }: InviteCodeContainerProps) {
       inviteCode={inviteCode}
       isRenewing={isRenewing}
       onCopy={handleCopy}
+      onShare={handleShare}
       onRenew={handleRenew}
     />
   );
