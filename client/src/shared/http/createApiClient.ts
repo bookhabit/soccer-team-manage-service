@@ -36,7 +36,7 @@ export interface ApiClient {
     post: <T>(url: string, data?: object, schema?: z.ZodSchema) => Promise<T>;
     put: <T>(url: string, data?: object, schema?: z.ZodSchema) => Promise<T>;
     patch: <T>(url: string, data?: object, schema?: z.ZodSchema) => Promise<T>;
-    delete: <T>(url: string, schema?: z.ZodSchema) => Promise<T>;
+    delete: <T>(url: string, data?: object, schema?: z.ZodSchema) => Promise<T>;
   };
 }
 
@@ -69,6 +69,7 @@ const formatError = (error: unknown, label: string) => {
 
   if (error.response) {
     // 🔥 모든 API의 상세 로그를 여기서 한 번에 처리
+    console.log('실패한 엔드포인트 : ', error.request.responseURL);
     console.log(`🔍 [${label}] 서버 응답 데이터:`, JSON.stringify(error.response.data, null, 2));
     return new ApiError(error.response.data as ApiErrorResponse);
   }
@@ -203,8 +204,8 @@ export function createApiClient(options: CreateApiClientOptions): ApiClient {
       privateApi.put(url, data).then((res) => handleResponse<T>(res, schema)),
     patch: <T>(url: string, data?: object, schema?: z.ZodSchema) =>
       privateApi.patch(url, data).then((res) => handleResponse<T>(res, schema)),
-    delete: <T>(url: string, schema?: z.ZodSchema) =>
-      privateApi.delete(url).then((res) => handleResponse<T>(res, schema)),
+    delete: <T>(url: string, data?: object, schema?: z.ZodSchema) =>
+      privateApi.delete(url, { data }).then((res) => handleResponse<T>(res, schema)),
   };
 
   return { publicApi, privateApi, http };

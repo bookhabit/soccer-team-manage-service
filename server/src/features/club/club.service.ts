@@ -49,12 +49,6 @@ export class ClubService {
   // ─── 내부 헬퍼 ─────────────────────────────────────────────────────────────
 
   private async recalcMannerScoreAvg(clubId: string) {
-    const result = await this.prisma.clubMember.aggregate({
-      where: { clubId },
-      _avg: { user: { mannerScore: true } } as any,
-    });
-
-    // aggregate 후 평균이 없으면 100 유지
     const agg = await this.prisma.$queryRaw<{ avg: number | null }[]>`
       SELECT AVG(u."mannerScore") as avg
       FROM club_members cm
@@ -93,6 +87,14 @@ export class ClubService {
       throw new ConflictException({
         code: ErrorCode.CLUB_ALREADY_MEMBER,
         message: '이미 소속된 팀이 있습니다.',
+      });
+    }
+
+    const nameExists = await this.prisma.club.findUnique({ where: { name: dto.name } });
+    if (nameExists) {
+      throw new ConflictException({
+        code: ErrorCode.CLUB_NAME_DUPLICATED,
+        message: '이미 존재하는 클럽 이름입니다.',
       });
     }
 
@@ -222,6 +224,72 @@ export class ClubService {
     };
   }
 
+  // ─── 팀원 상세 조회 ────────────────────────────────────────────────────────
+
+  async getMemberDetail(clubId: string, requesterId: string, targetUserId: string) {
+    await this.membership.assertMember(clubId, requesterId);
+
+    const member = await this.prisma.clubMember.findUnique({
+      where: { clubId_userId: { clubId, userId: targetUserId } },
+      select: {
+        role: true,
+        jerseyNumber: true,
+        speed: true,
+        shoot: true,
+        pass: true,
+        dribble: true,
+        defense: true,
+        physical: true,
+        isStatsPublic: true,
+        isPhonePublic: true,
+        joinedAt: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            avatarUrl: true,
+            position: true,
+            mannerScore: true,
+            foot: true,
+            level: true,
+          },
+        },
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException({ code: ErrorCode.CLUB_NOT_FOUND, message: '해당 팀원을 찾을 수 없습니다.' });
+    }
+
+    return {
+      userId: member.user.id,
+      name: member.user.name,
+      avatarUrl: member.user.avatarUrl,
+      jerseyNumber: member.jerseyNumber,
+      role: member.role,
+      position: member.user.position,
+      mannerScore: member.user.mannerScore,
+      foot: member.user.foot ?? null,
+      level: member.user.level ?? null,
+      phone: null, // User 모델에 phone 필드 미구현
+      isPhonePublic: member.isPhonePublic,
+      stats: {
+        speed: member.speed,
+        shoot: member.shoot,
+        pass: member.pass,
+        dribble: member.dribble,
+        defense: member.defense,
+        physical: member.physical,
+        isStatsPublic: member.isStatsPublic,
+        goals: 0,   // TODO: 경기 도메인 연동 후 집계
+        assists: 0,
+        momCount: 0,
+        matchCount: 0,
+      },
+      joinedAt: member.joinedAt.toISOString(),
+    };
+  }
+
   // ─── 팀원 강퇴 ─────────────────────────────────────────────────────────────
 
   async kickMember(clubId: string, kickerId: string, targetUserId: string) {
@@ -282,6 +350,10 @@ export class ClubService {
         : []),
       this.prisma.clubMember.delete({
         where: { clubId_userId: { clubId, userId } },
+      }),
+      // 탈퇴 시 가입 신청 이력 정리 — 재가입 시 중복 오류 방지
+      this.prisma.clubJoinRequest.deleteMany({
+        where: { clubId, userId },
       }),
       this.prisma.club.update({
         where: { id: clubId },
@@ -370,14 +442,20 @@ export class ClubService {
       });
     }
 
-    // 중복 신청 확인
+    // 중복 신청 확인 — PENDING 상태인 경우만 차단
     const existing = await this.prisma.clubJoinRequest.findUnique({
       where: { clubId_userId: { clubId, userId } },
     });
-    if (existing) {
+    if (existing?.status === JoinRequestStatus.PENDING) {
       throw new ConflictException({
         code: ErrorCode.CLUB_JOIN_REQUEST_DUPLICATE,
         message: '이미 가입 신청 중입니다.',
+      });
+    }
+    // APPROVED/REJECTED 이력이 남아 있으면 새 신청 전에 제거
+    if (existing) {
+      await this.prisma.clubJoinRequest.delete({
+        where: { clubId_userId: { clubId, userId } },
       });
     }
 

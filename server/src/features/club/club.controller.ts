@@ -24,6 +24,7 @@ import {
   ClubDetailResponseDto,
   ClubPreviewPageResponseDto,
   ClubMemberPageResponseDto,
+  ClubMemberDetailResponseDto,
   CreateJoinRequestResponseDto,
   JoinRequestPageResponseDto,
   InviteCodeResponseDto,
@@ -119,6 +120,19 @@ export class ClubController {
       limit: limit ? parseInt(limit, 10) : undefined,
       position,
     });
+  }
+
+  @Get(':clubId/members/:targetUserId')
+  @ApiOperation({ summary: '팀원 상세 조회' })
+  @ApiResponse({ status: 200, type: ClubMemberDetailResponseDto })
+  @ApiResponse({ status: 403, description: 'CLUB_NO_PERMISSION — 클럽 멤버가 아님' })
+  @ApiResponse({ status: 404, description: 'CLUB_NOT_FOUND — 팀원 없음' })
+  getMemberDetail(
+    @Param('clubId') clubId: string,
+    @Param('targetUserId') targetUserId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.clubService.getMemberDetail(clubId, user.sub, targetUserId);
   }
 
   @Delete(':clubId/members/:targetUserId/kick')

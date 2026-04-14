@@ -6,6 +6,7 @@ import { POSITION_LABEL } from '@/src/shared/constants/player.constants';
 
 interface MemberCardProps {
   member: ClubMember;
+  isMe?: boolean;
   onPress: () => void;
 }
 
@@ -18,7 +19,7 @@ const ROLE_LABEL: Record<string, string> = {
 /**
  * 팀원 목록에서 사용하는 팀원 카드 컴포넌트.
  */
-export function MemberCard({ member, onPress }: MemberCardProps) {
+export function MemberCard({ member, isMe = false, onPress }: MemberCardProps) {
   const roleLabel = ROLE_LABEL[member.role];
   const positionLabel = member.position ? POSITION_LABEL[member.position] : null;
 
@@ -28,6 +29,11 @@ export function MemberCard({ member, onPress }: MemberCardProps) {
       <View style={styles.info}>
         <View style={styles.nameRow}>
           <TextBox variant="body1Bold" color={colors.grey900}>{member.name}</TextBox>
+          {isMe ? (
+            <View style={styles.meBadge}>
+              <TextBox variant="captionBold" color={colors.blue500}>나</TextBox>
+            </View>
+          ) : null}
           {roleLabel ? (
             <TextBox variant="captionBold" color={colors.blue500}>{roleLabel}</TextBox>
           ) : null}
@@ -67,6 +73,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing[2],
+  },
+  meBadge: {
+    paddingHorizontal: spacing[2],
+    paddingVertical: 2,
+    borderRadius: 4,
+    backgroundColor: colors.blue50,
   },
   metaRow: {
     flexDirection: 'row',

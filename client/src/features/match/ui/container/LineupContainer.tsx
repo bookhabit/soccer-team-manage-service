@@ -43,6 +43,7 @@ function LineupContent({ matchId }: LineupContainerProps) {
   const [localQuarters, setLocalQuarters] = useState<Quarter[]>(
     lineupData?.length ? lineupData : [
       { id: 'q1', quarterNumber: 1, formation: '4-3-3', team: null, assignments: [] },
+      { id: 'q2', quarterNumber: 2, formation: '4-3-3', team: null, assignments: [] },
     ],
   );
 

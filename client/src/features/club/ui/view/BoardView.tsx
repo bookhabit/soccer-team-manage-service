@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, FlatList, TouchableOpacity, RefreshControl, StyleSheet } from 'react-native';
 import { TextBox, Spacing, ScreenLayout, colors, spacing } from '@ui';
 import { EmptyBoundary } from '@/src/shared/ui/server-state-handling/EmptyBoundary';
 import { PostListItem } from '../components/PostListItem';
@@ -17,8 +17,10 @@ interface BoardViewProps {
   activeTab: PostType | undefined;
   hasNextPage: boolean;
   canWrite: boolean;
+  isRefreshing: boolean;
   onTabChange: (tab: PostType | undefined) => void;
   onLoadMore: () => void;
+  onRefresh: () => void;
   onSelectPost: (postId: string) => void;
   onWrite: () => void;
 }
@@ -31,8 +33,10 @@ export function BoardView({
   activeTab,
   hasNextPage,
   canWrite,
+  isRefreshing,
   onTabChange,
   onLoadMore,
+  onRefresh,
   onSelectPost,
   onWrite,
 }: BoardViewProps) {
@@ -81,6 +85,9 @@ export function BoardView({
           onEndReached={hasNextPage ? onLoadMore : undefined}
           onEndReachedThreshold={0.5}
           ItemSeparatorComponent={() => <Spacing size={0} />}
+          refreshControl={
+            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+          }
         />
       </EmptyBoundary>
     </ScreenLayout>

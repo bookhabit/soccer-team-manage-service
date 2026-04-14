@@ -5,7 +5,8 @@
       "Bash(npx nest:*)",
       "Bash(npx prisma:*)",
       "Bash(npx tsc:*)",
-      "Bash(npx expo:*)"
+      "Bash(npx expo:*)",
+      "Bash(node:*)"
     ]
   }
 }

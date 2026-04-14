@@ -11,6 +11,7 @@ import {
   useDeletePost,
 } from '../../data/hooks/usePost';
 import { useMyClub } from '../../data/hooks/useClub';
+import { useMyProfile } from '@/src/features/auth/data/hooks/useAuth';
 import { PostDetailView } from '../view/PostDetailView';
 
 interface PostDetailContainerProps {
@@ -38,6 +39,7 @@ function PostDetailContent({ clubId, postId }: PostDetailContainerProps) {
   const { data: post } = usePostDetail(clubId, postId);
   const { data: commentsData } = useComments(clubId, postId);
   const { data: myClub } = useMyClub();
+  const { data: myProfile } = useMyProfile();
   const { mutate: createComment, isPending: isSubmittingComment } = useCreateComment(clubId, postId);
   const { mutate: deleteComment } = useDeleteComment(clubId, postId);
   const { mutate: deletePost, isPending: isDeletingPost } = useDeletePost(clubId);
@@ -45,7 +47,9 @@ function PostDetailContent({ clubId, postId }: PostDetailContainerProps) {
   const comments = commentsData.pages.flatMap((p) => p.data);
 
   const isCaptainOrVice = myClub?.myRole === 'CAPTAIN' || myClub?.myRole === 'VICE_CAPTAIN';
-  const canDeletePost = isCaptainOrVice;
+  const isAuthor = post.author.userId === myProfile?.id;
+  const canDeletePost = isCaptainOrVice || isAuthor;
+  const canEditPost = isAuthor;
 
   const handleSubmitComment = () => {
     const trimmed = commentInput.trim();
@@ -76,6 +80,10 @@ function PostDetailContent({ clubId, postId }: PostDetailContainerProps) {
     });
   };
 
+  const handleEditPost = () => {
+    router.push(`/club/${clubId}/board/write?postId=${postId}`);
+  };
+
   return (
     <PostDetailView
       post={post}
@@ -85,12 +93,14 @@ function PostDetailContent({ clubId, postId }: PostDetailContainerProps) {
       isDeleteDialogOpen={isDeleteDialogOpen}
       isDeletingPost={isDeletingPost}
       canDeletePost={canDeletePost}
+      canEditPost={canEditPost}
       onCommentChange={setCommentInput}
       onSubmitComment={handleSubmitComment}
       onDeleteComment={handleDeleteComment}
       onOpenDeleteDialog={() => setIsDeleteDialogOpen(true)}
       onCloseDeleteDialog={() => setIsDeleteDialogOpen(false)}
       onDeletePost={handleDeletePost}
+      onEditPost={handleEditPost}
     />
   );
 }

@@ -220,8 +220,8 @@ export function MatchProgressView({
           </>
         ) : null}
 
-        {/* 관리자 액션 */}
-        {isCaptainOrVice ? (
+        {/* 관리자 액션 — 종료된 경기에서는 포지션 배정 불가 */}
+        {isCaptainOrVice && status !== 'AFTER' ? (
           <>
             <View style={styles.divider} />
             <Button variant="secondary" onPress={onGoLineup}>포지션 배정</Button>

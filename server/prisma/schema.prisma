@@ -226,7 +226,7 @@ enum DissolveVoteStatus {
 // 아마추어 축구 클럽. 경기·게시판·멤버 관리의 중심 엔터티.
 model Club {
   id                  String            @id @default(cuid())
-  name                String            // 클럽명 (고유값은 아님 — 중복 가능)
+  name                String            @unique // 클럽명 (중복 불가)
   regionId            String            // FK → Region (소재지)
   level               ClubLevel         // 클럽 실력 수준
   maxMemberCount      Int               // 최대 인원 (2~50명)

@@ -5,6 +5,7 @@ import type { Href } from 'expo-router';
 import { Skeleton, ScreenLayout, spacing } from '@ui';
 import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useClubMembers } from '../../data/hooks/useClub';
+import { useMyProfile } from '@/src/features/auth/data/hooks/useAuth';
 import { MemberListView } from '../view/MemberListView';
 
 interface MemberListContainerProps {
@@ -33,6 +34,7 @@ function MemberListContent({ clubId }: MemberListContainerProps) {
   const [filter, setFilter] = useState('');
 
   const { data, fetchNextPage, hasNextPage } = useClubMembers(clubId);
+  const { data: myProfile } = useMyProfile();
 
   const allMembers = data.pages.flatMap((p) => p.data);
 
@@ -47,6 +49,7 @@ function MemberListContent({ clubId }: MemberListContainerProps) {
   return (
     <MemberListView
       members={filteredMembers}
+      myUserId={myProfile?.id}
       hasNextPage={hasNextPage ?? false}
       filter={filter}
       onFilterChange={setFilter}

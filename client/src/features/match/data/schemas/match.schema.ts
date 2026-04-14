@@ -5,7 +5,24 @@ import { z } from 'zod';
 export const MatchTypeSchema = z.enum(['LEAGUE', 'SELF']);
 export const AttendanceResponseSchema = z.enum(['ATTEND', 'ABSENT', 'UNDECIDED']);
 export const ClubLevelSchema = z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']);
+
+/** 선수 기본 포지션 카테고리 (프로필·랜덤 배정용) */
 export const PlayerPositionSchema = z.enum(['FW', 'MF', 'DF', 'GK']);
+
+/** 포메이션 슬롯 — 서버 FormationSlot enum과 동기화 */
+export const FormationSlotSchema = z.enum([
+  'GK',
+  // 수비
+  'LB', 'LCB', 'CB', 'RCB', 'RB', 'LWB', 'RWB',
+  // 수비형 미드필더
+  'LDM', 'CDM', 'RDM',
+  // 중앙 미드필더
+  'LM', 'LCM', 'CM', 'RCM', 'RM',
+  // 공격형 미드필더
+  'LAM', 'CAM', 'RAM',
+  // 공격
+  'LW', 'RW', 'LF', 'RF', 'LS', 'RS', 'ST',
+]);
 
 /** 경기 상태 — 클라이언트 computed (API 응답에 없음) */
 export const MatchStatusSchema = z.enum(['BEFORE', 'DURING', 'AFTER']);
@@ -13,6 +30,7 @@ export const MatchStatusSchema = z.enum(['BEFORE', 'DURING', 'AFTER']);
 export type MatchType = z.infer<typeof MatchTypeSchema>;
 export type AttendanceResponse = z.infer<typeof AttendanceResponseSchema>;
 export type MatchStatus = z.infer<typeof MatchStatusSchema>;
+export type FormationSlot = z.infer<typeof FormationSlotSchema>;
 
 // ─── Response Schemas ─────────────────────────────────────────────────────────
 
@@ -55,7 +73,7 @@ export const AttendanceSchema = z.object({
 
 export const AssignmentSchema = z.object({
   userId: z.string(),
-  position: PlayerPositionSchema,
+  position: FormationSlotSchema,
 });
 
 export const QuarterSchema = z.object({
@@ -146,8 +164,8 @@ export const UpdateMatchSchema = CreateMatchSchema.partial();
 
 export const GoalInputSchema = z.object({
   scorerUserId: z.string().min(1),
-  assistUserId: z.string().optional(),
-  quarterNumber: z.number().int().min(1).max(6).optional(),
+  assistUserId: z.string().min(1),
+  quarterNumber: z.number().int().min(1).max(6),
   team: z.string().optional(),
 });
 
@@ -159,7 +177,7 @@ export const RecordInputSchema = z.object({
 
 export const AssignmentInputSchema = z.object({
   userId: z.string().min(1),
-  position: PlayerPositionSchema,
+  position: FormationSlotSchema,
 });
 
 export const QuarterInputSchema = z.object({

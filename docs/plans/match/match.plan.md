@@ -120,8 +120,8 @@ match.schema.ts
   AttendanceSchema        — { userId, userName, avatarUrl, response }
   LineupSchema            — { quarters: QuarterSchema[] }
   QuarterSchema           — { quarterNumber, formation, team?, assignments: AssignmentSchema[] }
-  AssignmentSchema        — { userId, userName, position }
-  GoalSchema              — { scorerUserId, scorerName, assistUserId?, assistName?, quarterNumber? }
+  AssignmentSchema        — { userId, position: FormationSlotSchema } // 실제 구현: userName 없음, position은 FormationSlot enum (LB, ST 등 세분화)
+  GoalSchema              — { scorerUserId, assistUserId?, quarterNumber? } // 실제 구현: name 필드 없음
   MomResultSchema         — { winners: { userId, name, votes }[], totalVoters }
   MatchCommentSchema      — { id, authorId, authorName, avatarUrl, content, createdAt }
   MatchVideoSchema        — { id, youtubeUrl, registeredBy, createdAt }
@@ -131,7 +131,7 @@ match.schema.ts
   CreateMatchSchema (Form) — title, type, location, address?, startAt, endAt, voteDeadline
   UpdateMatchSchema (Form) — Partial<CreateMatchSchema>
   RecordInputSchema (Form) — homeScore, awayScore, goals: GoalInputSchema[]
-  GoalInputSchema          — scorerUserId, assistUserId?, quarterNumber?
+  GoalInputSchema          — scorerUserId, assistUserId(필수, 기획 변경 2026-04-14), quarterNumber(필수, 기획 변경 2026-04-14)
 ```
 
 ### Services (`data/services/match.service.ts`)

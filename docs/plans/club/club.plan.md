@@ -265,7 +265,7 @@ enum DissolveVoteStatus { IN_PROGRESS APPROVED REJECTED EXPIRED }
 
 model Club {
   id                String            @id @default(cuid())
-  name              String
+  name              String            @unique // 기획 변경: 중복 불가
   regionId          String
   level             ClubLevel
   maxMemberCount    Int               // 2–50
@@ -514,6 +514,7 @@ server/src/features/club/
 | `CLUB_009` | 주장 권한 이전 없이 탈퇴 불가 | 403 |
 | `CLUB_010` | 해체 투표 진행 중 — 중복 요청 불가 | 409 |
 | `CLUB_011` | 해체 투표 만료 | 410 |
+| `CLUB_NAME_DUPLICATED` | 클럽명 중복 (테스트 후 기획 변경) | 409 |
 | `POST_001` | 존재하지 않는 게시글 | 404 |
 | `POST_002` | 게시글 수정 권한 없음 | 403 |
 | `POST_003` | 게시글 삭제 권한 없음 | 403 |
@@ -538,23 +539,26 @@ server/src/features/club/
 
 ### 서버
 
-- [ ] Prisma 스키마 8개 모델 추가 후 마이그레이션
-- [ ] `User` 모델에 `ClubMember`, `ClubJoinRequest`, `Post`, `Comment` relation 추가
+- [x] Prisma 스키마 8개 모델 추가 후 마이그레이션
+- [x] `User` 모델에 `ClubMember`, `ClubJoinRequest`, `Post`, `Comment` relation 추가
 - [ ] `sanitize-html` 패키지 설치 + 전역 Sanitize Interceptor 구현
 - [ ] `helmet` 패키지 설치 + `main.ts`에 적용
 - [ ] `@nestjs/throttler` Rate Limit — `/clubs/join-by-code` IP당 10회/분
-- [ ] 클럽 도메인 에러 코드 (`CLUB_001`~`CLUB_011`, `POST_001`~`POST_003`, `COMMENT_001`) 등록
-- [ ] `ClubModule`, `PostModule`, `CommentModule` 생성 (nest g module/service/controller)
-- [ ] `createClub` — 트랜잭션: 클럽 생성 + CAPTAIN 멤버십 + 초대 코드 발급
-- [ ] `approveRequest` — 승인 + `currentMemberCount` 증가 + `maxMemberCount` 도달 시 `CLOSED` 자동 전환
-- [ ] `kickMember` — Prisma `$transaction`: Role 제거 → 멤버십 삭제 → BanRecord 생성
-- [ ] `leaveClub` — 부주장 역할 자동 해제 트랜잭션
+- [x] 클럽 도메인 에러 코드 등록 (이름 기반 코드로 구현: `CLUB_NOT_FOUND`, `CLUB_NO_PERMISSION` 등)
+- [x] `ClubModule` 생성 (단일 모듈로 통합 구현)
+- [x] `createClub` — 트랜잭션: 클럽 생성 + CAPTAIN 멤버십 + 초대 코드 발급
+  - [x] **기획 변경** (2026-04-14): Club name `@unique` 추가 → 중복 시 `CLUB_NAME_DUPLICATED` 409
+- [x] `approveRequest` — 승인 + `currentMemberCount` 증가 + `maxMemberCount` 도달 시 `CLOSED` 자동 전환
+  - [x] **버그 수정** (2026-04-14): `recalcMannerScoreAvg` Prisma aggregate 오류 → `$queryRaw`로 단일화
+- [x] `kickMember` — Prisma `$transaction`: Role 제거 → 멤버십 삭제 → BanRecord 생성
+- [x] `leaveClub` — 부주장 역할 자동 해제 트랜잭션
 - [ ] `dissolveClub` — 1인 즉시 해체 / 다수 투표 분기, 해체 확정 시 Pending 신청 자동 거절
 - [ ] `respondVote` — `expiresAt` 만료 체크(서버 시각 기준), 탈퇴·강퇴자 자동 동의 간주 로직
-- [ ] `getPostDetail` — Redis `INCR post:{id}:views` (Redis 장애 시 유실 허용, catch 처리)
+- [ ] `getPostDetail` — Redis `INCR post:{id}:views` (현재: DB 직접 증가 임시 구현)
 - [ ] `flushViewCounts` — Redis → DB flush 로직 (임계값 100 도달 시 또는 별도 트리거)
-- [ ] `mannerScoreAvg` 재계산 헬퍼 — 팀원 변동 및 개인 mannerScore 변경 시 호출
-- [ ] 모든 컨트롤러 `@ApiOperation`, `@ApiResponse` Swagger 문서화
+- [x] `mannerScoreAvg` 재계산 헬퍼 — `$queryRaw` JOIN으로 구현
+- [x] `getMemberDetail` — **신규 구현** (2026-04-14): `GET /clubs/:clubId/members/:userId`
+- [x] 모든 컨트롤러 `@ApiOperation`, `@ApiResponse` Swagger 문서화
 
 ### 클라이언트
 

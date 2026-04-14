@@ -57,9 +57,10 @@ export function ClubCreateContainer() {
   const onSubmit = handleSubmit((data) => {
     console.log('팀 생성 dto:', data);
     mutate(data, {
-      onSuccess: () => {
+      onSuccess: (newClub) => {
         toast.success('팀이 생성되었습니다!');
-        router.replace('/(app)/club' as any);
+        // 생성 직후 초대 코드 화면으로 이동 (기획 변경 2026-04-14)
+        router.replace(`/(app)/club/${newClub.id}/invite` as any);
       },
       onError: () => {
         toast.error('팀 생성에 실패했습니다.');

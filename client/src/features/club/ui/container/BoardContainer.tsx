@@ -28,8 +28,9 @@ function BoardSkeleton() {
 
 function BoardInner({ clubId }: BoardContainerProps) {
   const [activeTab, setActiveTab] = useState<PostType | undefined>(undefined);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const { data: myClub } = useMyClub();
-  const { data, fetchNextPage, hasNextPage } = usePosts(clubId, activeTab);
+  const { data, fetchNextPage, hasNextPage, refetch } = usePosts(clubId, activeTab);
 
   const posts = data.pages.flatMap((p) => p.data);
   const isMember = myClub?.id === clubId;
@@ -40,14 +41,22 @@ function BoardInner({ clubId }: BoardContainerProps) {
     startTransition(() => setActiveTab(tab));
   };
 
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setIsRefreshing(false);
+  };
+
   return (
     <BoardView
       posts={posts}
       activeTab={activeTab}
       hasNextPage={hasNextPage ?? false}
       canWrite={isMember}
+      isRefreshing={isRefreshing}
       onTabChange={handleTabChange}
       onLoadMore={() => fetchNextPage()}
+      onRefresh={handleRefresh}
       onSelectPost={(postId) =>
         router.push(`/(app)/club/${clubId}/board/${postId}` as Href)
       }

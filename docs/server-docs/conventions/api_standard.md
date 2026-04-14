@@ -36,29 +36,30 @@
 
 ## URL 네이밍 규칙
 
-| 방식 | 예시 |
-| --- | --- |
-| 리소스는 복수 명사 | `GET /teams`, `GET /matches` |
-| 계층 관계 표현 | `GET /teams/:teamId/members` |
+| 방식                      | 예시                                                 |
+| ------------------------- | ---------------------------------------------------- |
+| 리소스는 복수 명사        | `GET /teams`, `GET /matches`                         |
+| 계층 관계 표현            | `GET /teams/:teamId/members`                         |
 | 동작은 HTTP 메서드로 표현 | `POST /matches` (생성), `DELETE /matches/:id` (삭제) |
-| kebab-case 사용 | `GET /match-records` |
+| kebab-case 사용           | `GET /match-records`                                 |
 
 ---
 
 ## HTTP 메서드 규칙
 
-| 메서드 | 용도 | 예시 |
-| --- | --- | --- |
-| `GET` | 조회 | `GET /teams/:id` |
-| `POST` | 생성 | `POST /teams` |
-| `PATCH` | 부분 수정 | `PATCH /teams/:id` |
-| `DELETE` | 삭제 | `DELETE /teams/:id/members/:userId` |
+| 메서드   | 용도      | 예시                                |
+| -------- | --------- | ----------------------------------- |
+| `GET`    | 조회      | `GET /teams/:id`                    |
+| `POST`   | 생성      | `POST /teams`                       |
+| `PATCH`  | 부분 수정 | `PATCH /teams/:id`                  |
+| `DELETE` | 삭제      | `DELETE /teams/:id/members/:userId` |
 
 ---
 
 ## Swagger 작성 표준
 
 모든 엔드포인트에는 아래 데코레이터를 필수로 작성합니다.
+서버 기능 구현(코드 작성) 후 항상 Swagger 작성 필수
 
 - `@ApiOperation`: 해당 엔드포인트가 무엇을 하는지 한 줄 요약
 - `@ApiProperty`: DTO 필드별 예시 값(`example`)과 설명(`description`) 필수 작성

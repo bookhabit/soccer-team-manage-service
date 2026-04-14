@@ -141,6 +141,46 @@ export class ClubMemberPageResponseDto {
   nextCursor!: string | null;
 }
 
+export class MemberDetailStatsDto extends MemberStatsDto {
+  @ApiPropertyOptional({ example: 80, nullable: true })
+  speed!: number | null;
+
+  @ApiPropertyOptional({ example: 75, nullable: true })
+  shoot!: number | null;
+
+  @ApiPropertyOptional({ example: 85, nullable: true })
+  pass!: number | null;
+
+  @ApiPropertyOptional({ example: 70, nullable: true })
+  dribble!: number | null;
+
+  @ApiPropertyOptional({ example: 78, nullable: true })
+  defense!: number | null;
+
+  @ApiPropertyOptional({ example: 72, nullable: true })
+  physical!: number | null;
+
+  @ApiProperty({ example: true })
+  isStatsPublic!: boolean;
+}
+
+export class ClubMemberDetailResponseDto extends ClubMemberResponseDto {
+  @ApiPropertyOptional({ example: 'RIGHT', nullable: true })
+  foot!: string | null;
+
+  @ApiPropertyOptional({ example: 'AMATEUR', nullable: true })
+  level!: string | null;
+
+  @ApiPropertyOptional({ example: null, nullable: true })
+  phone!: string | null;
+
+  @ApiProperty({ example: false })
+  isPhonePublic!: boolean;
+
+  @ApiProperty({ type: MemberDetailStatsDto })
+  declare stats: MemberDetailStatsDto;
+}
+
 // ─── 가입 신청 ────────────────────────────────────────────────────────────────
 
 export class JoinRequestResponseDto {

@@ -13,7 +13,6 @@ import type {
   ClubMember,
   ClubMemberPage,
   MemberDetail,
-  JoinRequest,
   JoinRequestPage,
   InviteCode,
   DissolveVote,
@@ -92,7 +91,7 @@ export async function updateMemberStats(
 }
 
 export async function leaveClub(clubId: string, reason: LeaveReason): Promise<void> {
-  await http.delete(`/clubs/${clubId}/leave`);
+  await http.delete(`/clubs/${clubId}/leave`, { reason });
 }
 
 // ─── 가입 신청 ────────────────────────────────────────────────────────────────
@@ -100,13 +99,8 @@ export async function leaveClub(clubId: string, reason: LeaveReason): Promise<vo
 export async function createJoinRequest(
   clubId: string,
   body: JoinRequestInput,
-): Promise<JoinRequest> {
-  return http.post<JoinRequest>(
-    `/clubs/${clubId}/join-requests`,
-    body,
-    // 응답이 단순 { id, status } 형태이므로 partial 파싱
-    JoinRequestPageSchema.shape.data.element,
-  );
+): Promise<void> {
+  await http.post(`/clubs/${clubId}/join-requests`, body);
 }
 
 export async function cancelJoinRequest(clubId: string): Promise<void> {

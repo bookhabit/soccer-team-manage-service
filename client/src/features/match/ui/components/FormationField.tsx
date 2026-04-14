@@ -1,7 +1,9 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextBox, colors, spacing } from '@ui';
-type Assignment = { userId: string; position: 'FW' | 'MF' | 'DF' | 'GK' };
+import type { FormationSlot } from '../../data/schemas/match.schema';
+
+type Assignment = { userId: string; position: FormationSlot };
 
 interface FormationFieldProps {
   formation: string;
@@ -10,11 +12,14 @@ interface FormationFieldProps {
   team?: string | null;
 }
 
-const POSITION_ROW: Record<string, number> = {
+/** FormationSlot → 시각적 row (0=GK, 1=수비, 2=미드, 3=공격) */
+const POSITION_ROW: Record<FormationSlot, number> = {
   GK: 0,
-  DF: 1,
-  MF: 2,
-  FW: 3,
+  LB: 1, LCB: 1, CB: 1, RCB: 1, RB: 1, LWB: 1, RWB: 1,
+  LDM: 2, CDM: 2, RDM: 2,
+  LM: 2, LCM: 2, CM: 2, RCM: 2, RM: 2,
+  LAM: 2, CAM: 2, RAM: 2,
+  LW: 3, RW: 3, LF: 3, RF: 3, LS: 3, RS: 3, ST: 3,
 };
 
 export function FormationField({

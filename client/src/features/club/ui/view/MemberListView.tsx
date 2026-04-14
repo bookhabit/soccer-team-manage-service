@@ -6,6 +6,7 @@ import type { ClubMember } from '../../data/schemas/club.schema';
 
 interface MemberListViewProps {
   members: ClubMember[];
+  myUserId?: string;
   hasNextPage: boolean;
   filter: string;
   onFilterChange: (v: string) => void;
@@ -19,6 +20,7 @@ interface MemberListViewProps {
  */
 export function MemberListView({
   members,
+  myUserId,
   hasNextPage,
   filter,
   onFilterChange,
@@ -48,7 +50,11 @@ export function MemberListView({
           data={members}
           keyExtractor={(item) => item.userId}
           renderItem={({ item }) => (
-            <MemberCard member={item} onPress={() => onSelectMember(item.userId)} />
+            <MemberCard
+              member={item}
+              isMe={item.userId === myUserId}
+              onPress={() => onSelectMember(item.userId)}
+            />
           )}
           onEndReached={hasNextPage ? onLoadMore : undefined}
           onEndReachedThreshold={0.5}

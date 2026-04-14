@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query';
 import {
   getPosts,
   getPostDetail,
@@ -39,6 +39,19 @@ export function usePostDetail(clubId: string, postId: string) {
   });
 }
 
+/** non-suspense 버전 — 수정 폼 초기화용 */
+export function usePostDetailQuery(
+  clubId: string,
+  postId: string,
+  options?: { enabled?: boolean },
+) {
+  return useQuery({
+    queryKey: clubQueryKeys.post(clubId, postId),
+    queryFn: () => getPostDetail(clubId, postId),
+    enabled: options?.enabled ?? true,
+  });
+}
+
 // ─── 게시글 작성·수정·삭제 ────────────────────────────────────────────────────
 
 export function useCreatePost(clubId: string) {
@@ -47,7 +60,8 @@ export function useCreatePost(clubId: string) {
   return useMutation({
     mutationFn: (body: CreatePostInput) => createPost(clubId, body),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clubQueryKeys.posts(clubId) });
+      // ['club', clubId, 'posts'] prefix matches all tabs (전체·공지·일반·문의)
+      queryClient.invalidateQueries({ queryKey: ['club', clubId, 'posts'] });
     },
   });
 }
@@ -70,7 +84,7 @@ export function useDeletePost(clubId: string) {
   return useMutation({
     mutationFn: (postId: string) => deletePost(clubId, postId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: clubQueryKeys.posts(clubId) });
+      queryClient.invalidateQueries({ queryKey: ['club', clubId, 'posts'] });
     },
   });
 }

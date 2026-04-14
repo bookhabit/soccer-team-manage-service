@@ -19,12 +19,14 @@ interface PostDetailViewProps {
   isDeleteDialogOpen: boolean;
   isDeletingPost: boolean;
   canDeletePost: boolean;
+  canEditPost: boolean;
   onCommentChange: (v: string) => void;
   onSubmitComment: () => void;
   onDeleteComment: (commentId: string) => void;
   onOpenDeleteDialog: () => void;
   onCloseDeleteDialog: () => void;
   onDeletePost: () => void;
+  onEditPost: () => void;
 }
 
 /**
@@ -38,12 +40,14 @@ export function PostDetailView({
   isDeleteDialogOpen,
   isDeletingPost,
   canDeletePost,
+  canEditPost,
   onCommentChange,
   onSubmitComment,
   onDeleteComment,
   onOpenDeleteDialog,
   onCloseDeleteDialog,
   onDeletePost,
+  onEditPost,
 }: PostDetailViewProps) {
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
@@ -105,13 +109,22 @@ export function PostDetailView({
             {post.content}
           </TextBox>
 
-          {canDeletePost ? (
-            <View style={styles.deleteRow}>
-              <TouchableOpacity onPress={onOpenDeleteDialog}>
-                <TextBox variant="caption" color={colors.error}>
-                  게시글 삭제
-                </TextBox>
-              </TouchableOpacity>
+          {(canEditPost || canDeletePost) ? (
+            <View style={styles.actionRow}>
+              {canEditPost ? (
+                <TouchableOpacity onPress={onEditPost}>
+                  <TextBox variant="caption" color={colors.grey500}>
+                    수정
+                  </TextBox>
+                </TouchableOpacity>
+              ) : null}
+              {canDeletePost ? (
+                <TouchableOpacity onPress={onOpenDeleteDialog}>
+                  <TextBox variant="caption" color={colors.error}>
+                    삭제
+                  </TextBox>
+                </TouchableOpacity>
+              ) : null}
             </View>
           ) : null}
 
@@ -176,9 +189,11 @@ const styles = StyleSheet.create({
   body: {
     lineHeight: 24,
   },
-  deleteRow: {
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: spacing[4],
     marginTop: spacing[3],
-    alignItems: 'flex-end',
   },
   commentInputBar: {
     flexDirection: 'row',

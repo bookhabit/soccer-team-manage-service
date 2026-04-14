@@ -48,6 +48,7 @@ export const ErrorCode = {
 
   // ─── Club ──────────────────────────────────────────────────────────────────
   CLUB_NOT_FOUND: 'CLUB_NOT_FOUND',
+  CLUB_NAME_DUPLICATED: 'CLUB_NAME_DUPLICATED',
   CLUB_NO_PERMISSION: 'CLUB_NO_PERMISSION',
   CLUB_ALREADY_MEMBER: 'CLUB_ALREADY_MEMBER',
   CLUB_FULL: 'CLUB_FULL',
