@@ -124,6 +124,9 @@ model User {
   years             Int?            // 축구 경력 (년수)
   level             PlayerLevel?    // 실력 수준
 
+  // ── 연락처 ──
+  phone             String?         // 문의 연락처 (매칭 등록·신청 시 기본값)
+
   // ── 선호 지역 ──
   preferredRegionId String?         // FK → Region
 
@@ -146,6 +149,8 @@ model User {
   matchAttendances  MatchAttendance[]   // 출석 투표 응답
   matchParticipants MatchParticipant[]  // 실제 경기 참가 기록
   matchComments     MatchComment[]      // 경기 코멘트
+  matchPosts        MatchPost[]         // 등록한 매칭 게시글
+  matchApplications MatchApplication[]  // 신청한 매칭
 
   @@map("users")
 }
@@ -172,8 +177,9 @@ model Region {
   code    String @unique // 행정구역 코드 (예: 11680)
 
   // ── Relations ──
-  users   User[] // 이 지역을 선호 지역으로 설정한 유저들
-  clubs   Club[] // 이 지역에 소속된 클럽들
+  users      User[]      // 이 지역을 선호 지역으로 설정한 유저들
+  clubs      Club[]      // 이 지역에 소속된 클럽들
+  matchPosts MatchPost[] // 이 지역의 매칭 게시글
 
   @@map("regions")
 }
@@ -249,6 +255,8 @@ model Club {
   dissolveVotes       ClubDissolveVote[] // 해산 투표 이력
   posts               Post[]            // 클럽 게시판 글
   matches             Match[]           // 경기 목록
+  matchPosts          MatchPost[]       // 등록한 매칭 게시글
+  matchApplications   MatchApplication[] // 신청한 매칭
 
   @@map("clubs")
 }
@@ -436,6 +444,9 @@ model Match {
   recordedBy        String?     // 기록 입력한 운영진 userId (FK 없음)
   recordedAt        DateTime?   // 기록 입력 일시
 
+  // ── 매칭 연결 (매칭 수락으로 생성된 경우) ──
+  matchPostId       String?     // FK → MatchPost (매칭 수락으로 자동 생성된 경우)
+
   // ── 상태 ──
   isDeleted         Boolean     @default(false) // 소프트 삭제
   createdAt         DateTime    @default(now())
@@ -443,6 +454,7 @@ model Match {
 
   // ── Relations ──
   club              Club                 @relation(fields: [clubId], references: [id])
+  matchPost         MatchPost?           @relation(fields: [matchPostId], references: [id])
   attendances       MatchAttendance[]    // 출석 투표 응답
   participants      MatchParticipant[]   // 실제 경기 참가자 (기록 입력 시 확정)
   quarters          MatchQuarter[]       // 쿼터별 포지션 배정
@@ -607,4 +619,94 @@ model MatchRecordHistory {
   match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("match_record_histories")
+}
+
+// ─── MatchPost (매칭 게시글) ──────────────────────────────────────────────────
+
+enum MatchPostStatus {
+  OPEN    // 모집 중
+  MATCHED // 매칭 완료
+}
+
+enum MatchApplicationStatus {
+  PENDING  // 대기 중
+  ACCEPTED // 수락됨
+  REJECTED // 거절됨
+}
+
+enum MatchGender {
+  MALE   // 남성
+  FEMALE // 여성
+  MIXED  // 혼성
+}
+
+// 매칭 모집 게시글. 클럽 관리자가 등록하고 상대팀이 신청하는 방식.
+model MatchPost {
+  id           String          @id @default(cuid())
+  clubId       String          // FK → Club (등록팀)
+  createdBy    String          // FK → User (등록자 — 관리자)
+  regionId     String          // FK → Region
+
+  // ── 경기 정보 ──
+  matchDate    DateTime        // 경기 날짜
+  startTime    String          // 시작 시간 "HH:mm"
+  endTime      String          // 종료 시간 "HH:mm"
+  location     String          // 구장 이름
+  address      String?         // 구장 주소
+
+  // ── 모집 조건 ──
+  playerCount  Int             // 인원 (5~11)
+  gender       MatchGender     // 성별 조건
+  level        ClubLevel       // 실력 수준
+  fee          Int             @default(0)  // 참가비 원(KRW), 0=무료
+
+  // ── 연락처 ──
+  contactName  String          // 담당자 이름
+  contactPhone String          // 연락처
+
+  // ── 상태 ──
+  status       MatchPostStatus @default(OPEN)
+  isDeleted    Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  // ── Relations ──
+  club         Club            @relation(fields: [clubId], references: [id])
+  creator      User            @relation(fields: [createdBy], references: [id])
+  region       Region          @relation(fields: [regionId], references: [id])
+  applications MatchApplication[]
+  matches      Match[]         // 수락으로 자동 생성된 경기들
+
+  @@index([matchDate])
+  @@index([regionId])
+  @@index([level])
+  @@index([gender])
+  @@index([fee])
+  @@index([clubId])
+  @@map("match_posts")
+}
+
+// 매칭 신청. 상대팀 관리자가 게시글에 신청.
+model MatchApplication {
+  id              String                 @id @default(cuid())
+  postId          String                 // FK → MatchPost
+  applicantClubId String                 // FK → Club (신청팀)
+  applicantUserId String                 // FK → User (신청자)
+
+  // ── 신청 내용 ──
+  message         String?                // 신청 메시지 (max 100자)
+  contactName     String                 // 담당자 이름 (기본값: user.name)
+  contactPhone    String                 // 연락처 (기본값: user.phone)
+
+  status          MatchApplicationStatus @default(PENDING)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  // ── Relations ──
+  post            MatchPost              @relation(fields: [postId], references: [id], onDelete: Cascade)
+  applicantClub   Club                   @relation(fields: [applicantClubId], references: [id])
+  applicantUser   User                   @relation(fields: [applicantUserId], references: [id])
+
+  @@unique([postId, applicantClubId])
+  @@map("match_applications")
 }

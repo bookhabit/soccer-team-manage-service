@@ -68,6 +68,22 @@ export const ErrorCode = {
 
   // ─── Comment ───────────────────────────────────────────────────────────────
   COMMENT_NO_DELETE_PERMISSION: 'COMMENT_NO_DELETE_PERMISSION',
+
+  // ─── MatchPost ─────────────────────────────────────────────────────────────
+  MATCH_POST_001: 'MATCH_POST_001', // 존재하지 않는 매칭 게시글 404
+  MATCH_POST_002: 'MATCH_POST_002', // 게시글 수정/삭제 권한 없음 (등록자가 아님) 403
+  MATCH_POST_003: 'MATCH_POST_003', // 이미 매칭 완료된 게시글 (MATCHED) 409
+  MATCH_POST_004: 'MATCH_POST_004', // 만료된 게시글 (matchDate < now) 410
+  MATCH_POST_005: 'MATCH_POST_005', // 본인 팀 게시글에는 신청 불가 403
+  MATCH_POST_006: 'MATCH_POST_006', // 이미 신청한 게시글 409
+  MATCH_POST_007: 'MATCH_POST_007', // 신청 목록 조회 권한 없음 (등록자가 아님) 403
+  MATCH_POST_008: 'MATCH_POST_008', // 연락처 조회 권한 없음 (관계자가 아님) 403
+  MATCH_POST_009: 'MATCH_POST_009', // 연락처는 수락 후에만 조회 가능 403
+
+  // ─── MatchApplication ──────────────────────────────────────────────────────
+  MATCH_APPLICATION_001: 'MATCH_APPLICATION_001', // 존재하지 않는 신청 404
+  MATCH_APPLICATION_002: 'MATCH_APPLICATION_002', // 이미 처리된 신청 (ACCEPTED/REJECTED) 409
+  MATCH_APPLICATION_003: 'MATCH_APPLICATION_003', // 신청자 연락처(phone) 미설정 400
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

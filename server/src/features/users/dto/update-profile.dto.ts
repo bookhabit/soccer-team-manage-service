@@ -29,4 +29,10 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   preferredRegionId?: string;
+
+  @ApiPropertyOptional({ example: '010-1234-5678' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  phone?: string;
 }

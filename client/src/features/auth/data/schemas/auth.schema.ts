@@ -56,6 +56,7 @@ export const userProfileSchema = z.object({
   years: z.number().int().nullable(),
   level: z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']).nullable(),
   preferredRegionId: z.string().nullable(),
+  phone: z.string().nullable(),
   avatarUrl: z.string().nullable(),
   mannerScore: z.number(),
   isOnboarded: z.boolean(),

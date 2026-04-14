@@ -28,6 +28,7 @@ const PROFILE_SELECT = {
   years: true,
   level: true,
   preferredRegionId: true,
+  phone: true,
   avatarUrl: true,
   mannerScore: true,
   isOnboarded: true,

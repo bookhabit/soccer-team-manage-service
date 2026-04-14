@@ -49,6 +49,9 @@ export class UserProfileResponseDto {
   @ApiPropertyOptional({ example: 'clx1234abcd', nullable: true })
   preferredRegionId!: string | null;
 
+  @ApiPropertyOptional({ example: '010-1234-5678', nullable: true })
+  phone!: string | null;
+
   @ApiPropertyOptional({ example: 'https://cdn.example.com/avatar.png', nullable: true })
   avatarUrl!: string | null;
 

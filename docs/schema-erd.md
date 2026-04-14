@@ -144,6 +144,29 @@ ABSENT ABSENT
 UNDECIDED UNDECIDED
         }
     
+
+
+        MatchPostStatus {
+            OPEN OPEN
+MATCHED MATCHED
+        }
+    
+
+
+        MatchApplicationStatus {
+            PENDING PENDING
+ACCEPTED ACCEPTED
+REJECTED REJECTED
+        }
+    
+
+
+        MatchGender {
+            MALE MALE
+FEMALE FEMALE
+MIXED MIXED
+        }
+    
   "users" {
     String id "🗝️"
     String email "❓"
@@ -158,6 +181,7 @@ UNDECIDED UNDECIDED
     PlayerFoot foot "❓"
     Int years "❓"
     PlayerLevel level "❓"
+    String phone "❓"
     Float mannerScore 
     Boolean isOnboarded 
     UserStatus status 
@@ -379,6 +403,37 @@ UNDECIDED UNDECIDED
     Json afterData 
     }
   
+
+  "match_posts" {
+    String id "🗝️"
+    DateTime matchDate 
+    String startTime 
+    String endTime 
+    String location 
+    String address "❓"
+    Int playerCount 
+    MatchGender gender 
+    ClubLevel level 
+    Int fee 
+    String contactName 
+    String contactPhone 
+    MatchPostStatus status 
+    Boolean isDeleted 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "match_applications" {
+    String id "🗝️"
+    String message "❓"
+    String contactName 
+    String contactPhone 
+    MatchApplicationStatus status 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
     "users" |o--|| "AuthProvider" : "enum:provider"
     "users" |o--|o "Gender" : "enum:gender"
     "users" |o--|o "PlayerPosition" : "enum:position"
@@ -409,6 +464,7 @@ UNDECIDED UNDECIDED
     "matches" |o--|| "MatchType" : "enum:type"
     "matches" |o--|o "ClubLevel" : "enum:opponentLevel"
     "matches" }o--|| clubs : "club"
+    "matches" }o--|o match_posts : "matchPost"
     "match_attendances" |o--|| "AttendanceResponse" : "enum:response"
     "match_attendances" }o--|| matches : "match"
     "match_attendances" }o--|| users : "user"
@@ -424,4 +480,14 @@ UNDECIDED UNDECIDED
     "match_videos" }o--|| matches : "match"
     "opponent_ratings" |o--|| matches : "match"
     "match_record_histories" }o--|| matches : "match"
+    "match_posts" |o--|| "MatchGender" : "enum:gender"
+    "match_posts" |o--|| "ClubLevel" : "enum:level"
+    "match_posts" |o--|| "MatchPostStatus" : "enum:status"
+    "match_posts" }o--|| clubs : "club"
+    "match_posts" }o--|| users : "creator"
+    "match_posts" }o--|| regions : "region"
+    "match_applications" |o--|| "MatchApplicationStatus" : "enum:status"
+    "match_applications" }o--|| match_posts : "post"
+    "match_applications" }o--|| clubs : "applicantClub"
+    "match_applications" }o--|| users : "applicantUser"
 ```

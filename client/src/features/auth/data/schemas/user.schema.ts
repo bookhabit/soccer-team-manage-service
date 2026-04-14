@@ -8,6 +8,7 @@ export const updateProfileSchema = z.object({
   foot: z.enum(['LEFT', 'RIGHT', 'BOTH']).optional(),
   level: z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']).optional(),
   preferredRegionId: z.string().optional(),
+  phone: z.string().max(20).optional(),
 });
 
 export const withdrawSchema = z.object({
