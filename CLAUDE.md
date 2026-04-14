@@ -170,7 +170,8 @@ ToastProvider, useToast
 7. /performance {feature} → 성능 최적화
 8. /security {feature} → 보안 점검
 9. /seed {feature} -> 테스트 데이터 생성
-10. /verify → 개발자가 직접 case별로 기능 및 예외 검증
+10. 수동 검증 → 개발자가 직접 case별로 기능 및 예외 검증한 test_report 작성
+11. /verify → test_report 토대로 기능 수정 후 test_report_log 작성
 ```
 
 **한 번에 전체 실행**: `/feature {feature}`
