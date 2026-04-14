@@ -187,6 +187,13 @@ import { BottomCTASingle, BottomCTADouble, FixedBottomCTA } from '@mono/ui';
 <FixedBottomCTA safeArea>
   <Button fullWidth>직접 구성</Button>
 </FixedBottomCTA>
+
+// 하단 레이아웃과 함께 사용
+<ScreenLayout
+  bottomSlot={
+    <BottomCTASingle label="가입 신청" onClick={onSubmit} loading={isPending} safeArea />
+  }
+>
 ```
 
 ### Box / Grid
