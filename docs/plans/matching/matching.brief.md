@@ -64,14 +64,21 @@
 
 > 권한: 클럽 관리자(주장·부주장)만 등록 가능
 
+**전화번호 사전 확인 (진입 가드)**
+- 등록 버튼 클릭 시 `user.phone` 설정 여부 확인
+- 미설정 시 AlertDialog: "연락처를 먼저 설정해주세요" → [나중에] [프로필 설정 가기]
+- 설정 완료 후 등록 폼으로 진입
+
+**등록 폼 필드**
 - 팀 정보 (본인 소속팀 자동 채움)
-- 날짜 / 요일 / 시간
+- 날짜 / 요일 / 시작 시간 / 종료 시간
 - 인원 선택 (5 / 6 / 7 / 8 / 9 / 10 / 11명 중 선택)
 - 성별 선택 (혼성 / 남성 / 여성)
 - 구장 입력 (이름 + 주소)
 - 실력 레벨 선택
 - 참가비 (무료 / 금액 직접 입력, 원 단위 정수)
-- 문의용 연락처 (기본값: 등록자 휴대폰)
+- 문의 담당자 이름 (기본값: 등록자 이름, 수정 가능)
+- 문의 연락처 (기본값: `user.phone`, 수정 가능)
 
 **수정/삭제**
 
@@ -109,9 +116,13 @@
 ### 신청 (복수 신청 허용)
 
 1. 상대팀 관리자가 매칭 상세 페이지에서 **"매칭 신청"** 버튼 클릭
-2. 신청 메시지 입력 (선택, 최대 100자)
-3. 한 게시글에 여러 팀이 신청 가능. 동일 팀의 중복 신청 불가 (서버 unique 제약)
-4. 서버에서 게시글 등록팀 관리자에게 알림 (콘솔 로그 + TODO)
+2. **전화번호 사전 확인**: `user.phone` 미설정 시 AlertDialog → 프로필 설정 유도
+3. BottomSheet에서 입력:
+   - 신청 메시지 (선택, 최대 100자)
+   - 담당자 이름 (기본값: `user.name`, 수정 가능)
+   - 연락처 (기본값: `user.phone`, 수정 가능)
+4. 한 게시글에 여러 팀이 신청 가능. 동일 팀의 중복 신청 불가 (서버 unique 제약)
+5. 서버에서 게시글 등록팀 관리자에게 알림 (콘솔 로그 + TODO)
    - 신청팀 이름 / 레벨 / 신청 메시지 포함
 
 **신청 불가 조건 (서버에서 검증):**
@@ -137,7 +148,9 @@
 ### 연락처 노출 정책
 
 - 수락 전까지 양측 휴대폰 번호 미노출
-- 수락 이후 **인앱 화면에서 직접 표시** (이름 + 휴대폰 번호)
+- 수락 이후 **인앱 화면에서 직접 표시**:
+  - 등록팀 관리자 → 신청팀 연락처 (`MatchApplication.contactName` + `contactPhone`)
+  - 신청팀 관리자 → 등록팀 연락처 (`MatchPost.contactName` + `contactPhone`)
 - 연락처 조회 API에 Rate Limiting 적용 (IP당 일일 횟수 제한)
 - 별도 인앱 채팅 없음 — 외부 앱(전화·문자)으로 연결
 
@@ -171,13 +184,13 @@
 
 ```
 id, clubId, createdBy, regionId,
-matchDate (DateTime), startTime (String),
+matchDate (DateTime), startTime (String), endTime (String),   ← HH:mm 형식
 location, address,
 playerCount (Int — 5/6/7/8/9/10/11),
 gender (MALE | FEMALE | MIXED),
 level (ClubLevel),
 fee (Int, 0 = 무료),
-contactName, contactPhone,
+contactName, contactPhone,   ← 등록 시 직접 입력 (기본값: user.name, user.phone)
 status (OPEN | MATCHED),   ← EXPIRED는 동적 계산
 isDeleted (Boolean),
 createdAt, updatedAt
@@ -198,6 +211,8 @@ createdAt, updatedAt
 ```
 id, postId, applicantClubId, applicantUserId,
 message (String?, max 100자),
+contactName (String),    ← 신청 시 입력 (기본값: user.name)
+contactPhone (String),   ← 신청 시 입력 (기본값: user.phone, 수정 가능)
 status (PENDING | ACCEPTED | REJECTED),
 createdAt, updatedAt
 unique(postId, applicantClubId)
@@ -211,10 +226,12 @@ MatchApplicationStatus: PENDING, ACCEPTED, REJECTED
 MatchGender: MALE, FEMALE, MIXED
 ```
 
-### 기존 모델 연동
+### 기존 모델 변경
 
+- `User`: `phone String?` 필드 추가 — 프로필 설정에서 수정 가능 (온보딩 제외)
 - `Match` (경기 기록): 매칭 수락 시 양 팀에 `Match` 자동 생성
   - `matchPostId` 참조 필드 추가 권장 (연결 추적용)
+  - `startAt` = `matchDate + startTime`, `endAt` = `matchDate + endTime`
 
 ---
 
@@ -228,8 +245,14 @@ MatchGender: MALE, FEMALE, MIXED
 | 복수 신청 | 허용. 팀당 1회 제한. 수락 시 나머지 자동 거절 (트랜잭션) |
 | 인원 수 | 5~11명 중 선택 |
 | 참가비 단위 | 원(KRW) 정수, 0 = 무료 |
+| 경기 시간 | 시작 시간(`startTime`) + 종료 시간(`endTime`) 별도 입력 (HH:mm) |
 | 게시글 수정/삭제 | 등록자(관리자)만 가능, 매칭 완료 후 수정 불가 |
 | 매칭 성사 | 수락 버튼 플로우 → 양측 연락처 인앱 공유 + 양 팀 Match 자동 생성 |
+| Match 자동 생성 | `startAt = matchDate+startTime`, `endAt = matchDate+endTime` |
+| 연락처 저장 위치 | 등록팀: `MatchPost.contactName/Phone` / 신청팀: `MatchApplication.contactName/Phone` |
+| 연락처 기본값 | `user.name` / `user.phone` (수정 가능) |
+| 전화번호 가드 | 등록·신청 진입 시 `user.phone` 미설정이면 프로필 설정 유도 AlertDialog |
+| User.phone | 프로필 설정에서 수정 가능 (온보딩 불포함) |
 | 알림 | 콘솔 로그 + TODO (알림 기능 구축 시점에 구현) |
 | Rate Limiting | 연락처 조회 API에 IP당 일일 횟수 제한 |
 | 지역 검색 | Region 모델 기반 필터 (전체 조회도 병존) |

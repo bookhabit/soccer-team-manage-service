@@ -96,7 +96,7 @@ updateMatchPostSchema      // 수정 폼 입력값
 
 // 주요 필드
 id, clubId, clubName, clubLogoUrl, clubLevel,
-matchDate, startTime, location, address, regionId,
+matchDate, startTime, endTime, location, address, regionId,
 playerCount, gender, level, fee,
 status,               // 'OPEN' | 'MATCHED' (EXPIRED는 isExpired 파생)
 isExpired,            // matchDate < now() 클라이언트 파생
@@ -113,7 +113,7 @@ createMatchApplicationSchema  // 신청 폼 { message?: string }
 
 // 주요 필드
 id, postId, applicantClubId, applicantClubName, applicantClubLevel,
-applicantClubLogoUrl, message, status, createdAt
+applicantClubLogoUrl, message, contactName, contactPhone, status, createdAt
 ```
 
 ### Services
@@ -198,7 +198,9 @@ matchQueryKeys = {
 - `useApplyMatchPost()` 연결
 
 **`container/MatchCreateContainer.tsx`** / **`MatchEditContainer.tsx`**
+- 진입 시 `user.phone` 확인 → 미설정이면 AlertDialog 표시 후 프로필 설정 이동
 - `react-hook-form` + `createMatchPostSchema` Zod 연결
+- `contactName` 기본값 = `user.name`, `contactPhone` 기본값 = `user.phone`
 - `useCreateMatchPost()` / `useUpdateMatchPost()` 연결
 
 **`container/ApplicationListContainer.tsx`**
@@ -225,7 +227,7 @@ matchQueryKeys = {
 | `components/MatchFilterBar.tsx` | 필터 바 (날짜/지역/레벨/성별/참가비) |
 | `components/MatchStatusBadge.tsx` | 상태 뱃지 (모집중/완료/만료) |
 | `components/ContactCard.tsx` | 연락처 표시 카드 (수락 후 노출) |
-| `components/ApplyBottomSheet.tsx` | 신청 메시지 입력 BottomSheet |
+| `components/ApplyBottomSheet.tsx` | 신청 BottomSheet — 메시지(선택) + 담당자 이름 + 연락처 입력 |
 
 **빈 상태 컴포넌트** (`view/` 내 공존)
 - `MatchListEmptyView` — 조건에 맞는 게시글이 없어요
@@ -264,14 +266,15 @@ model MatchPost {
   regionId     String
   matchDate    DateTime
   startTime    String          // "HH:mm" 형식
+  endTime      String          // "HH:mm" 형식 — Match.endAt 계산에 사용
   location     String
   address      String?
   playerCount  Int             // 5~11
   gender       MatchGender
   level        ClubLevel
   fee          Int             @default(0)  // 원(KRW), 0=무료
-  contactName  String
-  contactPhone String
+  contactName  String          // 기본값: 등록자 user.name
+  contactPhone String          // 기본값: 등록자 user.phone
   status       MatchPostStatus @default(OPEN)
   isDeleted    Boolean         @default(false)
   createdAt    DateTime        @default(now())
@@ -296,6 +299,8 @@ model MatchApplication {
   applicantClubId  String
   applicantUserId  String
   message          String?                // max 100자
+  contactName      String                 // 기본값: 신청자 user.name
+  contactPhone     String                 // 기본값: 신청자 user.phone
   status           MatchApplicationStatus @default(PENDING)
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
@@ -313,6 +318,11 @@ model MatchApplication {
 matchPostId  String?   // 매칭 수락으로 생성된 경우 연결
 ```
 
+**기존 User 모델에 추가:**
+```prisma
+phone        String?   // 문의 연락처 — 프로필 설정에서 수정 가능
+```
+
 **Region 모델에 relation 추가:**
 ```prisma
 matchPosts   MatchPost[]
@@ -324,6 +334,7 @@ matchPosts   MatchPost[]
 ```ts
 @IsDateString() matchDate
 @IsString() @Matches(/^\d{2}:\d{2}$/) startTime
+@IsString() @Matches(/^\d{2}:\d{2}$/) endTime
 @IsString() location
 @IsOptional() @IsString() address
 @IsInt() @Min(5) @Max(11) playerCount
@@ -346,6 +357,8 @@ matchPosts   MatchPost[]
 **`dto/create-match-application.dto.ts`**
 ```ts
 @IsOptional() @IsString() @MaxLength(100) message
+@IsString() contactName
+@IsString() contactPhone
 ```
 
 ### Service 메서드
@@ -408,6 +421,7 @@ getMyApplications(userId)        // 본인 팀 신청 목록
 | `MATCH_POST_009` | 연락처는 수락 후에만 조회 가능 | 403 |
 | `MATCH_APPLICATION_001` | 존재하지 않는 신청 | 404 |
 | `MATCH_APPLICATION_002` | 이미 처리된 신청 (ACCEPTED/REJECTED) | 409 |
+| `MATCH_APPLICATION_003` | 신청자 연락처(phone) 미설정 — 클라이언트 가드로 차단하지만 서버도 검증 | 400 |
 
 ### 클라이언트 처리
 
@@ -428,6 +442,7 @@ getMyApplications(userId)        // 본인 팀 신청 목록
 - [ ] `MatchPost`, `MatchApplication` 모델 추가
 - [ ] `MatchPostStatus`, `MatchApplicationStatus`, `MatchGender` Enum 추가
 - [ ] `Match` 모델에 `matchPostId` 필드 추가
+- [ ] `User` 모델에 `phone String?` 필드 추가
 - [ ] `Region` 모델에 `matchPosts` relation 추가
 - [ ] `Club` 모델에 `matchPosts`, `matchApplications` relation 추가
 - [ ] 인덱스 6종 적용 (`matchDate`, `regionId`, `level`, `gender`, `fee`, `clubId`)
@@ -438,7 +453,7 @@ getMyApplications(userId)        // 본인 팀 신청 목록
 - [ ] DTO 작성 (Create, Update, Filter, CreateApplication)
 - [ ] `getList` — 동적 만료 필터(`matchDate >= now()`) + 커서 페이지네이션
 - [ ] `create` — ClubRole CAPTAIN/VICE_CAPTAIN 권한 검증
-- [ ] `accept` — 트랜잭션 (ACCEPTED + 일괄 REJECTED + status MATCHED + Match 2건 생성)
+- [ ] `accept` — 트랜잭션 (ACCEPTED + 일괄 REJECTED + status MATCHED + Match 2건 생성, `startAt`=`matchDate+startTime`, `endAt`=`matchDate+endTime`)
 - [ ] `getContact` — `@Throttle` Rate Limiting 적용, ACCEPTED 관계자 검증
 - [ ] 클럽 해체(`ClubDissolveVote` APPROVED) 시 MatchPost soft delete 훅 연동 (TODO 처리)
 - [ ] 에러 코드 `MATCH_POST_*`, `MATCH_APPLICATION_*` GlobalExceptionFilter 등록
@@ -455,6 +470,8 @@ getMyApplications(userId)        // 본인 팀 신청 목록
 - [ ] `/(app)/matching/[id]/edit` 수정 라우트
 - [ ] `/(app)/matching/[id]/applications` 신청 목록 라우트
 - [ ] Container 작성 (MatchingTab, MatchList, MatchDetail, MatchCreate, MatchEdit, ApplicationList, MyApplications)
+- [ ] `MatchCreateContainer` / `MatchDetailContainer`: 진입 시 `user.phone` 가드 (AlertDialog → 프로필 설정)
+- [ ] `ApplyBottomSheet`: `contactName`(기본값: user.name) + `contactPhone`(기본값: user.phone) 필드 추가
 - [ ] View 작성 7종 + Empty 컴포넌트 4종
 - [ ] `MatchPostCard`, `ApplicationCard`, `MatchFilterBar`, `MatchStatusBadge`, `ContactCard`, `ApplyBottomSheet` 컴포넌트
 - [ ] 4-state 처리: AsyncBoundary + EmptyBoundary 적용
