@@ -10,6 +10,41 @@ import { useAuthStore } from '@/src/shared/store/useAuthStore';
 
 const SECTIONS = [
   {
+    title: 'Matching 기능 테스트',
+    accounts: [
+      {
+        label: '마무리FC 주장 (등록자)',
+        description: '매칭 등록·신청 수락/거절·연락처 확인 (phone=010-1111-2222)',
+        email: 'captain@mamurifc.test',
+      },
+      {
+        label: '마무리FC 부주장 (phone 없음)',
+        description: 'phone guard AlertDialog 확인 — 등록/신청 진입 시 프로필 이동 유도',
+        email: 'vice@mamurifc.test',
+      },
+      {
+        label: '마무리FC 일반 멤버 (권한 없음)',
+        description: '일반 멤버는 매칭 등록·신청 버튼 미노출 확인',
+        email: 'member1@mamurifc.test',
+      },
+      {
+        label: '카동FC 주장 (신청자)',
+        description: '마무리FC 게시글 신청, 내 신청 탭 PENDING 확인 (phone=010-3333-4444)',
+        email: 'captain@kadongfc.test',
+      },
+      {
+        label: '한강FC 주장 (3팀 수락 테스트)',
+        description: 'POST_MULTI에 PENDING 신청 — 카동 수락 시 자동 REJECTED 확인',
+        email: 'captain@hangangfc.test',
+      },
+      {
+        label: '강남FC 주장 (3팀 수락 테스트)',
+        description: 'POST_MULTI에 PENDING 신청 — 카동 수락 시 자동 REJECTED 확인',
+        email: 'captain@gangnamfc.test',
+      },
+    ],
+  },
+  {
     title: 'Match 기능 테스트',
     accounts: [
       {
@@ -184,7 +219,7 @@ export default function TestLoginScreen() {
 
         {/* 안내 */}
         <TextBox variant="caption" color={colors.grey400} style={{ textAlign: 'center' }}>
-          seed 실행: cd server {'&&'} npm run seed:club {'&&'} npm run seed:match
+          seed 실행: cd server {'&&'} npm run seed:club {'&&'} npm run seed:match {'&&'} npm run seed:matching
         </TextBox>
       </ScrollView>
     </SafeAreaView>

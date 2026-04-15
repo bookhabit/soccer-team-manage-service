@@ -15,6 +15,7 @@
     "db:seed": "ts-node --project tsconfig.json -e \"require('tsconfig-paths/register')\" prisma/seed.ts",
     "seed:club": "ts-node --project tsconfig.seed.json prisma/seeds/club.seed.ts",
     "seed:match": "ts-node --project tsconfig.seed.json prisma/seeds/match.seed.ts",
+    "seed:matching": "ts-node --project tsconfig.seed.json prisma/seeds/matching.seed.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --testPathPattern=e2e"
