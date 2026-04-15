@@ -20,6 +20,7 @@ interface MatchFormViewProps {
   defaultValues?: Partial<CreateMatchInput>;
   isSubmitting: boolean;
   submitLabel?: string;
+  headerAction?: React.ReactNode;
   onSubmit: (data: CreateMatchInput) => void;
   onCancel: () => void;
 }
@@ -108,6 +109,7 @@ export function MatchFormView({
   defaultValues,
   isSubmitting,
   submitLabel = '경기 등록',
+  headerAction,
   onSubmit,
   onCancel,
 }: MatchFormViewProps) {
@@ -200,6 +202,12 @@ export function MatchFormView({
             </TextBox>
           </TouchableOpacity>
         </View>
+        {headerAction ? (
+          <>
+            <Spacing size={3} />
+            {headerAction}
+          </>
+        ) : null}
         <Spacing size={4} />
 
         {/* 경기 유형 */}

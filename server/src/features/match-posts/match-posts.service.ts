@@ -10,7 +10,6 @@ import {
   MatchApplicationStatus,
   MatchGender,
   MatchPostStatus,
-  MatchType,
 } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ClubMembershipService } from '../../common/services/club-membership.service';
@@ -72,10 +71,6 @@ function buildMatchPostCard(post: any) {
   };
 }
 
-function combineDateTime(matchDate: string, time: string): Date {
-  const datePart = new Date(matchDate).toISOString().slice(0, 10);
-  return new Date(`${datePart}T${time}:00`);
-}
 
 @Injectable()
 export class MatchPostsService {
@@ -144,11 +139,27 @@ export class MatchPostsService {
 
     const posts = await this.prisma.matchPost.findMany({
       where: { clubId: myClub.clubId, isDeleted: false },
-      select: MATCH_POST_SELECT,
+      select: {
+        ...MATCH_POST_SELECT,
+        applications: {
+          where: { status: MatchApplicationStatus.ACCEPTED },
+          select: { applicantClub: { select: { name: true, level: true } } },
+          take: 1,
+        },
+      },
       orderBy: { matchDate: 'desc' },
     });
 
-    return { items: posts.map(buildMatchPostCard) };
+    return {
+      items: posts.map((post) => {
+        const accepted = post.applications[0] ?? null;
+        return {
+          ...buildMatchPostCard(post),
+          opponentClubName: accepted?.applicantClub.name ?? null,
+          opponentClubLevel: accepted?.applicantClub.level ?? null,
+        };
+      }),
+    };
   }
 
   // ─── 상세 조회 ────────────────────────────────────────────────────────────
@@ -267,8 +278,8 @@ export class MatchPostsService {
     if (post.createdBy !== userId) {
       throw new ForbiddenException({ code: ErrorCode.MATCH_POST_002, message: '수정 권한이 없습니다.' });
     }
-    if (post.status === MatchPostStatus.MATCHED) {
-      throw new ConflictException({ code: ErrorCode.MATCH_POST_003, message: '매칭 완료된 게시글은 수정할 수 없습니다.' });
+    if (post.status !== MatchPostStatus.OPEN) {
+      throw new ConflictException({ code: ErrorCode.MATCH_POST_003, message: '모집 중인 게시글만 수정할 수 있습니다.' });
     }
 
     const updated = await this.prisma.matchPost.update({
@@ -378,8 +389,8 @@ export class MatchPostsService {
     if (post.clubId === memberClub.clubId) {
       throw new ForbiddenException({ code: ErrorCode.MATCH_POST_005, message: '본인 팀 게시글에는 신청할 수 없습니다.' });
     }
-    if (post.status === MatchPostStatus.MATCHED) {
-      throw new ConflictException({ code: ErrorCode.MATCH_POST_003, message: '이미 매칭이 완료된 게시글입니다.' });
+    if (post.status !== MatchPostStatus.OPEN) {
+      throw new ConflictException({ code: ErrorCode.MATCH_POST_003, message: '신청할 수 없는 게시글입니다.' });
     }
     if (new Date(post.matchDate) < new Date()) {
       throw new GoneException({ code: ErrorCode.MATCH_POST_004, message: '만료된 매칭 게시글입니다.' });
@@ -488,13 +499,6 @@ export class MatchPostsService {
         createdBy: true,
         clubId: true,
         status: true,
-        matchDate: true,
-        startTime: true,
-        endTime: true,
-        location: true,
-        address: true,
-        level: true,
-        club: { select: { name: true } },
       },
     });
 
@@ -504,13 +508,13 @@ export class MatchPostsService {
     if (post.createdBy !== userId) {
       throw new ForbiddenException({ code: ErrorCode.MATCH_POST_007, message: '수락 권한이 없습니다.' });
     }
-    if (post.status === MatchPostStatus.MATCHED) {
-      throw new ConflictException({ code: ErrorCode.MATCH_POST_003, message: '이미 매칭이 완료된 게시글입니다.' });
+    if (post.status !== MatchPostStatus.OPEN) {
+      throw new ConflictException({ code: ErrorCode.MATCH_POST_003, message: '이미 매칭이 완료되었거나 취소된 게시글입니다.' });
     }
 
     const app = await this.prisma.matchApplication.findFirst({
       where: { id: appId, postId },
-      select: { status: true, applicantClubId: true, applicantClub: { select: { name: true, level: true } } },
+      select: { status: true, applicantClubId: true, applicantClub: { select: { name: true } } },
     });
 
     if (!app) {
@@ -519,10 +523,6 @@ export class MatchPostsService {
     if (app.status !== MatchApplicationStatus.PENDING) {
       throw new ConflictException({ code: ErrorCode.MATCH_APPLICATION_002, message: '이미 처리된 신청입니다.' });
     }
-
-    const startAt = combineDateTime(post.matchDate.toISOString(), post.startTime);
-    const endAt = combineDateTime(post.matchDate.toISOString(), post.endTime);
-    const voteDeadline = new Date(startAt.getTime() - 24 * 60 * 60 * 1000);
 
     await this.prisma.$transaction(async (tx) => {
       await tx.matchApplication.update({
@@ -545,43 +545,43 @@ export class MatchPostsService {
         data: { status: MatchPostStatus.MATCHED },
       });
 
-      await tx.match.create({
-        data: {
-          clubId: post.clubId,
-          matchPostId: postId,
-          type: MatchType.SELF,
-          title: `vs ${app.applicantClub.name}`,
-          location: post.location,
-          address: post.address,
-          startAt,
-          endAt,
-          voteDeadline,
-          opponentName: app.applicantClub.name,
-          opponentLevel: app.applicantClub.level,
-        },
-      });
-
-      await tx.match.create({
-        data: {
-          clubId: app.applicantClubId,
-          matchPostId: postId,
-          type: MatchType.SELF,
-          title: `vs ${post.club.name}`,
-          location: post.location,
-          address: post.address,
-          startAt,
-          endAt,
-          voteDeadline,
-          opponentName: post.club.name,
-          opponentLevel: post.level,
-        },
-      });
-
+      // [기획 변경] 매칭 수락 시 Match 자동생성 제거.
+      // 경기 등록은 사용자가 직접 Match 폼에서 완료된 매칭 정보를 불러오는 방식으로 변경.
       console.log(`[TODO] 매칭 수락 알림 → 수락팀: ${app.applicantClub.name}, postId=${postId}`);
       for (const rejected of rejectedApps) {
         console.log(`[TODO] 매칭 거절 알림 → ${rejected.applicantClub.name}, postId=${postId}`);
       }
     });
+  }
+
+  // ─── 매칭 취소 ────────────────────────────────────────────────────────────
+
+  async cancel(id: string, userId: string) {
+    const post = await this.prisma.matchPost.findFirst({
+      where: { id, isDeleted: false },
+      select: { clubId: true, status: true },
+    });
+
+    if (!post) {
+      throw new NotFoundException({ code: ErrorCode.MATCH_POST_001, message: '존재하지 않는 매칭 게시글입니다.' });
+    }
+    if (post.status !== MatchPostStatus.MATCHED) {
+      throw new ConflictException({ code: ErrorCode.MATCH_POST_010, message: '매칭 완료 상태에서만 취소할 수 있습니다.' });
+    }
+
+    const isAdmin = await this.prisma.clubMember.findFirst({
+      where: { userId, clubId: post.clubId, role: { in: [ClubRole.CAPTAIN, ClubRole.VICE_CAPTAIN] } },
+    });
+    if (!isAdmin) {
+      throw new ForbiddenException({ code: ErrorCode.MATCH_POST_002, message: '취소 권한이 없습니다.' });
+    }
+
+    await this.prisma.matchPost.update({
+      where: { id },
+      data: { status: MatchPostStatus.CANCELLED },
+    });
+
+    console.log(`[TODO] 매칭 취소 알림 → 상대팀, postId=${id}`);
   }
 
   // ─── 신청 거절 ────────────────────────────────────────────────────────────

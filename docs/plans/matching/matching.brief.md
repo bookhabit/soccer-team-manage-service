@@ -141,9 +141,8 @@
    - 나머지 PENDING 신청 일괄 → `REJECTED` + 각 신청팀에 거절 알림 (콘솔 로그 + TODO)
    - 게시글 상태 → `MATCHED` (추가 신청 버튼 비활성)
    - 양측 관리자에게 상대방 연락처(이름 + 휴대폰 번호) 인앱 화면 표시
-   - **양 팀 각자의 내부 `Match`(경기 관리 탭) 항목 자동 생성**
-     - 생성 데이터: 날짜/시간, 구장, 상대팀 이름 + 레벨
-     - 유형: `SELF` (리그 아님)
+   - **[기획 변경]** 매칭 수락 시 Match 자동생성 하지 않음.
+     - 대신 경기 등록 폼에서 "완료된 매칭 목록"에서 정보 pre-fill 하는 편의 기능 제공 (TODO)
 7. **거절 시**
    - 해당 신청 → `REJECTED`
    - 신청팀 관리자에게 거절 알림 (콘솔 로그 + TODO)
@@ -251,8 +250,9 @@ MatchGender: MALE, FEMALE, MIXED
 | 구장비 단위      | 원(KRW) 정수, 0 = 무료                                                               |
 | 경기 시간        | 시작 시간(`startTime`) + 종료 시간(`endTime`) 별도 입력 (HH:mm)                      |
 | 게시글 수정/삭제 | 등록자(관리자)만 가능, 매칭 완료 후 수정 불가                                        |
-| 매칭 성사        | 수락 버튼 플로우 → 양측 연락처 인앱 공유 + 양 팀 Match 자동 생성                     |
-| Match 자동 생성  | `startAt = matchDate+startTime`, `endAt = matchDate+endTime`                         |
+| 매칭 성사        | 수락 버튼 플로우 → 양측 연락처 인앱 공유. Match 자동생성 없음                        |
+| Match 연동       | 경기 등록 폼에서 완료된 매칭 목록 선택 → 필드 자동 채움 (✅ 구현 완료)               |
+| 매칭 취소        | 수락 완료(MATCHED) 후 취소 가능 → CANCELLED 상태. 등록팀 관리자만 가능 (✅ 구현 완료)|
 | 연락처 저장 위치 | 등록팀: `MatchPost.contactName/Phone` / 신청팀: `MatchApplication.contactName/Phone` |
 | 연락처 기본값    | `user.name` / `user.phone` (수정 가능)                                               |
 | 전화번호 가드    | 등록·신청 진입 시 `user.phone` 미설정이면 프로필 설정 유도 AlertDialog               |

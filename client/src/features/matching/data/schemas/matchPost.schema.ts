@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
 
-export const MatchPostStatusSchema = z.enum(['OPEN', 'MATCHED']);
+export const MatchPostStatusSchema = z.enum(['OPEN', 'MATCHED', 'CANCELLED']);
 export const MatchApplicationStatusSchema = z.enum(['PENDING', 'ACCEPTED', 'REJECTED']);
 export const MatchGenderSchema = z.enum(['MALE', 'FEMALE', 'MIXED']);
 export const ClubLevelSchema = z.enum(['BEGINNER', 'AMATEUR', 'SEMI_PRO', 'PRO']);
@@ -33,6 +33,8 @@ export const MatchPostSummarySchema = z.object({
   createdAt: z.string(),
   regionName: z.string(),
   regionSigungu: z.string(),
+  opponentClubName: z.string().nullable().optional(),
+  opponentClubLevel: ClubLevelSchema.nullable().optional(),
 });
 
 export const MatchPostDetailSchema = MatchPostSummarySchema.extend({
@@ -45,6 +47,10 @@ export const MatchPostDetailSchema = MatchPostSummarySchema.extend({
 export const MatchPostListSchema = z.object({
   items: z.array(MatchPostSummarySchema),
   nextCursor: z.string().nullable(),
+});
+
+export const MyMatchPostListSchema = z.object({
+  items: z.array(MatchPostSummarySchema),
 });
 
 export const MatchContactSchema = z.object({
@@ -80,6 +86,7 @@ export const UpdateMatchPostSchema = CreateMatchPostSchema.partial();
 export type MatchPostSummary = z.infer<typeof MatchPostSummarySchema>;
 export type MatchPostDetail = z.infer<typeof MatchPostDetailSchema>;
 export type MatchPostList = z.infer<typeof MatchPostListSchema>;
+export type MyMatchPostList = z.infer<typeof MyMatchPostListSchema>;
 export type MatchContact = z.infer<typeof MatchContactSchema>;
 export type CreateMatchPostInput = z.infer<typeof CreateMatchPostSchema>;
 export type UpdateMatchPostInput = z.infer<typeof UpdateMatchPostSchema>;

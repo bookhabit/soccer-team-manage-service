@@ -47,10 +47,27 @@ export function useAcceptApplication(postId: string) {
   return useMutation({
     mutationFn: (appId: string) => acceptMatchApplication(postId, appId),
     onSuccess: () => {
+      // 전체 목록 캐시에서 해당 게시글 status를 즉시 MATCHED로 반영 (배경 리페치 전에도 즉시 표시)
+      queryClient.setQueriesData(
+        { queryKey: ['match-posts', 'list'] },
+        (old: any) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page: any) => ({
+              ...page,
+              items: page.items.map((item: any) =>
+                item.id === postId ? { ...item, status: 'MATCHED' } : item,
+              ),
+            })),
+          };
+        },
+      );
       queryClient.invalidateQueries({ queryKey: matchQueryKeys.applications(postId) });
       queryClient.invalidateQueries({ queryKey: matchQueryKeys.detail(postId) });
       queryClient.invalidateQueries({ queryKey: ['match-posts', 'list'] });
       queryClient.invalidateQueries({ queryKey: matchQueryKeys.my() });
+      queryClient.invalidateQueries({ queryKey: matchQueryKeys.myApplications() });
     },
   });
 }

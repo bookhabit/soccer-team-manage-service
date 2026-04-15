@@ -13,6 +13,7 @@ import {
   createMatchPost,
   updateMatchPost,
   deleteMatchPost,
+  cancelMatchPost,
   getMatchContact,
 } from '../services/matchPost.service';
 import { matchQueryKeys } from './matchQueryKeys';
@@ -94,6 +95,19 @@ export function useDeleteMatchPost() {
       queryClient.invalidateQueries({ queryKey: ['match-posts', 'list'] });
       queryClient.invalidateQueries({ queryKey: matchQueryKeys.my() });
       queryClient.removeQueries({ queryKey: matchQueryKeys.detail(id) });
+    },
+  });
+}
+
+export function useCancelMatchPost() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => cancelMatchPost(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: matchQueryKeys.detail(id) });
+      queryClient.invalidateQueries({ queryKey: ['match-posts', 'list'] });
+      queryClient.invalidateQueries({ queryKey: matchQueryKeys.my() });
     },
   });
 }

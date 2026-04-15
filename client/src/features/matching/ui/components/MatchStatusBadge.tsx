@@ -21,6 +21,14 @@ export function MatchStatusBadge({ status, isExpired }: MatchStatusBadgeProps) {
     );
   }
 
+  if (status === 'CANCELLED') {
+    return (
+      <View style={[styles.badge, styles.cancelled]}>
+        <TextBox variant="captionBold" color={colors.grey500}>취소됨</TextBox>
+      </View>
+    );
+  }
+
   if (status === 'MATCHED') {
     return (
       <View style={[styles.badge, styles.matched]}>
@@ -45,5 +53,6 @@ const styles = StyleSheet.create({
   },
   open: { backgroundColor: colors.green50 },
   matched: { backgroundColor: colors.blue50 },
+  cancelled: { backgroundColor: colors.grey100 },
   expired: { backgroundColor: colors.grey100 },
 });

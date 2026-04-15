@@ -624,8 +624,9 @@ model MatchRecordHistory {
 // ─── MatchPost (매칭 게시글) ──────────────────────────────────────────────────
 
 enum MatchPostStatus {
-  OPEN    // 모집 중
-  MATCHED // 매칭 완료
+  OPEN      // 모집 중
+  MATCHED   // 매칭 완료
+  CANCELLED // 매칭 취소 (MATCHED 이후 취소)
 }
 
 enum MatchApplicationStatus {

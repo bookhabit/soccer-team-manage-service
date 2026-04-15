@@ -1,12 +1,14 @@
 import { http } from '@/src/shared/http/apiClient';
 import {
   MatchPostListSchema,
+  MyMatchPostListSchema,
   MatchPostDetailSchema,
   MatchPostSummarySchema,
   MatchContactSchema,
 } from '../schemas/matchPost.schema';
 import type {
   MatchPostList,
+  MyMatchPostList,
   MatchPostDetail,
   MatchPostSummary,
   MatchContact,
@@ -21,8 +23,8 @@ export async function getMatchPosts(filters: MatchPostFilters): Promise<MatchPos
   return http.get<MatchPostList>('/match-posts', filters as object, MatchPostListSchema);
 }
 
-export async function getMyMatchPosts(): Promise<{ items: MatchPostSummary[] }> {
-  return http.get<{ items: MatchPostSummary[] }>('/match-posts/my');
+export async function getMyMatchPosts(): Promise<MyMatchPostList> {
+  return http.get<MyMatchPostList>('/match-posts/my', undefined, MyMatchPostListSchema);
 }
 
 // ─── 상세 ────────────────────────────────────────────────────────────────────
@@ -43,6 +45,10 @@ export async function updateMatchPost(id: string, body: UpdateMatchPostInput): P
 
 export async function deleteMatchPost(id: string): Promise<void> {
   return http.delete<void>(`/match-posts/${id}`);
+}
+
+export async function cancelMatchPost(id: string): Promise<void> {
+  return http.patch<void>(`/match-posts/${id}/cancel`, {});
 }
 
 // ─── 연락처 ───────────────────────────────────────────────────────────────────

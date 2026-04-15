@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
-import { useToast, AlertDialog } from '@ui';
+import { useToast, AlertDialog, ConfirmDialog } from '@ui';
 import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useMyProfile } from '@/src/features/auth/data/hooks/useAuth';
-import { useMatchPostDetail, useMatchContact, useDeleteMatchPost } from '../../data/hooks/useMatchPosts';
+import { useMatchPostDetail, useMatchContact, useDeleteMatchPost, useCancelMatchPost } from '../../data/hooks/useMatchPosts';
 import { useApplyMatchPost } from '../../data/hooks/useMatchApplications';
 import { MatchDetailView } from '../view/MatchDetailView';
 import { ApplyBottomSheet } from '../components/ApplyBottomSheet';
@@ -23,12 +23,14 @@ function MatchDetailContent({ postId }: MatchDetailContainerProps) {
 
   const [applySheetOpen, setApplySheetOpen] = useState(false);
   const [phoneAlertOpen, setPhoneAlertOpen] = useState(false);
+  const [cancelConfirmOpen, setCancelConfirmOpen] = useState(false);
 
   // 연락처: 매칭완료 상태이고 자신이 관계자인 경우에만 조회
   const canFetchContact = post.status === 'MATCHED' && !post.canApply;
   const { data: contact } = useMatchContact(postId, canFetchContact);
 
   const { mutate: deletePost, isPending: isDeleting } = useDeleteMatchPost();
+  const { mutate: cancelPost, isPending: isCancelling } = useCancelMatchPost();
   const { mutate: applyPost, isPending: isApplying } = useApplyMatchPost(postId);
 
   const handleApplyPress = () => {
@@ -70,6 +72,24 @@ function MatchDetailContent({ postId }: MatchDetailContainerProps) {
     });
   };
 
+  const handleCancelConfirm = () => {
+    cancelPost(postId, {
+      onSuccess: () => {
+        toast.success('매칭이 취소되었습니다.');
+        setCancelConfirmOpen(false);
+      },
+      onError: (err: any) => {
+        const code = err?.response?.data?.code;
+        if (code === 'MATCH_POST_010') {
+          toast.error('매칭 완료 상태에서만 취소할 수 있습니다.');
+        } else {
+          toast.error('취소에 실패했습니다.');
+        }
+        setCancelConfirmOpen(false);
+      },
+    });
+  };
+
   return (
     <>
       <MatchDetailView
@@ -78,8 +98,10 @@ function MatchDetailContent({ postId }: MatchDetailContainerProps) {
         onApply={handleApplyPress}
         onEdit={() => router.push(`/(app)/matching/${postId}/edit` as Href)}
         onDelete={handleDelete}
+        onCancel={() => setCancelConfirmOpen(true)}
         onViewApplications={() => router.push(`/(app)/matching/${postId}/applications` as Href)}
         isDeleting={isDeleting}
+        isCancelling={isCancelling}
       />
 
       <ApplyBottomSheet
@@ -100,6 +122,16 @@ function MatchDetailContent({ postId }: MatchDetailContainerProps) {
         title="연락처 설정 필요"
         description="매칭 신청을 위해 먼저 프로필에서 연락처를 설정해주세요."
         confirmLabel="설정하러 가기"
+      />
+
+      <ConfirmDialog
+        isOpen={cancelConfirmOpen}
+        onClose={() => setCancelConfirmOpen(false)}
+        onConfirm={handleCancelConfirm}
+        title="매칭을 취소하시겠습니까?"
+        description="취소하면 상대팀에게 알림이 전송됩니다. 이 작업은 되돌릴 수 없습니다."
+        confirmLabel="취소하기"
+        destructive
       />
     </>
   );

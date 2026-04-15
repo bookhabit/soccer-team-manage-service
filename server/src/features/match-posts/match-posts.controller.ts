@@ -150,6 +150,21 @@ export class MatchPostsController {
     return this.matchPostsService.apply(postId, user.sub, dto);
   }
 
+  // ─── 매칭 취소 ───────────────────────────────────────────────────────────
+
+  @Patch(':id/cancel')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: '매칭 취소 (MATCHED → CANCELLED, 등록팀 관리자)' })
+  @ApiResponse({ status: 204 })
+  @ApiResponse({ status: 403, description: 'MATCH_POST_002 — 취소 권한 없음' })
+  @ApiResponse({ status: 409, description: 'MATCH_POST_010 — 취소할 수 없는 상태' })
+  async cancel(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    await this.matchPostsService.cancel(id, user.sub);
+  }
+
   // ─── 신청 목록 ────────────────────────────────────────────────────────────
 
   @Get(':id/applications')

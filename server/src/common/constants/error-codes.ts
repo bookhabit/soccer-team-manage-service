@@ -79,6 +79,7 @@ export const ErrorCode = {
   MATCH_POST_007: 'MATCH_POST_007', // 신청 목록 조회 권한 없음 (등록자가 아님) 403
   MATCH_POST_008: 'MATCH_POST_008', // 연락처 조회 권한 없음 (관계자가 아님) 403
   MATCH_POST_009: 'MATCH_POST_009', // 연락처는 수락 후에만 조회 가능 403
+  MATCH_POST_010: 'MATCH_POST_010', // 취소할 수 없는 상태 (OPEN 또는 이미 취소됨) 409
 
   // ─── MatchApplication ──────────────────────────────────────────────────────
   MATCH_APPLICATION_001: 'MATCH_APPLICATION_001', // 존재하지 않는 신청 404

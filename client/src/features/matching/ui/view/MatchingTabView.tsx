@@ -53,11 +53,15 @@ export function MatchingTabView({
         })}
       </View>
 
-      {/* 콘텐츠 */}
-      <View style={styles.content}>
-        {selectedTab === 'all' && listContent}
-        {selectedTab === 'my' && myPostsContent}
-        {selectedTab === 'applied' && myApplicationsContent}
+      {/* 콘텐츠 — display:none으로 마운트 유지 (탭 전환 시 스켈레톤 방지) */}
+      <View style={[styles.content, selectedTab !== 'all' && styles.hidden]}>
+        {listContent}
+      </View>
+      <View style={[styles.content, selectedTab !== 'my' && styles.hidden]}>
+        {myPostsContent}
+      </View>
+      <View style={[styles.content, selectedTab !== 'applied' && styles.hidden]}>
+        {myApplicationsContent}
       </View>
     </View>
   );
@@ -87,4 +91,5 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   content: { flex: 1 },
+  hidden: { display: 'none' },
 });

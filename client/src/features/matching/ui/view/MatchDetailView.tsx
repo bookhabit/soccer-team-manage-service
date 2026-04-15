@@ -29,8 +29,10 @@ interface MatchDetailViewProps {
   onApply: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onCancel: () => void;
   onViewApplications: () => void;
   isDeleting: boolean;
+  isCancelling: boolean;
 }
 
 /**
@@ -42,8 +44,10 @@ export function MatchDetailView({
   onApply,
   onEdit,
   onDelete,
+  onCancel,
   onViewApplications,
   isDeleting,
+  isCancelling,
 }: MatchDetailViewProps) {
   const dateLabel = new Date(post.matchDate).toLocaleDateString('ko-KR', {
     year: 'numeric',
@@ -112,10 +116,23 @@ export function MatchDetailView({
           </Section>
         )}
 
-        {/* 등록자 본인: 삭제 버튼 */}
+        {/* 등록자 본인: 매칭 취소 + 삭제 버튼 */}
         {post.isOwnPost && (
           <>
             <Spacing size={4} />
+            {post.status === 'MATCHED' && (
+              <>
+                <Button
+                  variant="danger"
+                  size="medium"
+                  onPress={onCancel}
+                  loading={isCancelling}
+                >
+                  매칭 취소
+                </Button>
+                <Spacing size={2} />
+              </>
+            )}
             <Button
               variant="danger"
               size="medium"
