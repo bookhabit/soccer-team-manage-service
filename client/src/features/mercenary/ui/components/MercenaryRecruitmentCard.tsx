@@ -57,7 +57,7 @@ export function MercenaryRecruitmentCard({ item, onAccept, onReject, isLoading }
         <Flex direction="row" gap={spacing[2]} style={styles.actions}>
           <Button
             variant="secondary"
-            size="sm"
+            size="small"
             style={styles.actionBtn}
             onPress={onReject}
             disabled={isLoading}
@@ -66,7 +66,7 @@ export function MercenaryRecruitmentCard({ item, onAccept, onReject, isLoading }
           </Button>
           <Button
             variant="primary"
-            size="sm"
+            size="small"
             style={styles.actionBtn}
             onPress={onAccept}
             disabled={isLoading}

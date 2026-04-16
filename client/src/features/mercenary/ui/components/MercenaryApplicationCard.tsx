@@ -35,7 +35,9 @@ export function MercenaryApplicationCard({ app, onAccept, onReject, isLoading }:
           <View style={styles.avatarPlaceholder} />
         )}
         <View style={styles.info}>
-          <TextBox variant="body2Bold" color={colors.grey900}>{app.applicantName}</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey900}>
+            {app.applicantName}
+          </TextBox>
           <Flex direction="row" gap={spacing[2]}>
             {app.applicantPosition && (
               <TextBox variant="caption" color={colors.grey600}>
@@ -61,18 +63,24 @@ export function MercenaryApplicationCard({ app, onAccept, onReject, isLoading }:
 
       {app.message && (
         <View style={styles.message}>
-          <TextBox variant="caption" color={colors.grey600}>{app.message}</TextBox>
+          <TextBox variant="caption" color={colors.grey600}>
+            {app.message}
+          </TextBox>
         </View>
       )}
 
       {app.status === 'ACCEPTED' && (
         <View style={styles.statusBadge}>
-          <TextBox variant="captionBold" color={colors.green600}>수락됨</TextBox>
+          <TextBox variant="captionBold" color={colors.green600}>
+            수락됨
+          </TextBox>
         </View>
       )}
       {app.status === 'REJECTED' && (
         <View style={[styles.statusBadge, styles.rejected]}>
-          <TextBox variant="captionBold" color={colors.grey500}>거절됨</TextBox>
+          <TextBox variant="captionBold" color={colors.grey500}>
+            거절됨
+          </TextBox>
         </View>
       )}
 
@@ -80,7 +88,7 @@ export function MercenaryApplicationCard({ app, onAccept, onReject, isLoading }:
         <Flex direction="row" gap={spacing[2]} style={styles.actions}>
           <Button
             variant="secondary"
-            size="sm"
+            size="small"
             style={styles.actionBtn}
             onPress={onReject}
             disabled={isLoading}
@@ -89,7 +97,7 @@ export function MercenaryApplicationCard({ app, onAccept, onReject, isLoading }:
           </Button>
           <Button
             variant="primary"
-            size="sm"
+            size="small"
             style={styles.actionBtn}
             onPress={onAccept}
             disabled={isLoading}

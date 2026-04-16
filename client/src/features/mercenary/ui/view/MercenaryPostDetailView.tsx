@@ -89,11 +89,11 @@ export function MercenaryPostDetailView({ post, onApply, onManageApplications, o
           <View style={styles.section}>
             <Flex direction="row" gap={spacing[2]}>
               {!post.isExpired && post.status === 'OPEN' && (
-                <Button variant="secondary" size="sm" onPress={onEdit} style={styles.actionBtn}>
+                <Button variant="secondary" size="small" onPress={onEdit} style={styles.actionBtn}>
                   수정
                 </Button>
               )}
-              <Button variant="danger" size="sm" onPress={onDelete} style={styles.actionBtn}>
+              <Button variant="danger" size="small" onPress={onDelete} style={styles.actionBtn}>
                 삭제
               </Button>
             </Flex>

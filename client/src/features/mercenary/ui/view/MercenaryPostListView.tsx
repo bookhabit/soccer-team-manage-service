@@ -36,7 +36,9 @@ export function MercenaryPostListView({
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <Flex align="center" justify="center" style={styles.empty}>
-            <TextBox variant="body2" color={colors.grey400}>등록된 게시글이 없어요</TextBox>
+            <TextBox variant="body2" color={colors.grey400}>
+              등록된 게시글이 없어요
+            </TextBox>
           </Flex>
         }
         ListFooterComponent={
@@ -53,7 +55,7 @@ export function MercenaryPostListView({
         }
       />
       <View style={styles.fab}>
-        <Button variant="primary" size="sm" onPress={onCreatePress}>
+        <Button variant="primary" size="medium" onPress={onCreatePress}>
           + 등록
         </Button>
       </View>

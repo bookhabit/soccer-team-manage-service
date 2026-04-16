@@ -53,7 +53,7 @@ export function MercenaryAvailabilityListView({
         }
       />
       <View style={styles.fab}>
-        <Button variant="primary" size="sm" onPress={onCreatePress}>
+        <Button variant="primary" size="small" onPress={onCreatePress}>
           + 등록
         </Button>
       </View>

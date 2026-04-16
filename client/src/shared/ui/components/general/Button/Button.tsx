@@ -23,6 +23,7 @@ export function Button({
   fullWidth = false,
   loading = false,
   disabled = false,
+  style,
   children,
   onPress,
 }: ButtonProps) {
@@ -37,6 +38,7 @@ export function Button({
         { backgroundColor: v.bg, height: s.height, paddingHorizontal: s.paddingHorizontal },
         fullWidth && styles.fullWidth,
         isDisabled && styles.disabled,
+        style,
       ]}
       onPress={onPress}
       disabled={isDisabled}
