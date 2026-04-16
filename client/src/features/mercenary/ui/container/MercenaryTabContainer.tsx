@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { TabView, TabBar, SceneMap } from 'react-native-tab-view';
-import { SafeAreaWrapper, colors } from '@ui';
+import { ScreenLayout, colors } from '@ui';
 import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { MercenaryPostListContainer } from './MercenaryPostListContainer';
 import { MercenaryAvailabilityListContainer } from './MercenaryAvailabilityListContainer';
@@ -33,7 +33,7 @@ export function MercenaryTabContainer() {
   const [index, setIndex] = useState(0);
 
   return (
-    <SafeAreaWrapper edges={['top']}>
+    <ScreenLayout>
       <TabView
         style={{ flex: 1 }}
         navigationState={{ index, routes: ROUTES }}
@@ -58,6 +58,6 @@ export function MercenaryTabContainer() {
           />
         )}
       />
-    </SafeAreaWrapper>
+    </ScreenLayout>
   );
 }

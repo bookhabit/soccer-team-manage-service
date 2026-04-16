@@ -152,7 +152,7 @@ main()
 
 **구현 기준:**
 
-- `@ui` 컴포넌트 사용 (Button, TextBox, Flex, SafeAreaWrapper 등)
+- `@ui` 컴포넌트 사용 (Button, TextBox, Flex 등)
 - 버튼 클릭 시 해당 계정으로 자동 로그인 후 홈으로 이동
 - 로그인 API: `POST /auth/login` (email + password)
 - 로그인 성공 시 `useAuthStore.setAccessToken()` 호출

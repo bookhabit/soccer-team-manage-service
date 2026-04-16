@@ -12,6 +12,7 @@ interface ClubTabViewProps {
   onGoBoard: () => void;
   onGoSettings: () => void;
   onGoJoinRequests: () => void;
+  onGoMatches: () => void;
 }
 
 /**
@@ -24,6 +25,7 @@ export function ClubTabView({
   onGoBoard,
   onGoSettings,
   onGoJoinRequests,
+  onGoMatches,
 }: ClubTabViewProps) {
   const isCaptainOrVice = club.myRole === 'CAPTAIN' || club.myRole === 'VICE_CAPTAIN';
   const levelLabel = LEVEL_LABEL[club.level] ?? club.level;
@@ -75,6 +77,7 @@ export function ClubTabView({
         <View style={styles.menuGrid}>
           <MenuButton label="팀원" onPress={onGoMembers} />
           <MenuButton label="게시판" onPress={onGoBoard} />
+          <MenuButton label="경기 기록" onPress={onGoMatches} />
           {isCaptainOrVice ? <MenuButton label="가입 신청" onPress={onGoJoinRequests} /> : null}
         </View>
       </ScrollView>

@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
-import { TextBox, colors, spacing } from '@ui';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
+import { TabView, TabBar } from 'react-native-tab-view';
+import { colors, spacing } from '@ui';
 
 export type MatchingTab = 'all' | 'my' | 'applied';
 
@@ -12,10 +13,10 @@ interface MatchingTabViewProps {
   myApplicationsContent: React.ReactNode;
 }
 
-const TABS: { key: MatchingTab; label: string }[] = [
-  { key: 'all', label: '전체 매칭' },
-  { key: 'my', label: '내 게시글' },
-  { key: 'applied', label: '내 신청' },
+const ROUTES = [
+  { key: 'all', title: '전체 매칭' },
+  { key: 'my', title: '내 게시글' },
+  { key: 'applied', title: '내 신청' },
 ];
 
 /**
@@ -28,68 +29,54 @@ export function MatchingTabView({
   myPostsContent,
   myApplicationsContent,
 }: MatchingTabViewProps) {
-  return (
-    <View style={styles.container}>
-      {/* 세그먼트 탭 */}
-      <View style={styles.tabBar}>
-        {TABS.map((tab) => {
-          const isActive = selectedTab === tab.key;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              style={[styles.tabItem, isActive && styles.tabItemActive]}
-              onPress={() => onTabChange(tab.key)}
-              activeOpacity={0.7}
-            >
-              <TextBox
-                variant="body2Bold"
-                color={isActive ? colors.blue500 : colors.grey500}
-              >
-                {tab.label}
-              </TextBox>
-              {isActive && <View style={styles.indicator} />}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+  const layout = useWindowDimensions();
+  const index = ROUTES.findIndex((r) => r.key === selectedTab);
 
-      {/* 콘텐츠 — display:none으로 마운트 유지 (탭 전환 시 스켈레톤 방지) */}
-      <View style={[styles.content, selectedTab !== 'all' && styles.hidden]}>
-        {listContent}
-      </View>
-      <View style={[styles.content, selectedTab !== 'my' && styles.hidden]}>
-        {myPostsContent}
-      </View>
-      <View style={[styles.content, selectedTab !== 'applied' && styles.hidden]}>
-        {myApplicationsContent}
-      </View>
-    </View>
+  const handleIndexChange = (i: number) => {
+    onTabChange(ROUTES[i]?.key as MatchingTab);
+  };
+
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    switch (route.key) {
+      case 'all':
+        return <View style={styles.scene}>{listContent}</View>;
+      case 'my':
+        return <View style={styles.scene}>{myPostsContent}</View>;
+      case 'applied':
+        return <View style={styles.scene}>{myApplicationsContent}</View>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <TabView
+      style={{ flex: 1 }}
+      navigationState={{ index, routes: ROUTES }}
+      renderScene={renderScene}
+      onIndexChange={handleIndexChange}
+      initialLayout={{ width: layout.width }}
+      renderTabBar={(props) => (
+        <TabBar
+          {...props}
+          style={{
+            backgroundColor: colors.background,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.grey100,
+            elevation: 0,
+            shadowOpacity: 0,
+          }}
+          indicatorStyle={{ backgroundColor: colors.blue500, height: 2 }}
+          activeColor={colors.blue500}
+          inactiveColor={colors.grey500}
+          tabStyle={{ paddingVertical: spacing[1] }}
+          pressColor={colors.blue50}
+        />
+      )}
+    />
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  tabBar: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: colors.grey100,
-  },
-  tabItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing[3],
-    position: 'relative',
-  },
-  tabItemActive: {},
-  indicator: {
-    position: 'absolute',
-    bottom: 0,
-    left: spacing[4],
-    right: spacing[4],
-    height: 2,
-    backgroundColor: colors.blue500,
-    borderRadius: 1,
-  },
-  content: { flex: 1 },
-  hidden: { display: 'none' },
+  scene: { flex: 1 },
 });

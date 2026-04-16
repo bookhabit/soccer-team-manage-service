@@ -196,6 +196,116 @@ import { BottomCTASingle, BottomCTADouble, FixedBottomCTA } from '@mono/ui';
 >
 ```
 
+### TopTabNavigator (react-native-tab-view)
+
+상단 탭 네비게이터. **앱 내 모든 top tab은 `react-native-tab-view`의 `TabView` + `TabBar`로 구현한다.**
+커스텀 `TouchableOpacity` 탭 바 또는 `display: none` 분기 패턴 사용 금지.
+
+#### 기본 패턴
+
+```tsx
+import React, { useState } from 'react';
+import { useWindowDimensions } from 'react-native';
+import { TabView, TabBar } from 'react-native-tab-view';
+import { colors, spacing } from '@ui';
+
+const ROUTES = [
+  { key: 'tab1', title: '탭1' },
+  { key: 'tab2', title: '탭2' },
+];
+
+export function MyTabView() {
+  const layout = useWindowDimensions();
+  const [index, setIndex] = useState(0);
+
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    switch (route.key) {
+      case 'tab1': return <Tab1Scene />;
+      case 'tab2': return <Tab2Scene />;
+      default: return null;
+    }
+  };
+
+  return (
+    <TabView
+      style={{ flex: 1 }}
+      navigationState={{ index, routes: ROUTES }}
+      renderScene={renderScene}
+      onIndexChange={setIndex}
+      initialLayout={{ width: layout.width }}
+      renderTabBar={(props) => (
+        <TabBar
+          {...props}
+          style={{
+            backgroundColor: colors.background,
+            borderBottomWidth: 1,
+            borderBottomColor: colors.grey100,
+            elevation: 0,
+            shadowOpacity: 0,
+          }}
+          indicatorStyle={{ backgroundColor: colors.blue500, height: 2 }}
+          activeColor={colors.blue500}
+          inactiveColor={colors.grey500}
+          tabStyle={{ paddingVertical: spacing[1] }}
+          pressColor={colors.blue50}
+        />
+      )}
+    />
+  );
+}
+```
+
+#### 외부에서 탭을 제어하는 경우 (controlled)
+
+컨테이너에서 `activeTab` 상태를 관리할 때는 `index`를 prop에서 유도한다.
+
+```tsx
+const ROUTES = [
+  { key: 'all', title: '전체' },
+  { key: 'NOTICE', title: '공지' },
+];
+
+// index를 직접 계산 — 로컬 state 불필요
+const index = ROUTES.findIndex((r) => r.key === (activeTab ?? 'all'));
+
+const handleIndexChange = (i: number) => {
+  const key = ROUTES[i]?.key;
+  onTabChange(key === 'all' ? undefined : key);
+};
+```
+
+#### 탭 바에 액션 버튼이 필요한 경우 (글쓰기 등)
+
+`renderTabBar`를 래퍼 `View`로 감싸고 `TabBar`는 `flex: 1`로 지정한다.
+
+```tsx
+renderTabBar={(props) => (
+  <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: colors.grey100 }}>
+    <View style={{ flex: 1 }}>
+      <TabBar {...props} style={{ elevation: 0, shadowOpacity: 0 }} ... />
+    </View>
+    <TouchableOpacity onPress={onWrite} style={{ paddingHorizontal: spacing[4], paddingVertical: spacing[3] }}>
+      <TextBox variant="body2Bold" color={colors.blue500}>글쓰기</TextBox>
+    </TouchableOpacity>
+  </View>
+)}
+```
+
+#### 탭 수가 많아 가로 스크롤이 필요한 경우
+
+```tsx
+<TabBar {...props} scrollEnabled tabStyle={{ width: 'auto', paddingHorizontal: spacing[4] }} ... />
+```
+
+#### 주의사항
+
+| 상황 | 방법 |
+|------|------|
+| 탭 전환 시 데이터 유지 | `lazy={false}` (기본값) — 모든 scene이 마운트 유지 |
+| 탭 처음 방문 시만 렌더 | `lazy={true}` + `renderLazyPlaceholder` 제공 |
+| 동적 routes (탭 수 가변) | `routes`를 컴포넌트 렌더 시 계산, `index`가 범위를 넘지 않게 주의 |
+| `as const` routes | TabView가 mutable 배열을 기대하므로 `as const` 사용 금지 |
+
 ### Box / Grid
 
 ```tsx

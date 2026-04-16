@@ -1,15 +1,16 @@
 import React from 'react';
-import { View, FlatList, TouchableOpacity, RefreshControl, StyleSheet } from 'react-native';
+import { View, FlatList, TouchableOpacity, RefreshControl, StyleSheet, useWindowDimensions } from 'react-native';
+import { TabView, TabBar } from 'react-native-tab-view';
 import { TextBox, Spacing, ScreenLayout, colors, spacing } from '@ui';
 import { EmptyBoundary } from '@/src/shared/ui/server-state-handling/EmptyBoundary';
 import { PostListItem } from '../components/PostListItem';
 import type { PostListItem as PostListItemType, PostType } from '../../data/schemas/post.schema';
 
-const TABS: { key: PostType | undefined; label: string }[] = [
-  { key: undefined, label: '전체' },
-  { key: 'NOTICE', label: '공지' },
-  { key: 'GENERAL', label: '일반' },
-  { key: 'INQUIRY', label: '문의' },
+const ROUTES = [
+  { key: 'all', title: '전체' },
+  { key: 'NOTICE', title: '공지' },
+  { key: 'GENERAL', title: '일반' },
+  { key: 'INQUIRY', title: '문의' },
 ];
 
 interface BoardViewProps {
@@ -40,78 +41,84 @@ export function BoardView({
   onSelectPost,
   onWrite,
 }: BoardViewProps) {
+  const layout = useWindowDimensions();
+  const tabIndex = ROUTES.findIndex((r) => r.key === (activeTab ?? 'all'));
+
+  const handleIndexChange = (i: number) => {
+    const key = ROUTES[i]?.key;
+    onTabChange(key === 'all' ? undefined : (key as PostType));
+  };
+
+  const renderScene = () => (
+    <EmptyBoundary
+      data={posts}
+      fallback={
+        <View style={styles.emptyWrapper}>
+          <TextBox variant="body2" color={colors.grey400}>게시글이 없습니다.</TextBox>
+        </View>
+      }
+    >
+      <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <PostListItem post={item} onPress={() => onSelectPost(item.id)} />
+        )}
+        onEndReached={hasNextPage ? onLoadMore : undefined}
+        onEndReachedThreshold={0.5}
+        ItemSeparatorComponent={() => <Spacing size={0} />}
+        refreshControl={
+          <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        }
+      />
+    </EmptyBoundary>
+  );
+
   return (
     <ScreenLayout>
-      {/* 탭 */}
-      <View style={styles.tabBar}>
-        {TABS.map((tab) => {
-          const isActive = tab.key === activeTab;
-          return (
-            <TouchableOpacity
-              key={String(tab.key)}
-              style={[styles.tab, isActive && styles.tabActive]}
-              onPress={() => onTabChange(tab.key)}
-            >
-              <TextBox
-                variant="body2Bold"
-                color={isActive ? colors.blue500 : colors.grey500}
-              >
-                {tab.label}
-              </TextBox>
-            </TouchableOpacity>
-          );
-        })}
-        {canWrite ? (
-          <TouchableOpacity style={styles.writeBtn} onPress={onWrite}>
-            <TextBox variant="body2Bold" color={colors.blue500}>글쓰기</TextBox>
-          </TouchableOpacity>
-        ) : null}
-      </View>
-
-      <EmptyBoundary
-        data={posts}
-        fallback={
-          <View style={styles.emptyWrapper}>
-            <TextBox variant="body2" color={colors.grey400}>게시글이 없습니다.</TextBox>
+      <TabView
+        style={{ flex: 1 }}
+        navigationState={{ index: tabIndex, routes: ROUTES }}
+        renderScene={renderScene}
+        onIndexChange={handleIndexChange}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={(props) => (
+          <View style={styles.tabBarWrapper}>
+            <View style={{ flex: 1 }}>
+              <TabBar
+                {...props}
+                style={{
+                  backgroundColor: colors.background,
+                  elevation: 0,
+                  shadowOpacity: 0,
+                }}
+                indicatorStyle={{ backgroundColor: colors.blue500, height: 2 }}
+                activeColor={colors.blue500}
+                inactiveColor={colors.grey500}
+                tabStyle={{ paddingVertical: spacing[1] }}
+                pressColor={colors.blue50}
+              />
+            </View>
+            {canWrite ? (
+              <TouchableOpacity style={styles.writeBtn} onPress={onWrite}>
+                <TextBox variant="body2Bold" color={colors.blue500}>글쓰기</TextBox>
+              </TouchableOpacity>
+            ) : null}
           </View>
-        }
-      >
-        <FlatList
-          data={posts}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <PostListItem post={item} onPress={() => onSelectPost(item.id)} />
-          )}
-          onEndReached={hasNextPage ? onLoadMore : undefined}
-          onEndReachedThreshold={0.5}
-          ItemSeparatorComponent={() => <Spacing size={0} />}
-          refreshControl={
-            <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
-          }
-        />
-      </EmptyBoundary>
+        )}
+      />
     </ScreenLayout>
   );
 }
 
 const styles = StyleSheet.create({
-  tabBar: {
+  tabBarWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: colors.grey100,
   },
-  tab: {
-    paddingHorizontal: spacing[4],
-    paddingVertical: spacing[3],
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: colors.blue500,
-  },
   writeBtn: {
-    marginLeft: 'auto',
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
   },

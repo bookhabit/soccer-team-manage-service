@@ -15,8 +15,7 @@ export type {
   BottomCTADoubleProps,
   FixedBottomCTAProps,
 } from './components/layout/BottomCTA';
-export { SafeAreaWrapper, ScreenLayout } from './components/layout/MobileLayout';
-export type { SafeAreaWrapperProps } from './components/layout/MobileLayout';
+export { ScreenLayout } from './components/layout/MobileLayout';
 
 // General
 export { default as TextBox } from './components/general/TextBox';
@@ -24,7 +23,11 @@ export { DfImage, AvatarImage, ThumbnailImage, CoverImage } from './components/g
 export { Button } from './components/general/Button';
 export type { ButtonProps, ButtonVariant, ButtonSize } from './components/general/Button';
 export { IconButton } from './components/general/IconButton';
-export type { IconButtonProps, IconButtonVariant, IconButtonSize } from './components/general/IconButton';
+export type {
+  IconButtonProps,
+  IconButtonVariant,
+  IconButtonSize,
+} from './components/general/IconButton';
 export { Input } from './components/general/Input';
 export type { InputProps } from './components/general/Input';
 export { Select } from './components/general/Select';

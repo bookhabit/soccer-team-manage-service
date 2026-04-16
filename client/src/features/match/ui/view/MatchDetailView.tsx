@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
+  useWindowDimensions,
 } from 'react-native';
+import { TabView, TabBar } from 'react-native-tab-view';
 import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, colors, spacing } from '@ui';
 import { GoalTimeline } from '../components/GoalTimeline';
 import { MomVoteList } from '../components/MomVoteList';
@@ -21,7 +23,12 @@ import type {
 } from '../../data/schemas/match.schema';
 import type { SubmitOpponentRatingInput } from '../../data/schemas/match.schema';
 
-type DetailTab = 'record' | 'comments' | 'videos' | 'rating';
+const ALL_ROUTES = [
+  { key: 'record', title: '기록' },
+  { key: 'comments', title: '댓글' },
+  { key: 'videos', title: '영상' },
+  { key: 'rating', title: '상대팀 평가' },
+];
 
 interface MatchDetailViewProps {
   match: MatchDetail;
@@ -59,13 +66,6 @@ interface MatchDetailViewProps {
   onSubmitRating: (dto: SubmitOpponentRatingInput) => void;
 }
 
-const TABS: { key: DetailTab; label: string }[] = [
-  { key: 'record', label: '기록' },
-  { key: 'comments', label: '댓글' },
-  { key: 'videos', label: '영상' },
-  { key: 'rating', label: '상대팀 평가' },
-];
-
 export function MatchDetailView({
   match,
   goals,
@@ -101,7 +101,10 @@ export function MatchDetailView({
   onRatingMvpNameChange,
   onSubmitRating,
 }: MatchDetailViewProps) {
-  const [activeTab, setActiveTab] = useState<DetailTab>('record');
+  const layout = useWindowDimensions();
+  const [index, setIndex] = useState(0);
+
+  const routes = match.type === 'LEAGUE' ? ALL_ROUTES : ALL_ROUTES.slice(0, 3);
 
   const startDate = new Date(match.startAt);
   const dateLabel = startDate.toLocaleDateString('ko-KR', {
@@ -110,6 +113,68 @@ export function MatchDetailView({
     day: 'numeric',
     weekday: 'short',
   });
+
+  const renderScene = ({ route }: { route: { key: string } }) => {
+    switch (route.key) {
+      case 'record':
+        return (
+          <RecordTab
+            match={match}
+            goals={goals}
+            momResult={momResult}
+            participants={participants}
+            myUserId={myUserId}
+            hasVotedMom={hasVotedMom}
+            isMomDeadlinePassed={isMomDeadlinePassed}
+            selectedMomUserId={selectedMomUserId}
+            isSubmittingMom={isSubmittingMom}
+            participantNames={participantNames}
+            onMomSelect={onMomSelect}
+            onSubmitMom={onSubmitMom}
+          />
+        );
+      case 'comments':
+        return (
+          <CommentsTab
+            comments={comments}
+            myUserId={myUserId}
+            commentInput={commentInput}
+            isSubmittingComment={isSubmittingComment}
+            onCommentChange={onCommentChange}
+            onSubmitComment={onSubmitComment}
+            onDeleteComment={onDeleteComment}
+          />
+        );
+      case 'videos':
+        return (
+          <VideosTab
+            videos={videos}
+            videoUrlInput={videoUrlInput}
+            isSubmittingVideo={isSubmittingVideo}
+            onVideoUrlChange={onVideoUrlChange}
+            onRegisterVideo={onRegisterVideo}
+            onDeleteVideo={onDeleteVideo}
+          />
+        );
+      case 'rating':
+        return (
+          <RatingTab
+            match={match}
+            score={ratingScore}
+            review={ratingReview}
+            mvpName={ratingMvpName}
+            isSubmitting={isSubmittingRating}
+            hasSubmitted={hasSubmittedRating}
+            onScoreChange={onRatingScoreChange}
+            onReviewChange={onRatingReviewChange}
+            onMvpNameChange={onRatingMvpNameChange}
+            onSubmit={onSubmitRating}
+          />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <ScreenLayout>
@@ -129,84 +194,31 @@ export function MatchDetailView({
         )}
       </View>
 
-      {/* 탭 네비게이션 */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.tabs}
-      >
-        {TABS.filter((t) => t.key !== 'rating' || match.type === 'LEAGUE').map((tab) => {
-          const isActive = activeTab === tab.key;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              style={[styles.tab, isActive && styles.tabActive]}
-              onPress={() => setActiveTab(tab.key)}
-              activeOpacity={0.7}
-            >
-              <TextBox
-                variant={isActive ? 'body2Bold' : 'body2'}
-                color={isActive ? colors.blue500 : colors.grey500}
-              >
-                {tab.label}
-              </TextBox>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
-
-      {/* 탭 컨텐츠 */}
-      {activeTab === 'record' && (
-        <RecordTab
-          match={match}
-          goals={goals}
-          momResult={momResult}
-          participants={participants}
-          myUserId={myUserId}
-          hasVotedMom={hasVotedMom}
-          isMomDeadlinePassed={isMomDeadlinePassed}
-          selectedMomUserId={selectedMomUserId}
-          isSubmittingMom={isSubmittingMom}
-          participantNames={participantNames}
-          onMomSelect={onMomSelect}
-          onSubmitMom={onSubmitMom}
-        />
-      )}
-      {activeTab === 'comments' && (
-        <CommentsTab
-          comments={comments}
-          myUserId={myUserId}
-          commentInput={commentInput}
-          isSubmittingComment={isSubmittingComment}
-          onCommentChange={onCommentChange}
-          onSubmitComment={onSubmitComment}
-          onDeleteComment={onDeleteComment}
-        />
-      )}
-      {activeTab === 'videos' && (
-        <VideosTab
-          videos={videos}
-          videoUrlInput={videoUrlInput}
-          isSubmittingVideo={isSubmittingVideo}
-          onVideoUrlChange={onVideoUrlChange}
-          onRegisterVideo={onRegisterVideo}
-          onDeleteVideo={onDeleteVideo}
-        />
-      )}
-      {activeTab === 'rating' && match.type === 'LEAGUE' && (
-        <RatingTab
-          match={match}
-          score={ratingScore}
-          review={ratingReview}
-          mvpName={ratingMvpName}
-          isSubmitting={isSubmittingRating}
-          hasSubmitted={hasSubmittedRating}
-          onScoreChange={onRatingScoreChange}
-          onReviewChange={onRatingReviewChange}
-          onMvpNameChange={onRatingMvpNameChange}
-          onSubmit={onSubmitRating}
-        />
-      )}
+      <TabView
+        style={{ flex: 1 }}
+        navigationState={{ index, routes }}
+        renderScene={renderScene}
+        onIndexChange={setIndex}
+        initialLayout={{ width: layout.width }}
+        renderTabBar={(props) => (
+          <TabBar
+            {...props}
+            style={{
+              backgroundColor: colors.background,
+              borderBottomWidth: 1,
+              borderBottomColor: colors.grey100,
+              elevation: 0,
+              shadowOpacity: 0,
+            }}
+            indicatorStyle={{ backgroundColor: colors.blue500, height: 2 }}
+            activeColor={colors.blue500}
+            inactiveColor={colors.grey500}
+            tabStyle={{ paddingVertical: spacing[1] }}
+            pressColor={colors.blue50}
+            scrollEnabled={routes.length > 3}
+          />
+        )}
+      />
     </ScreenLayout>
   );
 }
@@ -508,22 +520,6 @@ const styles = StyleSheet.create({
   },
   score: {
     marginTop: spacing[1],
-  },
-  tabs: {
-    flexDirection: 'row',
-    paddingHorizontal: spacing[4],
-    gap: spacing[2],
-    paddingVertical: spacing[2],
-    borderBottomWidth: 1,
-    borderBottomColor: colors.grey100,
-  },
-  tab: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-  },
-  tabActive: {
-    borderBottomWidth: 2,
-    borderBottomColor: colors.blue500,
   },
   tabContent: {
     padding: spacing[4],
