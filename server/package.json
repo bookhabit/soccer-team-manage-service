@@ -16,6 +16,8 @@
     "seed:club": "ts-node --project tsconfig.seed.json prisma/seeds/club.seed.ts",
     "seed:match": "ts-node --project tsconfig.seed.json prisma/seeds/match.seed.ts",
     "seed:matching": "ts-node --project tsconfig.seed.json prisma/seeds/matching.seed.ts",
+    "seed:mercenary": "ts-node --project tsconfig.seed.json prisma/seeds/mercenary.seed.ts",
+    "setup:data": "prisma migrate dev --name add-mercenary-feature && npm run db:seed && npm run seed:club && npm run seed:match && npm run seed:matching && npm run seed:mercenary",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --testPathPattern=e2e"

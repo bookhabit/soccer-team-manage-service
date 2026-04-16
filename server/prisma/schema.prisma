@@ -149,8 +149,10 @@ model User {
   matchAttendances  MatchAttendance[]   // 출석 투표 응답
   matchParticipants MatchParticipant[]  // 실제 경기 참가 기록
   matchComments     MatchComment[]      // 경기 코멘트
-  matchPosts        MatchPost[]         // 등록한 매칭 게시글
-  matchApplications MatchApplication[]  // 신청한 매칭
+  matchPosts              MatchPost[]            // 등록한 매칭 게시글
+  matchApplications       MatchApplication[]     // 신청한 매칭
+  mercenaryAvailabilities MercenaryAvailability[] // 용병 가능 게시글
+  mercenaryApplications   MercenaryApplication[] // 용병 지원 목록
 
   @@map("users")
 }
@@ -177,9 +179,10 @@ model Region {
   code    String @unique // 행정구역 코드 (예: 11680)
 
   // ── Relations ──
-  users      User[]      // 이 지역을 선호 지역으로 설정한 유저들
-  clubs      Club[]      // 이 지역에 소속된 클럽들
-  matchPosts MatchPost[] // 이 지역의 매칭 게시글
+  users           User[]           // 이 지역을 선호 지역으로 설정한 유저들
+  clubs           Club[]           // 이 지역에 소속된 클럽들
+  matchPosts      MatchPost[]      // 이 지역의 매칭 게시글
+  mercenaryPosts  MercenaryPost[]  // 이 지역의 용병 구함 게시글
 
   @@map("regions")
 }
@@ -255,8 +258,10 @@ model Club {
   dissolveVotes       ClubDissolveVote[] // 해산 투표 이력
   posts               Post[]            // 클럽 게시판 글
   matches             Match[]           // 경기 목록
-  matchPosts          MatchPost[]       // 등록한 매칭 게시글
-  matchApplications   MatchApplication[] // 신청한 매칭
+  matchPosts             MatchPost[]            // 등록한 매칭 게시글
+  matchApplications      MatchApplication[]     // 신청한 매칭
+  mercenaryPosts         MercenaryPost[]        // 용병 구함 게시글
+  mercenaryRecruitments  MercenaryRecruitment[] // 영입 신청 목록
 
   @@map("clubs")
 }
@@ -619,6 +624,141 @@ model MatchRecordHistory {
   match      Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("match_record_histories")
+}
+
+// ─── Mercenary (용병) ─────────────────────────────────────────────────────────
+
+enum MercenaryPostStatus {
+  OPEN   // 모집 중
+  CLOSED // 마감 (인원 충족 자동 마감)
+}
+
+enum MercenaryApplicationStatus {
+  PENDING  // 대기 중
+  ACCEPTED // 수락됨
+  REJECTED // 거절됨
+}
+
+enum NoShowReportStatus {
+  PENDING  // 검토 대기
+  APPROVED // 승인됨 (노쇼 인정)
+  REJECTED // 기각됨
+}
+
+// 용병 구함 게시글. 클럽 관리자가 등록하고 개인 플레이어가 지원하는 방식.
+model MercenaryPost {
+  id            String              @id @default(cuid())
+  clubId        String
+  createdBy     String              // userId (FK 없음 — 탈퇴 후 보존)
+  regionId      String
+  positions     PlayerPosition[]    // 구하는 포지션 (복수)
+  requiredCount Int                 // 필요 인원
+  acceptedCount Int                 @default(0)  // 현재 수락 인원
+  matchDate     DateTime            // 경기 날짜
+  startTime     String              // HH:mm
+  endTime       String              // HH:mm
+  location      String              // 구장 이름 (max 100)
+  address       String?             // 상세 주소 (max 200)
+  level         ClubLevel
+  fee           Int                 @default(0)  // 0 = 무료
+  description   String?             // 상세 설명 (max 500)
+  contactName   String              // 담당자 이름
+  contactPhone  String              // 담당자 연락처
+  status        MercenaryPostStatus @default(OPEN)
+  isDeleted     Boolean             @default(false)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  club          Club                   @relation(fields: [clubId], references: [id])
+  region        Region                 @relation(fields: [regionId], references: [id])
+  applications  MercenaryApplication[]
+
+  @@index([matchDate])
+  @@index([regionId])
+  @@index([level])
+  @@index([clubId])
+  @@map("mercenary_posts")
+}
+
+// 용병 가능 게시글. 개인 플레이어가 용병 활동을 등록하는 방식.
+model MercenaryAvailability {
+  id             String         @id @default(cuid())
+  userId         String
+  positions      PlayerPosition[] // 가능 포지션 (복수)
+  availableDates DateTime[]       // 가능 날짜 배열 — MAX 경과 시 만료
+  regionIds      String[]         // 가능 지역 ID 배열
+  timeSlot       String?          // 가능 시간대 (자유 텍스트, max 100)
+  bio            String?          // 자기소개 (max 500)
+  acceptsFee     Boolean          @default(true)
+  isDeleted      Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  user           User                   @relation(fields: [userId], references: [id])
+  recruitments   MercenaryRecruitment[]
+
+  @@index([userId])
+  @@map("mercenary_availabilities")
+}
+
+// 입단 신청. 개인 플레이어가 용병 구함 게시글에 지원.
+model MercenaryApplication {
+  id          String                     @id @default(cuid())
+  postId      String
+  applicantId String                     // FK → User
+  message     String?                    // max 100자
+  status      MercenaryApplicationStatus @default(PENDING)
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+
+  post          MercenaryPost  @relation(fields: [postId], references: [id])
+  applicant     User           @relation(fields: [applicantId], references: [id])
+  noShowReports NoShowReport[] @relation("AppNoShowReport")
+
+  @@unique([postId, applicantId])
+  @@map("mercenary_applications")
+}
+
+// 영입 신청. 클럽 관리자가 용병 가능 게시글에 영입 신청.
+model MercenaryRecruitment {
+  id               String                     @id @default(cuid())
+  availabilityId   String
+  recruitingClubId String                     // FK → Club
+  recruitedBy      String                     // 신청한 관리자 userId (FK 없음)
+  message          String?                    // max 100자
+  contactName      String                     // 팀 담당자 이름
+  contactPhone     String                     // 팀 담당자 연락처
+  status           MercenaryApplicationStatus @default(PENDING)
+  createdAt        DateTime                   @default(now())
+  updatedAt        DateTime                   @updatedAt
+
+  availability  MercenaryAvailability @relation(fields: [availabilityId], references: [id])
+  recruitingClub Club                  @relation(fields: [recruitingClubId], references: [id])
+  noShowReports  NoShowReport[]        @relation("RecNoShowReport")
+
+  @@unique([availabilityId, recruitingClubId])
+  @@map("mercenary_recruitments")
+}
+
+// 노쇼 신고. 경기 날짜 이후, 수락된 신청에 대해 신고 가능.
+model NoShowReport {
+  id             String             @id @default(cuid())
+  reporterId     String             // 신고자 userId (FK 없음)
+  reportedUserId String             // 피신고자 userId (FK 없음)
+  applicationId  String?            // FK → MercenaryApplication (입단 기반)
+  recruitmentId  String?            // FK → MercenaryRecruitment (영입 기반)
+  reason         String             // 신고 사유 (max 200자)
+  status         NoShowReportStatus @default(PENDING)
+  reviewedBy     String?            // 운영자 userId (FK 없음)
+  reviewedAt     DateTime?
+  createdAt      DateTime           @default(now())
+
+  application MercenaryApplication? @relation("AppNoShowReport", fields: [applicationId], references: [id])
+  recruitment MercenaryRecruitment? @relation("RecNoShowReport", fields: [recruitmentId], references: [id])
+
+  @@unique([reporterId, applicationId])
+  @@unique([reporterId, recruitmentId])
+  @@map("no_show_reports")
 }
 
 // ─── MatchPost (매칭 게시글) ──────────────────────────────────────────────────

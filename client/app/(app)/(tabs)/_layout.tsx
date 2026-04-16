@@ -79,6 +79,20 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="mercenary"
+        options={{
+          title: '용병',
+          tabBarIcon: ({ color, focused }) => (
+            <TabIcon
+              name="person-add-outline"
+              focusedName="person-add"
+              color={color}
+              focused={focused}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="vote"
         options={{
           title: '투표',

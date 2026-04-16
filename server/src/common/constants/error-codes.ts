@@ -85,6 +85,34 @@ export const ErrorCode = {
   MATCH_APPLICATION_001: 'MATCH_APPLICATION_001', // 존재하지 않는 신청 404
   MATCH_APPLICATION_002: 'MATCH_APPLICATION_002', // 이미 처리된 신청 (ACCEPTED/REJECTED) 409
   MATCH_APPLICATION_003: 'MATCH_APPLICATION_003', // 신청자 연락처(phone) 미설정 400
+
+  // ─── MercenaryPost ─────────────────────────────────────────────────────────
+  MERCENARY_POST_001: 'MERCENARY_POST_001', // 존재하지 않는 게시글 404
+  MERCENARY_POST_002: 'MERCENARY_POST_002', // 수정/삭제 권한 없음 403
+  MERCENARY_POST_003: 'MERCENARY_POST_003', // OPEN 상태 아님 (마감·수정 불가) 409
+  MERCENARY_POST_004: 'MERCENARY_POST_004', // 만료된 게시글 410
+  MERCENARY_POST_005: 'MERCENARY_POST_005', // 본인 팀 게시글 지원 불가 403
+  MERCENARY_POST_006: 'MERCENARY_POST_006', // 이미 지원한 게시글 409
+  MERCENARY_POST_007: 'MERCENARY_POST_007', // 지원자 목록 조회 권한 없음 403
+
+  // ─── MercenaryAvailability ─────────────────────────────────────────────────
+  MERCENARY_AVAIL_001: 'MERCENARY_AVAIL_001', // 존재하지 않는 게시글 404
+  MERCENARY_AVAIL_002: 'MERCENARY_AVAIL_002', // 수정/삭제 권한 없음 403
+  MERCENARY_AVAIL_003: 'MERCENARY_AVAIL_003', // 만료된 게시글 410
+  MERCENARY_AVAIL_004: 'MERCENARY_AVAIL_004', // 이미 영입 신청한 게시글 409
+  MERCENARY_AVAIL_005: 'MERCENARY_AVAIL_005', // 본인 게시글에 영입 신청 불가 403
+
+  // ─── MercenaryApplication / Recruitment ────────────────────────────────────
+  MERCENARY_APP_001: 'MERCENARY_APP_001', // 존재하지 않는 신청 404
+  MERCENARY_APP_002: 'MERCENARY_APP_002', // 이미 처리된 신청 409
+
+  // ─── Blacklist ─────────────────────────────────────────────────────────────
+  MERCENARY_BLACKLIST: 'MERCENARY_BLACKLIST', // 블랙리스트 유저 403
+
+  // ─── NoShowReport ──────────────────────────────────────────────────────────
+  NO_SHOW_REPORT_001: 'NO_SHOW_REPORT_001', // 신고 가능한 수락 신청 없음 403
+  NO_SHOW_REPORT_002: 'NO_SHOW_REPORT_002', // 경기 날짜 이전 신고 불가 422
+  NO_SHOW_REPORT_003: 'NO_SHOW_REPORT_003', // 이미 신고됨 409
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

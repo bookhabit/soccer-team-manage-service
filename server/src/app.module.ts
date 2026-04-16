@@ -10,6 +10,8 @@ import { ClubModule } from './features/club/club.module';
 import { PostModule } from './features/post/post.module';
 import { MatchModule } from './features/match/match.module';
 import { MatchPostsModule } from './features/match-posts/match-posts.module';
+import { MercenaryPostsModule } from './features/mercenary-posts/mercenary-posts.module';
+import { MercenaryAvailabilitiesModule } from './features/mercenary-availabilities/mercenary-availabilities.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -26,6 +28,8 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     PostModule,
     MatchModule,
     MatchPostsModule,
+    MercenaryPostsModule,
+    MercenaryAvailabilitiesModule,
   ],
   providers: [
     // Guard 순서 보장: JWT 검증 → Roles 검사

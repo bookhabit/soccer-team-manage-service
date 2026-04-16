@@ -10,6 +10,46 @@ import { useAuthStore } from '@/src/shared/store/useAuthStore';
 
 const SECTIONS = [
   {
+    title: 'Mercenary 기능 테스트',
+    accounts: [
+      {
+        label: '마무리FC 주장 (용병 구함 등록자)',
+        description: '용병 구함 등록·지원자 수락/거절·CLOSED 자동 전환 확인 (phone=010-1111-2222)',
+        email: 'captain@mamurifc.test',
+      },
+      {
+        label: '마무리FC 부주장 (phone 없음)',
+        description: 'phone 미설정 → 등록 진입 시 AlertDialog 확인 (MERC-05-003)',
+        email: 'vice@mamurifc.test',
+      },
+      {
+        label: '마무리FC 일반 멤버 (권한 없음)',
+        description: '일반 멤버 → 용병 구함 등록 버튼 미노출, 지원자 관리 403 확인',
+        email: 'member1@mamurifc.test',
+      },
+      {
+        label: '카동FC 주장 (영입 신청자)',
+        description: '용병 가능 게시글 영입 신청, 용병 구함 지원 (phone=010-3333-4444)',
+        email: 'captain@kadongfc.test',
+      },
+      {
+        label: '용병 가능 등록 유저 (영입 수락/거절)',
+        description: '용병 가능 등록 + AVAIL_WITH_RECRUIT에 마무리FC PENDING 영입 신청 존재',
+        email: 'player@mercenary.test',
+      },
+      {
+        label: '블랙리스트 유저 (mannerScore=15)',
+        description: '용병 구함/가능 등록 시 403 MERCENARY_BLACKLIST 에러 확인',
+        email: 'blacklist@mercenary.test',
+      },
+      {
+        label: '클럽 미소속 유저',
+        description: '용병 가능 등록 + 용병 구함 게시글 지원하기 확인',
+        email: 'newbie@test.com',
+      },
+    ],
+  },
+  {
     title: 'Matching 기능 테스트',
     accounts: [
       {
@@ -219,7 +259,7 @@ export default function TestLoginScreen() {
 
         {/* 안내 */}
         <TextBox variant="caption" color={colors.grey400} style={{ textAlign: 'center' }}>
-          seed 실행: cd server {'&&'} npm run seed:club {'&&'} npm run seed:match {'&&'} npm run seed:matching
+          seed 실행: npm run seed:club → seed:match → seed:matching → seed:mercenary
         </TextBox>
       </ScrollView>
     </SafeAreaView>

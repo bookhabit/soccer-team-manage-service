@@ -146,9 +146,33 @@ UNDECIDED UNDECIDED
     
 
 
+        MercenaryPostStatus {
+            OPEN OPEN
+CLOSED CLOSED
+        }
+    
+
+
+        MercenaryApplicationStatus {
+            PENDING PENDING
+ACCEPTED ACCEPTED
+REJECTED REJECTED
+        }
+    
+
+
+        NoShowReportStatus {
+            PENDING PENDING
+APPROVED APPROVED
+REJECTED REJECTED
+        }
+    
+
+
         MatchPostStatus {
             OPEN OPEN
 MATCHED MATCHED
+CANCELLED CANCELLED
         }
     
 
@@ -404,6 +428,76 @@ MIXED MIXED
     }
   
 
+  "mercenary_posts" {
+    String id "🗝️"
+    String createdBy 
+    PlayerPosition positions 
+    Int requiredCount 
+    Int acceptedCount 
+    DateTime matchDate 
+    String startTime 
+    String endTime 
+    String location 
+    String address "❓"
+    ClubLevel level 
+    Int fee 
+    String description "❓"
+    String contactName 
+    String contactPhone 
+    MercenaryPostStatus status 
+    Boolean isDeleted 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "mercenary_availabilities" {
+    String id "🗝️"
+    PlayerPosition positions 
+    DateTime availableDates 
+    String regionIds 
+    String timeSlot "❓"
+    String bio "❓"
+    Boolean acceptsFee 
+    Boolean isDeleted 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "mercenary_applications" {
+    String id "🗝️"
+    String message "❓"
+    MercenaryApplicationStatus status 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "mercenary_recruitments" {
+    String id "🗝️"
+    String recruitedBy 
+    String message "❓"
+    String contactName 
+    String contactPhone 
+    MercenaryApplicationStatus status 
+    DateTime createdAt 
+    DateTime updatedAt 
+    }
+  
+
+  "no_show_reports" {
+    String id "🗝️"
+    String reporterId 
+    String reportedUserId 
+    String reason 
+    NoShowReportStatus status 
+    String reviewedBy "❓"
+    DateTime reviewedAt "❓"
+    DateTime createdAt 
+    }
+  
+
   "match_posts" {
     String id "🗝️"
     DateTime matchDate 
@@ -480,6 +574,22 @@ MIXED MIXED
     "match_videos" }o--|| matches : "match"
     "opponent_ratings" |o--|| matches : "match"
     "match_record_histories" }o--|| matches : "match"
+    "mercenary_posts" |o--}o "PlayerPosition" : "enum:positions"
+    "mercenary_posts" |o--|| "ClubLevel" : "enum:level"
+    "mercenary_posts" |o--|| "MercenaryPostStatus" : "enum:status"
+    "mercenary_posts" }o--|| clubs : "club"
+    "mercenary_posts" }o--|| regions : "region"
+    "mercenary_availabilities" |o--}o "PlayerPosition" : "enum:positions"
+    "mercenary_availabilities" }o--|| users : "user"
+    "mercenary_applications" |o--|| "MercenaryApplicationStatus" : "enum:status"
+    "mercenary_applications" }o--|| mercenary_posts : "post"
+    "mercenary_applications" }o--|| users : "applicant"
+    "mercenary_recruitments" |o--|| "MercenaryApplicationStatus" : "enum:status"
+    "mercenary_recruitments" }o--|| mercenary_availabilities : "availability"
+    "mercenary_recruitments" }o--|| clubs : "recruitingClub"
+    "no_show_reports" |o--|| "NoShowReportStatus" : "enum:status"
+    "no_show_reports" }o--|o mercenary_applications : "application"
+    "no_show_reports" }o--|o mercenary_recruitments : "recruitment"
     "match_posts" |o--|| "MatchGender" : "enum:gender"
     "match_posts" |o--|| "ClubLevel" : "enum:level"
     "match_posts" |o--|| "MatchPostStatus" : "enum:status"
