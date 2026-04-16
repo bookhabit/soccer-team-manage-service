@@ -15,6 +15,7 @@ import { MercenaryAvailabilitiesModule } from './features/mercenary-availabiliti
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { MatchFeedModule } from './features/match-feed/match-feed.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
     MatchPostsModule,
     MercenaryPostsModule,
     MercenaryAvailabilitiesModule,
+    MatchFeedModule,
   ],
   providers: [
     // Guard 순서 보장: JWT 검증 → Roles 검사

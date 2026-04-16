@@ -102,6 +102,10 @@ export const ErrorCode = {
   MERCENARY_AVAIL_004: 'MERCENARY_AVAIL_004', // 이미 영입 신청한 게시글 409
   MERCENARY_AVAIL_005: 'MERCENARY_AVAIL_005', // 본인 게시글에 영입 신청 불가 403
 
+  // ─── MatchFeed ─────────────────────────────────────────────────────────────
+  MATCH_FEED_001: 'MATCH_FEED_001', // district 필터는 province와 함께 사용해야 합니다. 400
+  MATCH_FEED_002: 'MATCH_FEED_002', // 날짜 범위는 최대 6개월까지 설정할 수 있습니다. 400
+
   // ─── MercenaryApplication / Recruitment ────────────────────────────────────
   MERCENARY_APP_001: 'MERCENARY_APP_001', // 존재하지 않는 신청 404
   MERCENARY_APP_002: 'MERCENARY_APP_002', // 이미 처리된 신청 409
