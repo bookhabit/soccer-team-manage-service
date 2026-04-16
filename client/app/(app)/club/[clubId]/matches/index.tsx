@@ -9,7 +9,7 @@ export default function MatchHistoryScreen() {
   return (
     <MatchHistoryContainer
       clubId={clubId}
-      onMatchPress={(matchId) => router.push(`/(app)/vote/${matchId}` as Href)}
+      onMatchPress={(matchId) => router.push(`/(app)/vote/${matchId}/detail` as Href)}
     />
   );
 }

@@ -33,7 +33,14 @@ function formatDateTime(dateStr: string, startTime: string, endTime: string) {
   return `${d.getFullYear()}.${d.getMonth() + 1}.${d.getDate()}(${days[d.getDay()]}) ${startTime}~${endTime}`;
 }
 
-export function MercenaryPostDetailView({ post, onApply, onManageApplications, onEdit, onDelete, isApplying }: Props) {
+export function MercenaryPostDetailView({
+  post,
+  onApply,
+  onManageApplications,
+  onEdit,
+  onDelete,
+  isApplying,
+}: Props) {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
@@ -43,18 +50,26 @@ export function MercenaryPostDetailView({ post, onApply, onManageApplications, o
 
         {/* 팀 정보 */}
         <View style={styles.section}>
-          <TextBox variant="heading3" color={colors.grey900}>{post.clubName}</TextBox>
-          <TextBox variant="body2" color={colors.grey500}>{LEVEL_LABEL[post.clubLevel] ?? post.clubLevel}</TextBox>
+          <TextBox variant="heading3" color={colors.grey900}>
+            {post.clubName}
+          </TextBox>
+          <TextBox variant="body2" color={colors.grey500}>
+            {LEVEL_LABEL[post.clubLevel] ?? post.clubLevel}
+          </TextBox>
         </View>
 
         {/* 구하는 용병 정보 */}
         <View style={styles.section}>
-          <TextBox variant="body2Bold" color={colors.grey700}>구하는 용병</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey700}>
+            구하는 용병
+          </TextBox>
           <Spacing size={2} />
           <Flex direction="row" gap={spacing[2]}>
             {post.positions.map((p) => (
               <View key={p} style={styles.posChip}>
-                <TextBox variant="captionBold" color={colors.primary}>{POSITION_LABEL[p] ?? p}</TextBox>
+                <TextBox variant="captionBold" color={colors.primary}>
+                  {POSITION_LABEL[p] ?? p}
+                </TextBox>
               </View>
             ))}
           </Flex>
@@ -66,21 +81,36 @@ export function MercenaryPostDetailView({ post, onApply, onManageApplications, o
 
         {/* 경기 정보 */}
         <View style={styles.section}>
-          <TextBox variant="body2Bold" color={colors.grey700}>경기 정보</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey700}>
+            경기 정보
+          </TextBox>
           <Spacing size={2} />
-          <InfoRow label="일시" value={formatDateTime(post.matchDate, post.startTime, post.endTime)} />
-          <InfoRow label="장소" value={`${post.location}${post.address ? ` (${post.address})` : ''}`} />
+          <InfoRow
+            label="일시"
+            value={formatDateTime(post.matchDate, post.startTime, post.endTime)}
+          />
+          <InfoRow
+            label="장소"
+            value={`${post.location}${post.address ? ` (${post.address})` : ''}`}
+          />
           <InfoRow label="실력" value={LEVEL_LABEL[post.level] ?? post.level} />
-          <InfoRow label="참가비" value={post.fee === 0 ? '무료' : `${post.fee.toLocaleString()}원`} />
+          <InfoRow
+            label="참가비"
+            value={post.fee === 0 ? '무료' : `${post.fee.toLocaleString()}원`}
+          />
           <InfoRow label="지역" value={`${post.regionName} ${post.regionSigungu}`} />
         </View>
 
         {/* 상세 설명 */}
         {post.description && (
           <View style={styles.section}>
-            <TextBox variant="body2Bold" color={colors.grey700}>상세 설명</TextBox>
+            <TextBox variant="body2Bold" color={colors.grey700}>
+              상세 설명
+            </TextBox>
             <Spacing size={2} />
-            <TextBox variant="body2" color={colors.grey600}>{post.description}</TextBox>
+            <TextBox variant="body2" color={colors.grey600}>
+              {post.description}
+            </TextBox>
           </View>
         )}
 
@@ -119,10 +149,10 @@ export function MercenaryPostDetailView({ post, onApply, onManageApplications, o
             {post.alreadyApplied
               ? '지원 완료'
               : post.isExpired
-              ? '만료된 게시글'
-              : post.status === 'CLOSED'
-              ? '마감된 게시글'
-              : '지원하기'}
+                ? '만료된 게시글'
+                : post.status === 'CLOSED'
+                  ? '마감된 게시글'
+                  : '지원하기'}
           </Button>
         </BottomCTASingle>
       )}
@@ -133,8 +163,12 @@ export function MercenaryPostDetailView({ post, onApply, onManageApplications, o
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Flex direction="row" style={styles.infoRow}>
-      <TextBox variant="body2" color={colors.grey500} style={styles.infoLabel}>{label}</TextBox>
-      <TextBox variant="body2" color={colors.grey900} style={styles.infoValue}>{value}</TextBox>
+      <TextBox variant="body2" color={colors.grey500} style={styles.infoLabel}>
+        {label}
+      </TextBox>
+      <TextBox variant="body2" color={colors.grey900} style={styles.infoValue}>
+        {value}
+      </TextBox>
     </Flex>
   );
 }

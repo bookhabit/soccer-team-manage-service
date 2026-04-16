@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -7,7 +7,11 @@ import {
   TextInput,
   StyleSheet,
   useWindowDimensions,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabView, TabBar } from 'react-native-tab-view';
 import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, colors, spacing } from '@ui';
 import { GoalTimeline } from '../components/GoalTimeline';
@@ -30,7 +34,7 @@ const ALL_ROUTES = [
   { key: 'rating', title: '상대팀 평가' },
 ];
 
-interface MatchDetailViewProps {
+interface ClubMatchDetailViewProps {
   match: MatchDetail;
   goals: Goal[];
   momResult: MomResult | null;
@@ -66,7 +70,7 @@ interface MatchDetailViewProps {
   onSubmitRating: (dto: SubmitOpponentRatingInput) => void;
 }
 
-export function MatchDetailView({
+export function ClubMatchDetailView({
   match,
   goals,
   momResult,
@@ -100,7 +104,7 @@ export function MatchDetailView({
   onRatingReviewChange,
   onRatingMvpNameChange,
   onSubmitRating,
-}: MatchDetailViewProps) {
+}: ClubMatchDetailViewProps) {
   const layout = useWindowDimensions();
   const [index, setIndex] = useState(0);
 
@@ -180,17 +184,25 @@ export function MatchDetailView({
     <ScreenLayout>
       {/* 경기 헤더 */}
       <View style={styles.matchHeader}>
-        <TextBox variant="heading3" color={colors.grey900}>{match.title}</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          {match.title}
+        </TextBox>
         {match.opponentName ? (
-          <TextBox variant="body2" color={colors.grey700}>vs {match.opponentName}</TextBox>
+          <TextBox variant="body2" color={colors.grey700}>
+            vs {match.opponentName}
+          </TextBox>
         ) : null}
-        <TextBox variant="caption" color={colors.grey500}>{dateLabel}</TextBox>
+        <TextBox variant="caption" color={colors.grey500}>
+          {dateLabel}
+        </TextBox>
         {match.isRecordSubmitted ? (
           <TextBox variant="heading2" color={colors.grey900} style={styles.score}>
             {match.homeScore} : {match.awayScore}
           </TextBox>
         ) : (
-          <TextBox variant="body2" color={colors.grey400}>경기 기록 미등록</TextBox>
+          <TextBox variant="body2" color={colors.grey400}>
+            경기 기록 미등록
+          </TextBox>
         )}
       </View>
 
@@ -213,9 +225,9 @@ export function MatchDetailView({
             indicatorStyle={{ backgroundColor: colors.blue500, height: 2 }}
             activeColor={colors.blue500}
             inactiveColor={colors.grey500}
-            tabStyle={{ paddingVertical: spacing[1] }}
+            tabStyle={{ flex: 1, paddingVertical: spacing[1], paddingHorizontal: 0 }}
             pressColor={colors.blue50}
-            scrollEnabled={routes.length > 3}
+            scrollEnabled={false}
           />
         )}
       />
@@ -254,22 +266,28 @@ function RecordTab({
 }) {
   return (
     <ScrollView contentContainerStyle={styles.tabContent}>
-      {/* 득점 타임라인 */}
-      <TextBox variant="body2Bold" color={colors.grey900}>득점 기록</TextBox>
+      <TextBox variant="body2Bold" color={colors.grey900}>
+        득점 기록
+      </TextBox>
       <Spacing size={2} />
       <GoalTimeline goals={goals} participantNames={participantNames} />
 
       <View style={styles.divider} />
 
-      {/* MOM 결과 */}
       {momResult ? (
         <>
-          <TextBox variant="body2Bold" color={colors.grey900}>MOM</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey900}>
+            MOM
+          </TextBox>
           <Spacing size={2} />
           {momResult.winners.map((w) => (
             <View key={w.userId} style={styles.momWinner}>
-              <TextBox variant="body2" color={colors.grey900}>⭐ {w.name}</TextBox>
-              <TextBox variant="caption" color={colors.grey500}>{w.votes}표</TextBox>
+              <TextBox variant="body2" color={colors.grey900}>
+                ⭐ {w.name}
+              </TextBox>
+              <TextBox variant="caption" color={colors.grey500}>
+                {w.votes}표
+              </TextBox>
             </View>
           ))}
           <Spacing size={2} />
@@ -280,10 +298,11 @@ function RecordTab({
         </>
       ) : null}
 
-      {/* MOM 투표 */}
       {match.isRecordSubmitted && !hasVotedMom && !isMomDeadlinePassed ? (
         <>
-          <TextBox variant="body2Bold" color={colors.grey900}>MOM 투표</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey900}>
+            MOM 투표
+          </TextBox>
           <Spacing size={2} />
           <MomVoteList
             participants={participants}
@@ -296,19 +315,21 @@ function RecordTab({
           {selectedMomUserId ? (
             <>
               <Spacing size={3} />
-              <Button
-                variant="primary"
-                onPress={onSubmitMom}
-                loading={isSubmittingMom}
-              >MOM 투표하기</Button>
+              <Button variant="primary" onPress={onSubmitMom} loading={isSubmittingMom}>
+                MOM 투표하기
+              </Button>
             </>
           ) : null}
           <View style={styles.divider} />
         </>
       ) : match.isRecordSubmitted && hasVotedMom ? (
-        <TextBox variant="caption" color={colors.grey400}>이미 MOM 투표를 완료했습니다.</TextBox>
+        <TextBox variant="caption" color={colors.grey400}>
+          이미 MOM 투표를 완료했습니다.
+        </TextBox>
       ) : match.isRecordSubmitted && isMomDeadlinePassed ? (
-        <TextBox variant="caption" color={colors.grey400}>MOM 투표가 마감되었습니다.</TextBox>
+        <TextBox variant="caption" color={colors.grey400}>
+          MOM 투표가 마감되었습니다.
+        </TextBox>
       ) : null}
 
       <Spacing size={10} />
@@ -333,8 +354,24 @@ function CommentsTab({
   onSubmitComment: () => void;
   onDeleteComment: (id: string) => void;
 }) {
+  const insets = useSafeAreaInsets();
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const show = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
+    const hide = Keyboard.addListener('keyboardDidHide', () => setKeyboardVisible(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+
   return (
-    <View style={styles.commentsContainer}>
+    <KeyboardAvoidingView
+      style={styles.commentsContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : keyboardVisible ? 200 : 0}
+    >
       <FlatList
         data={comments}
         keyExtractor={(item) => item.id}
@@ -354,20 +391,26 @@ function CommentsTab({
                   {new Date(item.createdAt).toLocaleDateString('ko-KR')}
                 </TextBox>
               </View>
-              <TextBox variant="body2" color={colors.grey800}>{item.content}</TextBox>
+              <TextBox variant="body2" color={colors.grey800}>
+                {item.content}
+              </TextBox>
             </View>
             {item.authorId === myUserId ? (
               <TouchableOpacity onPress={() => onDeleteComment(item.id)}>
-                <TextBox variant="caption" color={colors.error}>삭제</TextBox>
+                <TextBox variant="caption" color={colors.error}>
+                  삭제
+                </TextBox>
               </TouchableOpacity>
             ) : null}
           </View>
         )}
         ListEmptyComponent={
-          <TextBox variant="body2" color={colors.grey400}>첫 댓글을 남겨보세요.</TextBox>
+          <TextBox variant="body2" color={colors.grey400}>
+            첫 댓글을 남겨보세요.
+          </TextBox>
         }
       />
-      <View style={styles.commentInputBar}>
+      <View style={[styles.commentInputBar, { paddingBottom: insets.bottom || spacing[3] }]}>
         <TextInput
           style={styles.commentInput}
           placeholder="댓글을 입력하세요..."
@@ -378,7 +421,10 @@ function CommentsTab({
           maxLength={500}
         />
         <TouchableOpacity
-          style={[styles.sendBtn, (!commentInput.trim() || isSubmittingComment) && styles.sendBtnDisabled]}
+          style={[
+            styles.sendBtn,
+            (!commentInput.trim() || isSubmittingComment) && styles.sendBtnDisabled,
+          ]}
           onPress={onSubmitComment}
           disabled={isSubmittingComment || !commentInput.trim()}
         >
@@ -390,7 +436,7 @@ function CommentsTab({
           </TextBox>
         </TouchableOpacity>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -411,7 +457,6 @@ function VideosTab({
 }) {
   return (
     <ScrollView contentContainerStyle={styles.tabContent}>
-      {/* URL 등록 폼 */}
       <View style={styles.videoInputRow}>
         <TextInput
           style={styles.videoInput}
@@ -420,24 +465,31 @@ function VideosTab({
           value={videoUrlInput}
           onChangeText={onVideoUrlChange}
         />
-        <Button
-          variant="primary"
-          onPress={onRegisterVideo}
-          loading={isSubmittingVideo}
-        >등록</Button>
+        <Button variant="primary" onPress={onRegisterVideo} loading={isSubmittingVideo}>
+          등록
+        </Button>
       </View>
       <Spacing size={4} />
 
       {videos.length === 0 ? (
-        <TextBox variant="body2" color={colors.grey400}>등록된 영상이 없습니다.</TextBox>
+        <TextBox variant="body2" color={colors.grey400}>
+          등록된 영상이 없습니다.
+        </TextBox>
       ) : (
         videos.map((v) => (
           <View key={v.id} style={styles.videoItem}>
-            <TextBox variant="body2" color={colors.blue500} numberOfLines={1} style={styles.videoUrl}>
+            <TextBox
+              variant="body2"
+              color={colors.blue500}
+              numberOfLines={1}
+              style={styles.videoUrl}
+            >
               {v.youtubeUrl}
             </TextBox>
             <TouchableOpacity onPress={() => onDeleteVideo(v.id)}>
-              <TextBox variant="caption" color={colors.error}>삭제</TextBox>
+              <TextBox variant="caption" color={colors.error}>
+                삭제
+              </TextBox>
             </TouchableOpacity>
           </View>
         ))
@@ -483,7 +535,9 @@ function RatingTab({
   if (hasSubmitted) {
     return (
       <View style={styles.tabContent}>
-        <TextBox variant="body2" color={colors.grey500}>상대팀 평가를 완료했습니다.</TextBox>
+        <TextBox variant="body2" color={colors.grey500}>
+          상대팀 평가를 완료했습니다.
+        </TextBox>
       </View>
     );
   }
@@ -505,7 +559,9 @@ function RatingTab({
           onSubmit({ score, review: review || undefined, mvpName: mvpName || undefined })
         }
         loading={isSubmitting}
-      >평가 제출</Button>
+      >
+        평가 제출
+      </Button>
       <Spacing size={10} />
     </ScrollView>
   );

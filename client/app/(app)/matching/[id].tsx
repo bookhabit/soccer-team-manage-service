@@ -1,14 +1,14 @@
 import React from 'react';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { MatchDetailContainer } from '@/src/features/matching/ui/container/MatchDetailContainer';
+import { MatchPostDetailContainer } from '@/src/features/matching/ui/container/MatchPostDetailContainer';
 
-export default function MatchDetailPage() {
+export default function MatchPostDetailPage() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   return (
     <>
       <Stack.Screen options={{ title: '매칭 상세' }} />
-      <MatchDetailContainer postId={id} />
+      <MatchPostDetailContainer postId={id} />
     </>
   );
 }

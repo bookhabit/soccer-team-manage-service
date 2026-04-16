@@ -253,7 +253,7 @@ export function MatchProgressView({
               </Button>
             ) : match.isRecordSubmitted ? (
               <Button variant="secondary" onPress={onGoMomVote}>
-                MOM 투표
+                경기 기록 보기
               </Button>
             ) : null}
           </>

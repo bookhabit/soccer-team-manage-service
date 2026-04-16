@@ -13,11 +13,11 @@ import {
 } from '../../data/hooks/useMatch';
 import { MatchProgressView } from '../view/MatchProgressView';
 
-interface MatchDetailContainerProps {
+interface MatchProgressContainerProps {
   matchId: string;
 }
 
-function MatchDetailSkeleton() {
+function MatchProgressSkeleton() {
   return (
     <ScreenLayout>
       <View style={styles.skeleton}>
@@ -31,7 +31,7 @@ function MatchDetailSkeleton() {
   );
 }
 
-function MatchDetailContent({ matchId }: MatchDetailContainerProps) {
+function MatchProgressContent({ matchId }: MatchProgressContainerProps) {
   const { toast } = useToast();
   const { data: club } = useMyClub();
   const clubId = club?.id ?? '';
@@ -83,10 +83,10 @@ function MatchDetailContent({ matchId }: MatchDetailContainerProps) {
   );
 }
 
-export function MatchDetailContainer({ matchId }: MatchDetailContainerProps) {
+export function MatchProgressContainer({ matchId }: MatchProgressContainerProps) {
   return (
-    <AsyncBoundary loadingFallback={<MatchDetailSkeleton />}>
-      <MatchDetailContent matchId={matchId} />
+    <AsyncBoundary loadingFallback={<MatchProgressSkeleton />}>
+      <MatchProgressContent matchId={matchId} />
     </AsyncBoundary>
   );
 }

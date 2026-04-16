@@ -23,7 +23,7 @@ const GENDER_LABEL: Record<string, string> = {
   MIXED: '혼성',
 };
 
-interface MatchDetailViewProps {
+interface MatchPostDetailViewProps {
   post: MatchPostDetail;
   contact: MatchContact | undefined;
   onApply: () => void;
@@ -36,9 +36,10 @@ interface MatchDetailViewProps {
 }
 
 /**
- * 매칭 게시글 상세 뷰.
+ * 매칭 게시글 상세 뷰 — 상대팀 찾기 게시판의 게시글 상세.
+ * 클럽 내부 경기 상세는 ClubMatchDetailView를 사용.
  */
-export function MatchDetailView({
+export function MatchPostDetailView({
   post,
   contact,
   onApply,
@@ -48,7 +49,7 @@ export function MatchDetailView({
   onViewApplications,
   isDeleting,
   isCancelling,
-}: MatchDetailViewProps) {
+}: MatchPostDetailViewProps) {
   const dateLabel = new Date(post.matchDate).toLocaleDateString('ko-KR', {
     year: 'numeric',
     month: 'long',
@@ -122,12 +123,7 @@ export function MatchDetailView({
             <Spacing size={4} />
             {post.status === 'MATCHED' && (
               <>
-                <Button
-                  variant="danger"
-                  size="medium"
-                  onPress={onCancel}
-                  loading={isCancelling}
-                >
+                <Button variant="danger" size="medium" onPress={onCancel} loading={isCancelling}>
                   매칭 취소
                 </Button>
                 <Spacing size={2} />

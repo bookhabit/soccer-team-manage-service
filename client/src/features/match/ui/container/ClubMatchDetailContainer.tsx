@@ -16,15 +16,15 @@ import {
   useDeleteVideo,
   useSubmitOpponentRating,
 } from '../../data/hooks/useMatch';
-import { MatchDetailView } from '../view/MatchDetailView';
+import { ClubMatchDetailView } from '../view/ClubMatchDetailView';
 import type { Goal, MatchVideo } from '../../data/schemas/match.schema';
 import type { SubmitOpponentRatingInput } from '../../data/schemas/match.schema';
 
-interface MatchDetailTabContainerProps {
+interface ClubMatchDetailContainerProps {
   matchId: string;
 }
 
-function MatchDetailTabSkeleton() {
+function ClubMatchDetailSkeleton() {
   return (
     <ScreenLayout>
       <View style={styles.skeleton}>
@@ -40,7 +40,7 @@ function MatchDetailTabSkeleton() {
   );
 }
 
-function MatchDetailTabContent({ matchId }: MatchDetailTabContainerProps) {
+function ClubMatchDetailContent({ matchId }: ClubMatchDetailContainerProps) {
   const [selectedMomUserId, setSelectedMomUserId] = useState<string | null>(null);
   const [commentInput, setCommentInput] = useState('');
   const [videoUrlInput, setVideoUrlInput] = useState('');
@@ -71,9 +71,7 @@ function MatchDetailTabContent({ matchId }: MatchDetailTabContainerProps) {
   );
 
   const comments = commentsData.pages.flatMap((p) => p.items);
-  // Videos are not in the match detail schema directly; we derive from match detail as extended field
   const videos: MatchVideo[] = (match as any).videos ?? [];
-  // Goals similarly
   const goals: Goal[] = (match as any).goals ?? [];
 
   const participantNames = attendances.reduce<Record<string, string>>((acc, a) => {
@@ -158,7 +156,7 @@ function MatchDetailTabContent({ matchId }: MatchDetailTabContainerProps) {
   };
 
   return (
-    <MatchDetailView
+    <ClubMatchDetailView
       match={match}
       goals={goals}
       momResult={momResult}
@@ -196,10 +194,10 @@ function MatchDetailTabContent({ matchId }: MatchDetailTabContainerProps) {
   );
 }
 
-export function MatchDetailTabContainer({ matchId }: MatchDetailTabContainerProps) {
+export function ClubMatchDetailContainer({ matchId }: ClubMatchDetailContainerProps) {
   return (
-    <AsyncBoundary loadingFallback={<MatchDetailTabSkeleton />}>
-      <MatchDetailTabContent matchId={matchId} />
+    <AsyncBoundary loadingFallback={<ClubMatchDetailSkeleton />}>
+      <ClubMatchDetailContent matchId={matchId} />
     </AsyncBoundary>
   );
 }

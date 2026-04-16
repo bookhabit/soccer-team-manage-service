@@ -242,7 +242,7 @@ matchQueryKeys = {
 | --------------------------------- | ----------------------------------------------------------- |
 | `view/MatchingTabView.tsx`        | 3-탭 세그먼트 + 탭별 콘텐츠 분기                            |
 | `view/MatchListView.tsx`          | FlatList + 무한 스크롤 + 필터 바                            |
-| `view/MatchDetailView.tsx`        | 상세 정보 + 신청 버튼 (4-state)                             |
+| `view/MatchPostDetailView.tsx`    | 상세 정보 + 신청 버튼 (4-state)                             |
 | `view/MatchCreateView.tsx`        | 등록 폼                                                     |
 | `view/MatchEditView.tsx`          | 수정 폼 (OPEN 상태 전제)                                    |
 | `view/ApplicationListView.tsx`    | 신청 목록 + 수락/거절 버튼                                  |

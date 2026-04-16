@@ -3,5 +3,5 @@ export { MatchFormView } from './MatchFormView';
 export { MatchProgressView } from './MatchProgressView';
 export { LineupView } from './LineupView';
 export { RecordFormView } from './RecordFormView';
-export { MatchDetailView } from './MatchDetailView';
+export { ClubMatchDetailView } from './ClubMatchDetailView';
 export { MatchRecordListView } from './MatchRecordListView';
