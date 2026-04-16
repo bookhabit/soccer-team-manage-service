@@ -323,6 +323,71 @@ import { Select } from "@mono/ui";
 />;
 ```
 
+### DateInputField
+
+날짜 선택 필드. Android는 네이티브 DatePicker, iOS는 하단 시트(스피너) 방식으로 열린다.
+**날짜 입력이 필요한 모든 폼에서 `TextField` 대신 반드시 이 컴포넌트를 사용한다.**
+
+```tsx
+import { DateInputField } from '@ui';
+
+// react-hook-form Controller와 연동
+<Controller
+  control={control}
+  name="matchDate"
+  render={({ field }) => (
+    <DateInputField
+      label="경기 날짜 *"
+      value={field.value ?? ''}       // 'YYYY-MM-DD' 형식
+      onChange={field.onChange}
+      error={errors.matchDate?.message}
+      minimumDate={new Date()}         // 오늘 이전 날짜 비활성화 (선택)
+    />
+  )}
+/>
+```
+
+| prop          | 타입                   | 필수 | 설명                                |
+| ------------- | ---------------------- | ---- | ----------------------------------- |
+| `label`       | `string`               | ✅   | 입력 필드 레이블                    |
+| `value`       | `string`               | ✅   | 현재 날짜값 (`'YYYY-MM-DD'`)        |
+| `onChange`    | `(v: string) => void`  | ✅   | 날짜 선택 시 콜백                   |
+| `error`       | `string`               | —    | 에러 메시지 (있으면 빨간 테두리)    |
+| `minimumDate` | `Date`                 | —    | 이 날짜 이전 선택 불가              |
+
+### TimeInputField
+
+시간 선택 필드. Android는 네이티브 TimePicker(24시간), iOS는 하단 시트(스피너) 방식.
+**시간 입력이 필요한 모든 폼에서 `TextField` 대신 반드시 이 컴포넌트를 사용한다.**
+
+```tsx
+import { TimeInputField } from '@ui';
+
+// react-hook-form Controller와 연동
+<Controller
+  control={control}
+  name="startTime"
+  render={({ field }) => (
+    <TimeInputField
+      label="시작 시간 *"
+      value={field.value ?? ''}       // 'HH:mm' 형식
+      onChange={field.onChange}
+      error={errors.startTime?.message}
+    />
+  )}
+/>
+```
+
+| prop       | 타입                   | 필수 | 설명                             |
+| ---------- | ---------------------- | ---- | -------------------------------- |
+| `label`    | `string`               | ✅   | 입력 필드 레이블                 |
+| `value`    | `string`               | ✅   | 현재 시간값 (`'HH:mm'`)          |
+| `onChange` | `(v: string) => void`  | ✅   | 시간 선택 시 콜백                |
+| `error`    | `string`               | —    | 에러 메시지 (있으면 빨간 테두리) |
+
+> ⚠️ **날짜/시간 입력에 `<TextField placeholder="YYYY-MM-DD">` 형태 사용 금지.**
+> 사용자가 직접 타이핑하면 형식 오류가 발생하므로 반드시 picker 컴포넌트를 사용한다.
+
 ### Checkbox / Switch
 
 ```tsx

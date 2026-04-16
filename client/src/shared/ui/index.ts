@@ -41,6 +41,8 @@ export type {
 } from './components/general/TextField';
 export { ListRow } from './components/general/ListRow';
 export type { ListRowProps } from './components/general/ListRow';
+export { DateInputField } from './components/general/DateInputField';
+export { TimeInputField } from './components/general/TimeInputField';
 
 // Feedback
 export { Skeleton } from './components/feedback/Skeleton';

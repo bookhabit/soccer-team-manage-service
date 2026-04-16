@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import { Controller } from 'react-hook-form';
 import type { Control, FieldErrors } from 'react-hook-form';
 import {
@@ -12,6 +12,8 @@ import {
   colors,
   spacing,
   Button,
+  DateInputField,
+  TimeInputField,
 } from '@ui';
 import { PositionPicker } from '../components/PositionPicker';
 import type { Region } from '@/src/shared/services/region.service';
@@ -50,11 +52,15 @@ export function MercenaryPostFormView({
       }
     >
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <TextBox variant="heading3" color={colors.grey900}>용병 구함 등록</TextBox>
+        <TextBox variant="heading3" color={colors.grey900}>
+          용병 구함 등록
+        </TextBox>
         <Spacing size={4} />
 
         {/* 포지션 */}
-        <TextBox variant="body2Bold" color={colors.grey700}>포지션 *</TextBox>
+        <TextBox variant="body2Bold" color={colors.grey700}>
+          포지션 *
+        </TextBox>
         <Spacing size={2} />
         <Controller
           control={control}
@@ -64,7 +70,9 @@ export function MercenaryPostFormView({
           )}
         />
         {errors.positions && (
-          <TextBox variant="caption" color={colors.error}>{errors.positions.message}</TextBox>
+          <TextBox variant="caption" color={colors.error}>
+            {errors.positions.message}
+          </TextBox>
         )}
         <Spacing size={4} />
 
@@ -89,12 +97,12 @@ export function MercenaryPostFormView({
           control={control}
           name="matchDate"
           render={({ field }) => (
-            <TextField
-              title="경기 날짜 *"
-              placeholder="YYYY-MM-DD"
+            <DateInputField
+              label="경기 날짜 *"
               value={field.value ?? ''}
-              onChangeText={field.onChange}
-              errorMessage={errors.matchDate?.message}
+              onChange={field.onChange}
+              error={errors.matchDate?.message}
+              minimumDate={new Date()}
             />
           )}
         />
@@ -105,12 +113,11 @@ export function MercenaryPostFormView({
           control={control}
           name="startTime"
           render={({ field }) => (
-            <TextField
-              title="시작 시간 *"
-              placeholder="HH:mm"
+            <TimeInputField
+              label="시작 시간 *"
               value={field.value ?? ''}
-              onChangeText={field.onChange}
-              errorMessage={errors.startTime?.message}
+              onChange={field.onChange}
+              error={errors.startTime?.message}
             />
           )}
         />
@@ -121,12 +128,11 @@ export function MercenaryPostFormView({
           control={control}
           name="endTime"
           render={({ field }) => (
-            <TextField
-              title="종료 시간 *"
-              placeholder="HH:mm"
+            <TimeInputField
+              label="종료 시간 *"
               value={field.value ?? ''}
-              onChangeText={field.onChange}
-              errorMessage={errors.endTime?.message}
+              onChange={field.onChange}
+              error={errors.endTime?.message}
             />
           )}
         />
@@ -170,7 +176,7 @@ export function MercenaryPostFormView({
           name="regionId"
           render={({ field }) => (
             <Select
-              title="지역 *"
+              label="지역 *"
               options={regionOptions}
               value={field.value ?? ''}
               onChange={field.onChange}
@@ -186,7 +192,7 @@ export function MercenaryPostFormView({
           name="level"
           render={({ field }) => (
             <Select
-              title="실력 *"
+              label="실력 *"
               options={LEVEL_OPTIONS}
               value={field.value ?? ''}
               onChange={field.onChange}
