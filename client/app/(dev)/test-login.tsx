@@ -10,6 +10,36 @@ import { useAuthStore } from '@/src/shared/store/useAuthStore';
 
 const SECTIONS = [
   {
+    title: 'Head-to-Head 기능 테스트',
+    accounts: [
+      {
+        label: '마무리FC 주장 — H2H 진입 (7승 2무 3패)',
+        description: '피드 상세 → 상대 전적 보기 → 마무리FC vs 카동FC 12경기 이력 (무한스크롤 확인)',
+        email: 'captain@mamurifc.test',
+      },
+      {
+        label: '마무리FC 일반 멤버 — H2H 진입',
+        description: '멤버도 H2H 진입 가능 확인 (H2H-01-006)',
+        email: 'member1@mamurifc.test',
+      },
+      {
+        label: '카동FC 주장 — 역방향 H2H',
+        description: '카동FC 기준 마무리FC 전적 (승/패 반전 확인)',
+        email: 'captain@kadongfc.test',
+      },
+      {
+        label: '부산FC 주장 — H2H 빈 상태',
+        description: '부산FC vs 마무리FC → 이력 없음, "아직 맞붙은 적이 없습니다." 확인',
+        email: 'captain@busanfc.test',
+      },
+      {
+        label: '클럽 미소속 유저 — 403 차단',
+        description: 'H2H API 직접 호출 시 403 H2H_001 응답 확인',
+        email: 'newbie@test.com',
+      },
+    ],
+  },
+  {
     title: 'Match Feed 기능 테스트',
     accounts: [
       {
@@ -289,7 +319,7 @@ export default function TestLoginScreen() {
 
         {/* 안내 */}
         <TextBox variant="caption" color={colors.grey400} style={{ textAlign: 'center' }}>
-          seed 실행: seed:club → seed:match → seed:matching → seed:mercenary → seed:match-feed
+          seed 실행: seed:club → seed:match → seed:matching → seed:mercenary → seed:match-feed → seed:head-to-head
         </TextBox>
       </ScrollView>
     </SafeAreaView>

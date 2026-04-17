@@ -9,7 +9,7 @@ export interface Region {
 export async function getRegions(): Promise<Region[]> {
   try {
     const res = await apiClient.publicApi.get<Region[]>('/regions');
-    console.log('Fetched regions:', res.data);
+
     return res.data;
   } catch (error) {
     console.error('Failed to fetch regions:', error);

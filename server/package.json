@@ -18,7 +18,9 @@
     "seed:matching": "ts-node --project tsconfig.seed.json prisma/seeds/matching.seed.ts",
     "seed:mercenary": "ts-node --project tsconfig.seed.json prisma/seeds/mercenary.seed.ts",
     "seed:match-feed": "ts-node --project tsconfig.seed.json prisma/seeds/match-feed.seed.ts",
-    "setup:data": "prisma migrate dev --name add-mercenary-feature && npm run db:seed && npm run seed:club && npm run seed:match && npm run seed:matching && npm run seed:mercenary && npm run seed:match-feed",
+    "seed:head-to-head": "ts-node --project tsconfig.seed.json prisma/seeds/head-to-head.seed.ts",
+    "seed:all": "ts-node --project tsconfig.seed.json prisma/seeds/index.seed.ts",
+    "setup:data": "prisma migrate dev && npm run db:seed && npm run seed:all",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "jest --testPathPattern=e2e"
