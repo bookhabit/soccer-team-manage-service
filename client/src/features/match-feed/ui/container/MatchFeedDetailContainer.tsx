@@ -1,9 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Skeleton, ScreenLayout, Spacing, spacing } from '@ui';
+import { router } from 'expo-router';
+import type { Href } from 'expo-router';
 import { useMatchFeedDetail } from '../../data/hooks/useMatchFeed';
 import { MatchFeedDetailView } from '../view/MatchFeedDetailView';
 import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
+import { useMyClub } from '@/src/features/club/data/hooks/useClub';
 
 interface MatchFeedDetailContainerProps {
   matchId: string;
@@ -27,11 +30,20 @@ function MatchFeedDetailSkeleton() {
 
 function MatchFeedDetailInner({ matchId }: MatchFeedDetailContainerProps) {
   const { data: detail } = useMatchFeedDetail(matchId);
+  const { data: myClub } = useMyClub();
+
+  const canGoH2H = detail.clubId === myClub?.id && detail.opponentClubId !== null;
+  const onGoOpponentRecord = canGoH2H
+    ? () =>
+        router.push(
+          `/(app)/club/${detail.clubId}/head-to-head/${detail.opponentClubId}` as Href,
+        )
+    : undefined;
 
   return (
     <MatchFeedDetailView
       detail={detail}
-      onGoOpponentRecord={undefined}
+      onGoOpponentRecord={onGoOpponentRecord}
     />
   );
 }

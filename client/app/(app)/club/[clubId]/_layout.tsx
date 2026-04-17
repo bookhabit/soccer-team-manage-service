@@ -23,6 +23,7 @@ export default function ClubIdLayout() {
       <Stack.Screen name="transfer-captain" />
       <Stack.Screen name="matches/index" />
       <Stack.Screen name="vote" />
+      <Stack.Screen name="head-to-head/[opponentClubId]" />
     </Stack>
   );
 }

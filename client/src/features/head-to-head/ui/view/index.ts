@@ -1,2 +1,1 @@
-// head-to-head ui/view exports
-export {};
+export * from './HeadToHeadView';

@@ -1,2 +1,1 @@
-// head-to-head ui/container exports
-export {};
+export * from './HeadToHeadContainer';
