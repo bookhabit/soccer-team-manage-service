@@ -49,6 +49,8 @@ export function PostDetailView({
   onDeletePost,
   onEditPost,
 }: PostDetailViewProps) {
+  const hasComments = comments.length > 0;
+
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior="padding">
       <ScreenLayout
@@ -136,7 +138,7 @@ export function PostDetailView({
           </TextBox>
           <Spacing size={2} />
 
-          {comments.length === 0 ? (
+          {!hasComments ? (
             <TextBox variant="body2" color={colors.grey400}>
               첫 댓글을 남겨보세요.
             </TextBox>

@@ -41,6 +41,8 @@ export function MercenaryPostDetailView({
   onDelete,
   isApplying,
 }: Props) {
+  const canEditPost = !post.isExpired && post.status === 'OPEN';
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
@@ -118,7 +120,7 @@ export function MercenaryPostDetailView({
         {post.isOwnPost && (
           <View style={styles.section}>
             <Flex direction="row" gap={spacing[2]}>
-              {!post.isExpired && post.status === 'OPEN' && (
+              {canEditPost && (
                 <Button variant="secondary" size="small" onPress={onEdit} style={styles.actionBtn}>
                   수정
                 </Button>
@@ -133,7 +135,7 @@ export function MercenaryPostDetailView({
 
       {/* CTA */}
       {post.isOwnPost ? (
-        <BottomCTASingle safeArea>
+        <BottomCTASingle safeArea label="지원자 관리">
           <Button variant="primary" onPress={onManageApplications} fullWidth>
             지원자 관리
           </Button>

@@ -62,6 +62,7 @@ export function LineupView({
 
   // 참석 인원만 표시 (ATTEND만, ABSENT·UNDECIDED 제외)
   const attendingPlayers = attendances.filter((a) => a.response === 'ATTEND');
+  const hasAttendingPlayers = attendingPlayers.length > 0;
 
   // 현재 포메이션에 해당하는 슬롯 목록
   const formationSlots = currentQuarter
@@ -110,7 +111,7 @@ export function LineupView({
             </TextBox>
             <Spacing size={2} />
 
-            {attendingPlayers.length === 0 ? (
+            {!hasAttendingPlayers ? (
               <TextBox variant="body2" color={colors.grey400}>참석 선수가 없습니다.</TextBox>
             ) : (
               attendingPlayers.map((a) => {

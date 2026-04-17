@@ -264,6 +264,8 @@ function RecordTab({
   onMomSelect: (userId: string) => void;
   onSubmitMom: () => void;
 }) {
+  const canVoteMom = match.isRecordSubmitted && !hasVotedMom && !isMomDeadlinePassed;
+
   return (
     <ScrollView contentContainerStyle={styles.tabContent}>
       <TextBox variant="body2Bold" color={colors.grey900}>
@@ -298,7 +300,7 @@ function RecordTab({
         </>
       ) : null}
 
-      {match.isRecordSubmitted && !hasVotedMom && !isMomDeadlinePassed ? (
+      {canVoteMom ? (
         <>
           <TextBox variant="body2Bold" color={colors.grey900}>
             MOM 투표
@@ -455,6 +457,8 @@ function VideosTab({
   onRegisterVideo: () => void;
   onDeleteVideo: (id: string) => void;
 }) {
+  const hasVideos = videos.length > 0;
+
   return (
     <ScrollView contentContainerStyle={styles.tabContent}>
       <View style={styles.videoInputRow}>
@@ -471,7 +475,7 @@ function VideosTab({
       </View>
       <Spacing size={4} />
 
-      {videos.length === 0 ? (
+      {!hasVideos ? (
         <TextBox variant="body2" color={colors.grey400}>
           등록된 영상이 없습니다.
         </TextBox>

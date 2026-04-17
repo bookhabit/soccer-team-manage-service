@@ -31,10 +31,15 @@ export function DissolveVoteView({
   onOpenConfirm,
   onCloseConfirm,
 }: DissolveVoteViewProps) {
+  const isNoActiveVote = vote == null || vote.status === 'EXPIRED' || vote.status === 'REJECTED';
+  const isApproved = vote?.status === 'APPROVED';
+  const isInProgress = !isNoActiveVote && !isApproved;
+  const hasResponded = vote?.myResponse != null;
+
   return (
     <ScreenLayout>
       <View style={styles.content}>
-        {vote == null || vote.status === 'EXPIRED' || vote.status === 'REJECTED' ? (
+        {isNoActiveVote && (
           <>
             <TextBox variant="heading3" color={colors.grey900}>
               팀 해체
@@ -61,7 +66,9 @@ export function DissolveVoteView({
               </TextBox>
             )}
           </>
-        ) : vote.status === 'APPROVED' ? (
+        )}
+
+        {isApproved && (
           <>
             <TextBox variant="heading3" color={colors.grey900}>
               팀이 해체되었습니다
@@ -71,8 +78,9 @@ export function DissolveVoteView({
               팀이 해체 처리되었습니다.
             </TextBox>
           </>
-        ) : (
-          /* IN_PROGRESS */
+        )}
+
+        {isInProgress && vote && (
           <>
             <TextBox variant="heading3" color={colors.grey900}>
               해체 투표 진행 중
@@ -90,7 +98,7 @@ export function DissolveVoteView({
 
             <Spacing size={5} />
 
-            {vote.myResponse == null ? (
+            {!hasResponded ? (
               <View style={styles.buttonRow}>
                 <View style={styles.btn}>
                   <Button

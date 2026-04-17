@@ -46,10 +46,11 @@ interface MatchPickerDrawerProps {
 function MatchPickerDrawer({ isOpen, onClose, onSelect }: MatchPickerDrawerProps) {
   const { data } = useMyMatchPosts();
   const matchedPosts = (data?.items ?? []).filter((p) => p.status === 'MATCHED');
+  const hasMatchedPosts = matchedPosts.length > 0;
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="완료된 매칭에서 불러오기">
-      {matchedPosts.length === 0 ? (
+      {!hasMatchedPosts ? (
         <View style={drawerStyles.empty}>
           <TextBox variant="body2" color={colors.grey500}>
             완료된 매칭이 없습니다.

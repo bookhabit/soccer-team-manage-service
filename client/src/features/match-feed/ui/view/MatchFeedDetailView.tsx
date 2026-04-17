@@ -22,6 +22,7 @@ export function MatchFeedDetailView({ detail, onGoOpponentRecord }: MatchFeedDet
   const isLeague = detail.type === 'LEAGUE';
   const homeTeamLabel = isLeague ? detail.clubName : 'A팀';
   const awayTeamLabel = isLeague ? (detail.opponentName ?? '상대팀') : 'B팀';
+  const hasMom = detail.momList.length > 0;
 
   return (
     <ScreenLayout>
@@ -80,7 +81,7 @@ export function MatchFeedDetailView({ detail, onGoOpponentRecord }: MatchFeedDet
         </View>
 
         {/* MOM 섹션 */}
-        {detail.momList.length > 0 && (
+        {hasMom && (
           <View style={styles.section}>
             <TextBox variant="body2Bold" color={colors.grey900}>
               MOM

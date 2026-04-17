@@ -115,6 +115,7 @@ export function MatchFormView({
 }: MatchFormViewProps) {
   const [activeField, setActiveField] = useState<DateField | null>(null);
   const [tempDate, setTempDate] = useState<Date>(new Date());
+  const showIOSPicker = Platform.OS === 'ios' && activeField !== null;
 
   const {
     control,
@@ -337,7 +338,7 @@ export function MatchFormView({
       </ScrollView>
 
       {/* iOS: Modal spinner picker */}
-      {Platform.OS === 'ios' && activeField !== null && (
+      {showIOSPicker && (
         <IOSPickerModal
           visible
           label={DATE_FIELD_LABEL[activeField]}

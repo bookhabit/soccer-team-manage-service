@@ -72,6 +72,14 @@ export function MatchProgressView({
 
   const attending = attendances.filter((a) => a.response === 'ATTEND');
   const absent = attendances.filter((a) => a.response === 'ABSENT');
+  const hasAttending = attending.length > 0;
+  const hasAbsent = absent.length > 0;
+
+  const showVotePanel = status === 'BEFORE' && !isDeadlinePassed;
+  const showVoteClosed = status === 'BEFORE' && isDeadlinePassed;
+  const showAfterStatus = status === 'AFTER';
+  const canGoLineup = isCaptainOrVice && !showAfterStatus;
+  const canSubmitRecord = isCaptainOrVice && !match.isRecordSubmitted;
 
   return (
     <ScreenLayout>
@@ -130,7 +138,7 @@ export function MatchProgressView({
         </TextBox>
 
         {/* 내 응답 + 투표 버튼 (BEFORE 상태, 마감 전) */}
-        {status === 'BEFORE' && !isDeadlinePassed ? (
+        {showVotePanel && (
           <>
             <Spacing size={3} />
             <View style={styles.myResponseRow}>
@@ -173,14 +181,16 @@ export function MatchProgressView({
               </View>
             </View>
           </>
-        ) : status === 'BEFORE' && isDeadlinePassed ? (
+        )}
+
+        {showVoteClosed && (
           <>
             <Spacing size={3} />
             <TextBox variant="caption" color={colors.grey400}>
               투표가 마감되었습니다.
             </TextBox>
           </>
-        ) : null}
+        )}
 
         <View style={styles.divider} />
 
@@ -189,7 +199,7 @@ export function MatchProgressView({
           참석 선수 ({attending.length})
         </TextBox>
         <Spacing size={2} />
-        {attending.length === 0 ? (
+        {!hasAttending ? (
           <TextBox variant="body2" color={colors.grey400}>
             참석 선수가 없습니다.
           </TextBox>
@@ -210,7 +220,7 @@ export function MatchProgressView({
         )}
 
         {/* 불참자 목록 */}
-        {absent.length > 0 ? (
+        {hasAbsent ? (
           <>
             <Spacing size={3} />
             <TextBox variant="body2Bold" color={colors.grey900}>
@@ -234,30 +244,31 @@ export function MatchProgressView({
         ) : null}
 
         {/* 관리자 액션 — 종료된 경기에서는 포지션 배정 불가 */}
-        {isCaptainOrVice && status !== 'AFTER' ? (
+        {canGoLineup && (
           <>
             <View style={styles.divider} />
             <Button variant="secondary" onPress={onGoLineup}>
               포지션 배정
             </Button>
           </>
-        ) : null}
+        )}
 
         {/* 경기 후 액션 */}
-        {status === 'AFTER' ? (
+        {showAfterStatus && (
           <>
             <View style={styles.divider} />
-            {isCaptainOrVice && !match.isRecordSubmitted ? (
+            {canSubmitRecord && (
               <Button variant="primary" onPress={onGoRecord}>
                 경기 기록 입력
               </Button>
-            ) : match.isRecordSubmitted ? (
+            )}
+            {match.isRecordSubmitted && (
               <Button variant="secondary" onPress={onGoMomVote}>
                 경기 기록 보기
               </Button>
-            ) : null}
+            )}
           </>
-        ) : null}
+        )}
 
         <Spacing size={10} />
       </ScrollView>

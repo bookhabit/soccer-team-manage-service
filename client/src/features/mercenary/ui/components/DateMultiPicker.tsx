@@ -33,6 +33,7 @@ export function DateMultiPicker({ value, onChange }: Props) {
   const cells = buildCalendarDays(year, month);
   const selectedSet = new Set(value);
   const todayStr = toLocalDateStr(today.getFullYear(), today.getMonth(), today.getDate());
+  const hasSelectedDates = value.length > 0;
 
   const toggle = (day: number) => {
     const dateStr = toLocalDateStr(year, month, day);
@@ -120,7 +121,7 @@ export function DateMultiPicker({ value, onChange }: Props) {
       ))}
 
       {/* 선택된 날짜 칩 */}
-      {value.length > 0 && (
+      {hasSelectedDates && (
         <View style={styles.chips}>
           {value.map((d) => (
             <TouchableOpacity
