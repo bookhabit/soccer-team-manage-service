@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import type { MatchFeedItem as MatchFeedItemType } from '../../data/schemas/matchFeed.schema';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 interface MatchFeedItemProps {
   item: MatchFeedItemType;
@@ -41,7 +42,7 @@ export function MatchFeedItem({ item, onPress }: MatchFeedItemProps) {
       <View style={styles.header}>
         <View style={styles.clubRow}>
           <AvatarImage
-            source={item.clubLogoUrl ? { uri: item.clubLogoUrl } : null}
+            source={{ uri: getClubLogoUrl(item.clubLogoUrl) }}
             size={28}
           />
           <View style={styles.clubInfo}>

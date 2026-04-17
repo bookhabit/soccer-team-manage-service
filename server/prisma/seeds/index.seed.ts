@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import * as path from 'path';
 
-// 실행 순서: club → match → matching → mercenary → match-feed → head-to-head
+// 실행 순서: club → match → matching → mercenary → match-feed → head-to-head → file
 const SEEDS = [
   'club.seed.ts',
   'match.seed.ts',
@@ -9,6 +9,7 @@ const SEEDS = [
   'mercenary.seed.ts',
   'match-feed.seed.ts',
   'head-to-head.seed.ts',
+  'file.seed.ts',
 ];
 
 const serverRoot = path.resolve(__dirname, '../..');
@@ -37,6 +38,7 @@ async function main() {
   console.log('✅ 전체 시딩 완료');
   console.log('═'.repeat(60));
   console.log('\n앱 실행 → 개발 메뉴 → 테스트 로그인 에서 계정 선택\n');
+  console.log('파일 업로드 테스트: seed:file → 아바타/로고 초기화 후 진행\n');
 }
 
 main().catch((e) => {

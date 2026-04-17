@@ -16,6 +16,7 @@ import type { MatchPostDetail } from '../../data/schemas/matchPost.schema';
 import type { MatchContact } from '../../data/schemas/matchPost.schema';
 import { MatchStatusBadge } from '../components/MatchStatusBadge';
 import { ContactCard } from '../components/ContactCard';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 const GENDER_LABEL: Record<string, string> = {
   MALE: '남성',
@@ -75,7 +76,7 @@ export function MatchPostDetailView({
         {/* 클럽 헤더 */}
         <View style={styles.clubHeader}>
           <AvatarImage
-            source={post.clubLogoUrl ? { uri: post.clubLogoUrl } : undefined}
+            source={{ uri: getClubLogoUrl(post.clubLogoUrl) }}
             size={48}
           />
           <View style={styles.clubInfo}>

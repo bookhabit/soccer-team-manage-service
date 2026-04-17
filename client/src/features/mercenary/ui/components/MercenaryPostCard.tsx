@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { TextBox, colors, spacing, AvatarImage, Flex } from '@ui';
 import { MercenaryStatusBadge } from './MercenaryStatusBadge';
 import type { MercenaryPostSummary } from '../../data/schemas/mercenaryPost.schema';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 interface Props {
   post: MercenaryPostSummary;
@@ -34,11 +35,7 @@ export function MercenaryPostCard({ post, onPress }: Props) {
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       <Flex direction="row" align="center" justify="space-between" style={styles.header}>
         <Flex direction="row" align="center" gap={spacing[2]}>
-          {post.clubLogoUrl ? (
-            <AvatarImage source={{ uri: post.clubLogoUrl }} size={32} />
-          ) : (
-            <View style={styles.logoPlaceholder} />
-          )}
+          <AvatarImage source={{ uri: getClubLogoUrl(post.clubLogoUrl) }} size={32} />
           <View>
             <TextBox variant="body2Bold" color={colors.grey900}>{post.clubName}</TextBox>
             <TextBox variant="caption" color={colors.grey500}>{LEVEL_LABEL[post.clubLevel] ?? post.clubLevel}</TextBox>
@@ -87,12 +84,6 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   header: { marginBottom: spacing[3] },
-  logoPlaceholder: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.grey100,
-  },
   body: { gap: spacing[1] },
   positions: { marginBottom: spacing[1] },
   posChip: {

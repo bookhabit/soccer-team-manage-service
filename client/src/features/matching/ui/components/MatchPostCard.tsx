@@ -4,6 +4,7 @@ import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import { LEVEL_LABEL } from '@/src/shared/constants/player.constants';
 import type { MatchPostSummary } from '../../data/schemas/matchPost.schema';
 import { MatchStatusBadge } from './MatchStatusBadge';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 const GENDER_LABEL: Record<string, string> = {
   MALE: '남성',
@@ -32,7 +33,7 @@ export function MatchPostCard({ post, onPress }: MatchPostCardProps) {
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.8}>
       {/* 헤더: 클럽 */}
       <View style={styles.header}>
-        <AvatarImage source={post.clubLogoUrl ? { uri: post.clubLogoUrl } : undefined} size={36} />
+        <AvatarImage source={{ uri: getClubLogoUrl(post.clubLogoUrl) }} size={36} />
         <View style={styles.clubInfo}>
           <TextBox variant="body2Bold" color={colors.grey900}>{post.clubName}</TextBox>
           <TextBox variant="caption" color={colors.grey500}>{LEVEL_LABEL[post.clubLevel] ?? post.clubLevel}</TextBox>

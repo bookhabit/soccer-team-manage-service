@@ -19,6 +19,7 @@
     "seed:mercenary": "ts-node --project tsconfig.seed.json prisma/seeds/mercenary.seed.ts",
     "seed:match-feed": "ts-node --project tsconfig.seed.json prisma/seeds/match-feed.seed.ts",
     "seed:head-to-head": "ts-node --project tsconfig.seed.json prisma/seeds/head-to-head.seed.ts",
+    "seed:file": "ts-node --project tsconfig.seed.json prisma/seeds/file.seed.ts",
     "seed:all": "ts-node --project tsconfig.seed.json prisma/seeds/index.seed.ts",
     "setup:data": "prisma migrate dev && npm run db:seed && npm run seed:all",
     "test": "jest",

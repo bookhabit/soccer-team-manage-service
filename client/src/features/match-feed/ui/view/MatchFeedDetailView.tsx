@@ -3,6 +3,7 @@ import { ScrollView, View, StyleSheet } from 'react-native';
 import { ScreenLayout, TextBox, Button, AvatarImage, Spacing, colors, spacing } from '@ui';
 import { MatchGoalTimeline } from '../components/MatchGoalTimeline';
 import type { MatchFeedDetail } from '../../data/schemas/matchFeed.schema';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 interface MatchFeedDetailViewProps {
   detail: MatchFeedDetail;
@@ -31,7 +32,7 @@ export function MatchFeedDetailView({ detail, onGoOpponentRecord }: MatchFeedDet
         <View style={styles.header}>
           <View style={styles.clubRow}>
             <AvatarImage
-              source={detail.clubLogoUrl ? { uri: detail.clubLogoUrl } : null}
+              source={{ uri: getClubLogoUrl(detail.clubLogoUrl) }}
               size={36}
             />
             <View style={styles.clubMeta}>

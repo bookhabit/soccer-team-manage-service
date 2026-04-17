@@ -10,6 +10,36 @@ import { useAuthStore } from '@/src/shared/store/useAuthStore';
 
 const SECTIONS = [
   {
+    title: '파일 업로드 기능 테스트',
+    accounts: [
+      {
+        label: '마무리FC 주장 — 아바타 신규 업로드',
+        description: '프로필 편집 → 아바타 터치 → 이미지 선택 → 업로드 (FILE-04-011)',
+        email: 'captain@mamurifc.test',
+      },
+      {
+        label: '마무리FC 부주장 — 클럽 로고 업로드',
+        description: '클럽 설정 → 클럽 로고 변경 → 업로드 가능 확인 (FILE-04-006)',
+        email: 'vice@mamurifc.test',
+      },
+      {
+        label: '마무리FC 일반 멤버 — 로고 변경 메뉴 미노출',
+        description: '클럽 설정 진입 → "클럽 로고 변경" 항목 없음 확인 (FILE-01-004)',
+        email: 'member1@mamurifc.test',
+      },
+      {
+        label: '파일업로드 전용 — 재업로드·삭제 테스트',
+        description: '업로드 후 재업로드 → 이전 파일 대체 / 삭제 → 기본 이미지 복원 (FILE-04-012, FILE-04-003)',
+        email: 'file-with-avatar@test.com',
+      },
+      {
+        label: '클럽 미소속 유저 — 기본 이미지 표시',
+        description: 'avatarUrl=null → 기본 이미지 자동 표시 확인 (FILE-02-013)',
+        email: 'newbie@test.com',
+      },
+    ],
+  },
+  {
     title: 'Head-to-Head 기능 테스트',
     accounts: [
       {
@@ -319,7 +349,7 @@ export default function TestLoginScreen() {
 
         {/* 안내 */}
         <TextBox variant="caption" color={colors.grey400} style={{ textAlign: 'center' }}>
-          seed 실행: seed:club → seed:match → seed:matching → seed:mercenary → seed:match-feed → seed:head-to-head
+          seed 실행: seed:club → seed:match → seed:matching → seed:mercenary → seed:match-feed → seed:head-to-head → seed:file
         </TextBox>
       </ScrollView>
     </SafeAreaView>
