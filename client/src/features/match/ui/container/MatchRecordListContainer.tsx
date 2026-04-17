@@ -28,7 +28,7 @@ function MatchRecordListSkeleton() {
 function MatchRecordListContent({ clubId }: MatchRecordListContainerProps) {
   const { data, fetchNextPage, hasNextPage } = useMatches(clubId);
 
-  const allMatches = data.pages.flatMap((p) => p.items);
+  const allMatches = (data?.pages.flatMap((p) => p.items) ?? []);
   const pastMatches = allMatches.filter((m) => {
     return new Date(m.endAt).getTime() < Date.now() && m.isRecordSubmitted;
   });

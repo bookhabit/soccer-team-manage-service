@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsISO8601,
@@ -13,7 +14,7 @@ import {
   Min,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { AttendanceResponse, ClubLevel, FormationSlot, MatchType } from '@prisma/client';
 import { PartialType } from '@nestjs/swagger';
 
@@ -223,6 +224,12 @@ export class GetMatchesQueryDto {
   @IsOptional()
   @IsEnum(MatchType)
   type?: MatchType;
+
+  @ApiPropertyOptional({ description: '내가 뛴 경기만 (MatchParticipant 기준)' })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  myMatches?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()

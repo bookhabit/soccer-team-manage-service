@@ -42,6 +42,8 @@ export type {
   SplitTextFieldProps,
   TextAreaProps,
 } from './components/general/TextField';
+export { Chip } from './components/general/Chip';
+export type { ChipProps } from './components/general/Chip';
 export { ListRow } from './components/general/ListRow';
 export type { ListRowProps } from './components/general/ListRow';
 export { DateInputField } from './components/general/DateInputField';

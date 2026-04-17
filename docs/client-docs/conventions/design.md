@@ -515,6 +515,41 @@ import { Checkbox, Switch } from '@mono/ui';
 />
 ```
 
+### Chip
+
+카테고리·필터 선택 UI. **앱 내 모든 카테고리/필터 선택 UI는 반드시 `<Chip>`을 사용한다.**
+
+```tsx
+import { Chip } from '@ui';
+
+// 단독 사용
+<Chip label="매칭전" active={type === 'LEAGUE'} onPress={() => setType('LEAGUE')} />
+
+// 목록에서 선택 — 가로 스크롤 ScrollView 안에서 사용
+<ScrollView horizontal showsHorizontalScrollIndicator={false}
+  contentContainerStyle={{ flexDirection: 'row', gap: spacing[2], paddingHorizontal: spacing[4] }}>
+  {OPTIONS.map(({ value, label }) => (
+    <Chip
+      key={value}
+      label={label}
+      active={activeValue === value}
+      onPress={() => handleChange(value)}
+    />
+  ))}
+</ScrollView>
+```
+
+| prop       | 타입                  | 필수 | 설명                                       |
+| ---------- | --------------------- | ---- | ------------------------------------------ |
+| `label`    | `string`              | ✅   | 칩 텍스트                                  |
+| `active`   | `boolean`             | —    | 선택 상태 (파란 테두리 + 배경)             |
+| `onPress`  | `() => void`          | ✅   | 탭 핸들러                                  |
+| `disabled` | `boolean`             | —    | 비활성 상태 (opacity 0.5, 터치 무시)       |
+
+> ⚠️ **카테고리/필터에 `<TouchableOpacity>` + 인라인 chip 스타일 직접 구현 금지 — `<Chip>` 사용.**
+
+---
+
 ### ListRow
 
 리스트 항목 레이아웃.

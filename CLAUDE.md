@@ -134,7 +134,7 @@ typography: heading1~3 / body1~body2Bold / caption~captionBold / label
 
 // 주요 컴포넌트
 TextBox, Button, TextField, TextArea, Select
-Checkbox, Switch, ListRow, DfImage, AvatarImage, ThumbnailImage, CoverImage
+Checkbox, Switch, Chip, ListRow, DfImage, AvatarImage, ThumbnailImage, CoverImage
 Flex, Box, Grid, Spacing,
 BottomCTASingle, BottomCTADouble, FixedBottomCTA
 Skeleton, Modal, Drawer, AlertDialog, ConfirmDialog

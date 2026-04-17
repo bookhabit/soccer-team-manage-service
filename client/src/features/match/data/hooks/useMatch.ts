@@ -1,5 +1,6 @@
 import {
   useInfiniteQuery,
+  keepPreviousData,
   useMutation,
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
@@ -32,6 +33,7 @@ import {
 import { matchQueryKeys } from './matchQueryKeys';
 import type {
   CreateMatchInput,
+  MatchHistoryFilter,
   UpdateMatchInput,
   RecordInput,
   SaveLineupInput,
@@ -43,13 +45,14 @@ const DEFAULT_PAGE_SIZE = 20;
 
 // ─── 경기 목록·상세 ───────────────────────────────────────────────────────────
 
-export function useMatches(clubId: string, params?: { type?: string }) {
-  return useSuspenseInfiniteQuery({
-    queryKey: matchQueryKeys.list(clubId, params),
+export function useMatches(clubId: string, filter: MatchHistoryFilter = {}) {
+  return useInfiniteQuery({
+    queryKey: matchQueryKeys.list(clubId, filter),
     queryFn: ({ pageParam }) =>
-      getMatches(clubId, { ...params, cursor: pageParam as string | undefined }),
+      getMatches(clubId, { ...filter, cursor: pageParam as string | undefined }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    placeholderData: keepPreviousData,
   });
 }
 

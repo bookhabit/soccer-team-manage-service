@@ -228,6 +228,11 @@ export type RecordHistory = z.infer<typeof RecordHistorySchema>;
 
 export type CreateMatchInput = z.infer<typeof CreateMatchSchema>;
 export type UpdateMatchInput = z.infer<typeof UpdateMatchSchema>;
+
+export interface MatchHistoryFilter {
+  type?: 'LEAGUE' | 'SELF';
+  myMatches?: boolean;
+}
 export type RecordInput = z.infer<typeof RecordInputSchema>;
 export type SaveLineupInput = z.infer<typeof SaveLineupSchema>;
 export type CreateCommentInput = z.infer<typeof CreateCommentSchema>;

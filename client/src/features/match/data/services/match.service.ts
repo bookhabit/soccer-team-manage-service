@@ -36,7 +36,7 @@ const matchBase = (clubId: string, matchId: string) => `${base(clubId)}/${matchI
 
 export async function getMatches(
   clubId: string,
-  params?: { type?: string; cursor?: string; limit?: number },
+  params?: { type?: string; myMatches?: boolean; cursor?: string; limit?: number },
 ): Promise<MatchPage> {
   return http.get<MatchPage>(base(clubId), params, MatchPageSchema);
 }

@@ -8,7 +8,7 @@ import {
   FlatList,
   Animated,
 } from 'react-native';
-import { TextBox, Switch, colors, spacing, useToast } from '@ui';
+import { Chip, TextBox, Switch, colors, spacing, useToast } from '@ui';
 import { useRegions } from '@/src/shared/hooks/useRegions';
 import type { MatchFeedFilter } from '../../data/schemas/matchFeed.schema';
 import type { Region } from '@/src/shared/services/region.service';
@@ -129,38 +129,22 @@ export function MatchFeedFilterBar({ filter, isClubMember, onChange }: MatchFeed
         contentContainerStyle={styles.scrollContent}
       >
         {/* 지역 필터 버튼 */}
-        <TouchableOpacity
-          style={[styles.chip, isRegionActive && styles.chipActive]}
+        <Chip
+          label={isRegionActive ? `${currentRegionLabel} ✕` : currentRegionLabel}
+          active={isRegionActive}
           onPress={isRegionActive ? clearRegion : openRegionDrawer}
-          activeOpacity={0.75}
-        >
-          <TextBox
-            variant="captionBold"
-            color={isRegionActive ? colors.primary : colors.grey600}
-          >
-            {currentRegionLabel}
-            {isRegionActive ? ' ✕' : ''}
-          </TextBox>
-        </TouchableOpacity>
+        />
 
         {/* 유형 필터 칩 */}
         {(['ALL', 'LEAGUE', 'SELF'] as MatchType[]).map((type) => {
           const label = type === 'ALL' ? '전체' : type === 'LEAGUE' ? '매칭전' : '자체전';
-          const isActive = activeType === type;
           return (
-            <TouchableOpacity
+            <Chip
               key={type}
-              style={[styles.chip, isActive && styles.chipActive]}
+              label={label}
+              active={activeType === type}
               onPress={() => handleTypeChange(type)}
-              activeOpacity={0.75}
-            >
-              <TextBox
-                variant="captionBold"
-                color={isActive ? colors.primary : colors.grey600}
-              >
-                {label}
-              </TextBox>
-            </TouchableOpacity>
+            />
           );
         })}
 
@@ -286,18 +270,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[2],
     gap: spacing[2],
-  },
-  chip: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: spacing[2],
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.grey200,
-    backgroundColor: colors.background,
-  },
-  chipActive: {
-    borderColor: colors.primary,
-    backgroundColor: colors.blue50,
   },
   divider: {
     width: 1,

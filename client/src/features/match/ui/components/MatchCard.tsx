@@ -60,11 +60,15 @@ export function MatchCard({ match, totalMembers = 0, onPress }: MatchCardProps) 
       </View>
 
       {/* 제목 */}
-      <TextBox variant="body2Bold" color={colors.grey900}>{match.title}</TextBox>
+      <TextBox variant="body2Bold" color={colors.grey900}>
+        {match.title}
+      </TextBox>
 
       {/* 상대팀 (매칭전) */}
       {match.opponentName ? (
-        <TextBox variant="body2" color={colors.grey700}>vs {match.opponentName}</TextBox>
+        <TextBox variant="body2" color={colors.grey700}>
+          vs {match.opponentName}
+        </TextBox>
       ) : null}
 
       {/* 날짜·장소 */}
@@ -83,7 +87,9 @@ export function MatchCard({ match, totalMembers = 0, onPress }: MatchCardProps) 
 
       {/* 내 응답 */}
       <View style={styles.myResponse}>
-        <TextBox variant="caption" color={colors.grey500}>내 응답</TextBox>
+        <TextBox variant="caption" color={colors.grey500}>
+          내 응답
+        </TextBox>
         <AttendanceChip response={match.myResponse} />
       </View>
 
@@ -105,6 +111,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: spacing[4],
     gap: spacing[2],
+    marginHorizontal: spacing[4],
   },
   badgeRow: {
     flexDirection: 'row',

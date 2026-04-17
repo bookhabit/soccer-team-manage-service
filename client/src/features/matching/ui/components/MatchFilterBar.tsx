@@ -1,6 +1,6 @@
 import React from 'react';
-import { ScrollView, TouchableOpacity, StyleSheet, View } from 'react-native';
-import { TextBox, colors, spacing } from '@ui';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import { Chip, colors, spacing } from '@ui';
 import type { MatchPostFilters } from '../../data/schemas/matchPost.schema';
 
 const LEVEL_CHIPS = [
@@ -88,20 +88,6 @@ export function MatchFilterBar({ filters, onChange }: MatchFilterBarProps) {
   );
 }
 
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
-  return (
-    <TouchableOpacity
-      style={[styles.chip, active && styles.chipActive]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <TextBox variant="captionBold" color={active ? colors.blue600 : colors.grey600}>
-        {label}
-      </TextBox>
-    </TouchableOpacity>
-  );
-}
-
 const styles = StyleSheet.create({
   wrapper: {
     borderBottomWidth: 1,
@@ -112,18 +98,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing[4],
     gap: spacing[2],
     paddingVertical: spacing[1],
-  },
-  chip: {
-    paddingHorizontal: spacing[3],
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: colors.grey200,
-    backgroundColor: colors.background,
-  },
-  chipActive: {
-    borderColor: colors.blue300,
-    backgroundColor: colors.blue50,
   },
   divider: {
     width: 1,

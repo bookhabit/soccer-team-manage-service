@@ -93,13 +93,14 @@ export class MatchService {
       clubId,
       isDeleted: false,
       ...(query.type ? { type: query.type } : {}),
-      ...(query.cursor ? { id: { lt: query.cursor } } : {}),
+      ...(query.myMatches ? { participants: { some: { userId } } } : {}),
     };
 
     const matches = await this.prisma.match.findMany({
       where,
       orderBy: { startAt: 'desc' },
       take: limit + 1,
+      ...(query.cursor ? { cursor: { id: query.cursor }, skip: 1 } : {}),
       select: {
         ...MATCH_SUMMARY_SELECT,
         id: true,
