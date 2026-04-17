@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   applyMatchPost,
   getMatchApplications,
@@ -12,18 +12,20 @@ import type { CreateMatchApplicationInput } from '../schemas/matchApplication.sc
 // ─── 신청 목록 (등록자) ───────────────────────────────────────────────────────
 
 export function useMatchApplications(postId: string) {
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: matchQueryKeys.applications(postId),
     queryFn: () => getMatchApplications(postId),
+    placeholderData: keepPreviousData,
   });
 }
 
 // ─── 내 신청 목록 ─────────────────────────────────────────────────────────────
 
 export function useMyApplications() {
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: matchQueryKeys.myApplications(),
     queryFn: getMyApplications,
+    placeholderData: keepPreviousData,
   });
 }
 

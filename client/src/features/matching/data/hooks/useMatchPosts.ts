@@ -1,9 +1,9 @@
 import {
   useInfiniteQuery,
+  keepPreviousData,
   useMutation,
   useQuery,
   useQueryClient,
-  useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from '@tanstack/react-query';
 import {
@@ -24,19 +24,21 @@ const DEFAULT_PAGE_SIZE = 20;
 // ─── 목록 조회 ────────────────────────────────────────────────────────────────
 
 export function useMatchPosts(filters: Omit<MatchPostFilters, 'cursor'> = {}) {
-  return useSuspenseInfiniteQuery({
+  return useInfiniteQuery({
     queryKey: matchQueryKeys.lists(filters),
     queryFn: ({ pageParam }) =>
       getMatchPosts({ ...filters, cursor: pageParam as string | undefined, limit: DEFAULT_PAGE_SIZE }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    placeholderData: keepPreviousData,
   });
 }
 
 export function useMyMatchPosts() {
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: matchQueryKeys.my(),
     queryFn: getMyMatchPosts,
+    placeholderData: keepPreviousData,
   });
 }
 

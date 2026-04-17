@@ -261,6 +261,23 @@ export class ClubService {
       throw new NotFoundException({ code: ErrorCode.CLUB_NOT_FOUND, message: '해당 팀원을 찾을 수 없습니다.' });
     }
 
+    const matchFilter = { clubId, isDeleted: false, isRecordSubmitted: true };
+
+    const [goals, assists, momCount, matchCount] = await Promise.all([
+      this.prisma.matchGoal.count({
+        where: { scorerUserId: targetUserId, match: matchFilter },
+      }),
+      this.prisma.matchGoal.count({
+        where: { assistUserId: targetUserId, match: matchFilter },
+      }),
+      this.prisma.momVote.count({
+        where: { targetUserId, match: { clubId, isDeleted: false } },
+      }),
+      this.prisma.matchParticipant.count({
+        where: { userId: targetUserId, match: { clubId, isDeleted: false } },
+      }),
+    ]);
+
     return {
       userId: member.user.id,
       name: member.user.name,
@@ -281,10 +298,10 @@ export class ClubService {
         defense: member.defense,
         physical: member.physical,
         isStatsPublic: member.isStatsPublic,
-        goals: 0,   // TODO: 경기 도메인 연동 후 집계
-        assists: 0,
-        momCount: 0,
-        matchCount: 0,
+        goals,
+        assists,
+        momCount,
+        matchCount,
       },
       joinedAt: member.joinedAt.toISOString(),
     };

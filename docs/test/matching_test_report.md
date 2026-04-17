@@ -9,12 +9,12 @@
 
 | #   | 구분         | 우선순위 | 위치                     | 내용                                                                         | 상태      |
 | --- | ------------ | -------- | ------------------------ | ---------------------------------------------------------------------------- | --------- |
-| 1   | 🐛 버그      | P2       | MatchingTabContainer     | 탭 전환 시마다 스켈레톤 로딩 노출                                            | ⏳ 미처리 |
-| 2   | 📐 기획 변경 | P1       | MatchCreateView          | 날짜·시간 입력 UI가 MatchFormView 방식과 불일치 — 통일 필요                  | ⏳ 미처리 |
-| 3   | 🐛 버그      | P1       | ApplicationListContainer | 수락 후 전체 매칭 목록의 상태(모집중→매칭완료) 미동기화                      | ⏳ 미처리 |
-| 4   | 📐 기획 변경 | P1       | MatchCreateView          | 장소 입력: 카카오 주소 검색 API 도입 → regionId 입력 필드 제거               | ⏳ 미처리 |
-| 5   | ✨ 기능 추가 | P1       | matching                 | 매칭 취소 기능 필요 (투표 참석자 부족 등)                                    | ⏳ 미처리 |
-| 6   | 📐 기획 변경 | P1       | matching → match 연동    | 매칭 수락 시 Match 자동생성 → 투표탭 경기등록 시 완료된 매칭 pre-fill로 변경 | ⏳ 미처리 |
+| 1   | 🐛 버그      | P2       | MatchingTabContainer     | 탭 전환 시마다 스켈레톤 로딩 노출                                            | ⏳ 보류   |
+| 2   | 📐 기획 변경 | P1       | MatchCreateView          | 날짜·시간 입력 UI가 MatchFormView 방식과 불일치 — 통일 필요                  | ✅ 완료   |
+| 3   | 🐛 버그      | P1       | ApplicationListContainer | 수락 후 전체 매칭 목록의 상태(모집중→매칭완료) 미동기화                      | ✅ 완료   |
+| 4   | 📐 기획 변경 | P1       | MatchCreateView          | 장소 입력: 카카오 주소 검색 API 도입 → regionId 입력 필드 제거               | ⏳ 보류   |
+| 5   | ✨ 기능 추가 | P1       | matching                 | 매칭 취소 기능 필요 (투표 참석자 부족 등)                                    | ✅ 완료   |
+| 6   | 📐 기획 변경 | P1       | matching → match 연동    | 매칭 수락 시 Match 자동생성 → 투표탭 경기등록 시 완료된 매칭 pre-fill로 변경 | ✅ 완료   |
 
 ---
 

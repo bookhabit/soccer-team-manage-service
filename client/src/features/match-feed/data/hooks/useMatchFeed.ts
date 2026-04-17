@@ -1,5 +1,6 @@
 import {
-  useSuspenseInfiniteQuery,
+  useInfiniteQuery,
+  keepPreviousData,
   useSuspenseQuery,
 } from '@tanstack/react-query';
 import { matchFeedService } from '../services/matchFeed.service';
@@ -14,7 +15,7 @@ const DEFAULT_PAGE_SIZE = 20;
  * queryKey: matchFeedQueryKeys.list(filter)
  */
 export function useMatchFeed(filter: MatchFeedFilter = {}) {
-  return useSuspenseInfiniteQuery({
+  return useInfiniteQuery({
     queryKey: matchFeedQueryKeys.list(filter),
     queryFn: ({ pageParam }) =>
       matchFeedService.getFeedPage({
@@ -24,6 +25,7 @@ export function useMatchFeed(filter: MatchFeedFilter = {}) {
       }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    placeholderData: keepPreviousData,
   });
 }
 
