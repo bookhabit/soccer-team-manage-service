@@ -3,7 +3,6 @@ import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
 import { Skeleton, ScreenLayout, Spacing, spacing } from '@ui';
-import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useMatches } from '../../data/hooks/useMatch';
 import { MatchRecordListView } from '../view/MatchRecordListView';
 
@@ -25,13 +24,15 @@ function MatchRecordListSkeleton() {
   );
 }
 
-function MatchRecordListContent({ clubId }: MatchRecordListContainerProps) {
-  const { data, fetchNextPage, hasNextPage } = useMatches(clubId);
+export function MatchRecordListContainer({ clubId }: MatchRecordListContainerProps) {
+  const { data, fetchNextPage, hasNextPage, isPending } = useMatches(clubId);
 
-  const allMatches = (data?.pages.flatMap((p) => p.items) ?? []);
-  const pastMatches = allMatches.filter((m) => {
-    return new Date(m.endAt).getTime() < Date.now() && m.isRecordSubmitted;
-  });
+  if (isPending) return <MatchRecordListSkeleton />;
+
+  const allMatches = data?.pages.flatMap((p) => p.items) ?? [];
+  const pastMatches = allMatches.filter(
+    (m) => new Date(m.endAt).getTime() < Date.now() && m.isRecordSubmitted,
+  );
 
   const stats = pastMatches.reduce(
     (acc, m) => {
@@ -49,19 +50,9 @@ function MatchRecordListContent({ clubId }: MatchRecordListContainerProps) {
       matches={pastMatches}
       stats={stats}
       hasNextPage={hasNextPage ?? false}
-      onMatchPress={(matchId) =>
-        router.push(`/(app)/vote/${matchId}/detail` as Href)
-      }
+      onMatchPress={(matchId) => router.push(`/(app)/vote/${matchId}/detail` as Href)}
       onLoadMore={() => fetchNextPage()}
     />
-  );
-}
-
-export function MatchRecordListContainer({ clubId }: MatchRecordListContainerProps) {
-  return (
-    <AsyncBoundary loadingFallback={<MatchRecordListSkeleton />}>
-      <MatchRecordListContent clubId={clubId} />
-    </AsyncBoundary>
   );
 }
 

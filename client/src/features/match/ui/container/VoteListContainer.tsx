@@ -26,9 +26,11 @@ function VoteListSkeleton() {
 }
 
 function VoteListInner({ club }: { club: ClubDetail }) {
-  const { data, fetchNextPage, hasNextPage } = useMatches(club.id);
+  const { data, fetchNextPage, hasNextPage, isPending } = useMatches(club.id);
 
-  const matches = data.pages.flatMap((p) => p.items);
+  if (isPending) return <VoteListSkeleton />;
+
+  const matches = data?.pages.flatMap((p) => p.items) ?? [];
   const isCaptainOrVice = club.myRole === 'CAPTAIN' || club.myRole === 'VICE_CAPTAIN';
 
   return (

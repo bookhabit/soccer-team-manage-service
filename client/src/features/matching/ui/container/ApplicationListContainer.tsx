@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useToast } from '@ui';
-import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useMatchApplications, useAcceptApplication, useRejectApplication } from '../../data/hooks/useMatchApplications';
 import { ApplicationListView, ApplicationListSkeleton } from '../view/ApplicationListView';
 
@@ -8,8 +7,8 @@ interface ApplicationListContainerProps {
   postId: string;
 }
 
-function ApplicationListContent({ postId }: ApplicationListContainerProps) {
-  const { data } = useMatchApplications(postId);
+export function ApplicationListContainer({ postId }: ApplicationListContainerProps) {
+  const { data, isPending } = useMatchApplications(postId);
   const { toast } = useToast();
 
   const [acceptingId, setAcceptingId] = useState<string | null>(null);
@@ -17,6 +16,8 @@ function ApplicationListContent({ postId }: ApplicationListContainerProps) {
 
   const { mutate: accept } = useAcceptApplication(postId);
   const { mutate: reject } = useRejectApplication(postId);
+
+  if (isPending) return <ApplicationListSkeleton />;
 
   const handleAccept = (appId: string) => {
     setAcceptingId(appId);
@@ -61,16 +62,5 @@ function ApplicationListContent({ postId }: ApplicationListContainerProps) {
       acceptingId={acceptingId}
       rejectingId={rejectingId}
     />
-  );
-}
-
-/**
- * 신청 목록 Container (게시글 등록자용).
- */
-export function ApplicationListContainer({ postId }: ApplicationListContainerProps) {
-  return (
-    <AsyncBoundary loadingFallback={<ApplicationListSkeleton />}>
-      <ApplicationListContent postId={postId} />
-    </AsyncBoundary>
   );
 }

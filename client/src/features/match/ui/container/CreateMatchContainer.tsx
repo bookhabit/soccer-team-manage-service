@@ -45,7 +45,7 @@ interface MatchPickerDrawerProps {
 
 function MatchPickerDrawer({ isOpen, onClose, onSelect }: MatchPickerDrawerProps) {
   const { data } = useMyMatchPosts();
-  const matchedPosts = data.items.filter((p) => p.status === 'MATCHED');
+  const matchedPosts = (data?.items ?? []).filter((p) => p.status === 'MATCHED');
 
   return (
     <Drawer isOpen={isOpen} onClose={onClose} title="완료된 매칭에서 불러오기">
@@ -158,13 +158,11 @@ function CreateMatchContent() {
         onCancel={() => router.back()}
       />
 
-      <AsyncBoundary>
-        <MatchPickerDrawer
-          isOpen={drawerOpen}
-          onClose={() => setDrawerOpen(false)}
-          onSelect={handleSelect}
-        />
-      </AsyncBoundary>
+      <MatchPickerDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onSelect={handleSelect}
+      />
     </>
   );
 }
