@@ -19,8 +19,6 @@ interface MatchFeedFilterBarProps {
   onChange: (filter: MatchFeedFilter) => void;
 }
 
-type MatchType = 'ALL' | 'LEAGUE' | 'SELF';
-
 const SHEET_DURATION = 250;
 
 export function MatchFeedFilterBar({ filter, isClubMember, onChange }: MatchFeedFilterBarProps) {
@@ -98,17 +96,6 @@ export function MatchFeedFilterBar({ filter, isClubMember, onChange }: MatchFeed
     onChange(rest);
   };
 
-  const handleTypeChange = (type: MatchType) => {
-    if (type === 'ALL') {
-      const { type: _t, ...rest } = filter;
-      onChange(rest);
-    } else {
-      onChange({ ...filter, type });
-    }
-  };
-
-  const activeType: MatchType = filter.type ?? 'ALL';
-
   const handleMyClubToggle = () => {
     if (!isClubMember) {
       toast.info('클럽에 가입하면 사용할 수 있어요');
@@ -134,19 +121,6 @@ export function MatchFeedFilterBar({ filter, isClubMember, onChange }: MatchFeed
           active={isRegionActive}
           onPress={isRegionActive ? clearRegion : openRegionDrawer}
         />
-
-        {/* 유형 필터 칩 */}
-        {(['ALL', 'LEAGUE', 'SELF'] as MatchType[]).map((type) => {
-          const label = type === 'ALL' ? '전체' : type === 'LEAGUE' ? '매칭전' : '자체전';
-          return (
-            <Chip
-              key={type}
-              label={label}
-              active={activeType === type}
-              onPress={() => handleTypeChange(type)}
-            />
-          );
-        })}
 
         {/* 구분선 */}
         <View style={styles.divider} />

@@ -2,14 +2,12 @@ import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsDateString,
-  IsEnum,
   IsInt,
   IsOptional,
   IsString,
   Max,
   Min,
 } from 'class-validator';
-import { MatchType } from '@prisma/client';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class GetMatchFeedDto {
@@ -35,11 +33,6 @@ export class GetMatchFeedDto {
   @IsOptional()
   @IsString()
   district?: string;
-
-  @ApiPropertyOptional({ enum: MatchType, description: '경기 유형 필터' })
-  @IsOptional()
-  @IsEnum(MatchType)
-  type?: MatchType;
 
   @ApiPropertyOptional({ description: '내 클럽 경기만 조회 (클럽 미소속 시 무시)' })
   @IsOptional()

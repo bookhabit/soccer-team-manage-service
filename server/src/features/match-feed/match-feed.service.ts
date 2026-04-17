@@ -59,7 +59,7 @@ export class MatchFeedService {
     const where: Record<string, unknown> = {
       isRecordSubmitted: true,
       isDeleted: false,
-      ...(dto.type ? { type: dto.type } : {}),
+      type: 'LEAGUE',
       ...(myClubId ? { clubId: myClubId } : {}),
       ...(dto.myMatches ? { participants: { some: { userId } } } : {}),
       ...(dto.province || dto.district

@@ -74,7 +74,6 @@ export const matchFeedDetailSchema = z.object({
 export const matchFeedFilterSchema = z.object({
   province: z.string().optional(),
   district: z.string().optional(),
-  type: MatchTypeSchema.optional(),
   myClub: z.boolean().optional(),
   myMatches: z.boolean().optional(),
   from: z.string().optional(),
