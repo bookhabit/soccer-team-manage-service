@@ -4,14 +4,14 @@
 
 ## 테스트 계정 목록
 
-| 라벨 | 이메일 | 비밀번호 | 역할 | 클럽 |
-|---|---|---|---|---|
-| 마무리FC 주장 | captain@mamurifc.test | test1234! | CAPTAIN | 마무리FC |
-| 마무리FC 부주장 | vice@mamurifc.test | test1234! | VICE_CAPTAIN | 마무리FC |
-| 마무리FC 멤버1 | member1@mamurifc.test | test1234! | MEMBER | 마무리FC |
-| 마무리FC 멤버2 | member2@mamurifc.test | test1234! | MEMBER | 마무리FC |
-| 카동FC 주장 | captain@kadongfc.test | test1234! | CAPTAIN | 카동FC |
-| 클럽 미소속 | newbie@test.com | test1234! | — | — |
+| 라벨            | 이메일                | 비밀번호  | 역할         | 클럽     |
+| --------------- | --------------------- | --------- | ------------ | -------- |
+| 마무리FC 주장   | captain@mamurifc.test | test1234! | CAPTAIN      | 마무리FC |
+| 마무리FC 부주장 | vice@mamurifc.test    | test1234! | VICE_CAPTAIN | 마무리FC |
+| 마무리FC 멤버1  | member1@mamurifc.test | test1234! | MEMBER       | 마무리FC |
+| 마무리FC 멤버2  | member2@mamurifc.test | test1234! | MEMBER       | 마무리FC |
+| 카동FC 주장     | captain@kadongfc.test | test1234! | CAPTAIN      | 카동FC   |
+| 클럽 미소속     | newbie@test.com       | test1234! | —            | —        |
 
 > 앱 실행 → 홈 → `🧪 테스트 로그인` 에서 원클릭 로그인 가능
 
@@ -19,16 +19,16 @@
 
 ## 시드 데이터 상태 요약
 
-| 경기 ID | 상태 | 설명 |
-|---|---|---|
-| `BEFORE_SELF` | 경기 전 (D-3) | 자체 경기, 투표 마감 내일, 주장·부주장 ATTEND, 멤버1 ABSENT, 멤버2·3 UNDECIDED |
-| `BEFORE_LEAGUE` | 경기 전 (D-5) | 리그 경기 vs 카동FC, 포지션 배정(Q1: 4-3-3) 완료 |
-| `BEFORE_DEADLINE_PASSED` | 경기 전, 투표 마감 | 어제 마감, 투표 버튼 비활성화 대상 |
-| `DURING` | 경기 중 | 30분 전 시작, 1시간 후 종료 예정 |
-| `AFTER_LEAGUE_RECORDED` | 경기 후, 기록 완료 | 3:1 승, 골·어시 기록 있음, MOM 완료(멤버1 2표·주장 2표 동점), 상대 평가 완료 |
-| `AFTER_SELF_NO_RECORD` | 경기 후, 기록 미입력 | 자체 경기, 기록 없음 |
-| `AFTER_MOM_ACTIVE` | 경기 후, MOM 투표 중 | 2:2 무승부, 주장이 이미 투표(멤버1 선택), 멤버1은 미투표 |
-| `KADONG_BEFORE` | 경기 전 (D-7) | 카동FC 소속 경기 — 마무리FC 계정으로 미노출 확인용 |
+| 경기 ID                  | 상태                 | 설명                                                                           |
+| ------------------------ | -------------------- | ------------------------------------------------------------------------------ |
+| `BEFORE_SELF`            | 경기 전 (D-3)        | 자체 경기, 투표 마감 내일, 주장·부주장 ATTEND, 멤버1 ABSENT, 멤버2·3 UNDECIDED |
+| `BEFORE_LEAGUE`          | 경기 전 (D-5)        | 리그 경기 vs 카동FC, 포지션 배정(Q1: 4-3-3) 완료                               |
+| `BEFORE_DEADLINE_PASSED` | 경기 전, 투표 마감   | 어제 마감, 투표 버튼 비활성화 대상                                             |
+| `DURING`                 | 경기 중              | 30분 전 시작, 1시간 후 종료 예정                                               |
+| `AFTER_LEAGUE_RECORDED`  | 경기 후, 기록 완료   | 3:1 승, 골·어시 기록 있음, MOM 완료(멤버1 2표·주장 2표 동점), 상대 평가 완료   |
+| `AFTER_SELF_NO_RECORD`   | 경기 후, 기록 미입력 | 자체 경기, 기록 없음                                                           |
+| `AFTER_MOM_ACTIVE`       | 경기 후, MOM 투표 중 | 2:2 무승부, 주장이 이미 투표(멤버1 선택), 멤버1은 미투표                       |
+| `KADONG_BEFORE`          | 경기 전 (D-7)        | 카동FC 소속 경기 — 마무리FC 계정으로 미노출 확인용                             |
 
 ---
 
@@ -59,7 +59,7 @@
 
 ---
 
-## 🚩 시나리오 2: 출석 투표 응답 변경
+## 🚩 시나리오 2: 경기 참석 투표 응답 변경
 
 **[CASE ID: MATCH-04-003, MATCH-03-003]**
 
@@ -356,20 +356,20 @@
 
 ## 📋 시나리오-계정 매핑 빠른 참조
 
-| 시나리오 | 사용 계정 | 대상 경기 |
-|---|---|---|
-| 1. 목록·배지 | captain@mamurifc.test | 전체 7건 |
-| 2. 투표 응답 변경 | member2@mamurifc.test | BEFORE_SELF |
-| 3. 마감 투표 | member1@mamurifc.test | BEFORE_DEADLINE_PASSED |
-| 4. 경기 중 상태 | captain@mamurifc.test | DURING |
-| 5-A. 기록 미입력 CTA | captain@mamurifc.test | AFTER_SELF_NO_RECORD |
-| 5-B. 기록 미입력 권한 | member1@mamurifc.test | AFTER_SELF_NO_RECORD |
-| 6-A. MOM 투표 | member1@mamurifc.test | AFTER_MOM_ACTIVE |
-| 6-B. MOM 이미 투표 | captain@mamurifc.test | AFTER_MOM_ACTIVE |
-| 7. 기록 완료 4탭 | captain@mamurifc.test | AFTER_LEAGUE_RECORDED |
-| 8-A. 포지션 수정 | captain@mamurifc.test | BEFORE_LEAGUE |
-| 8-B. 포지션 읽기 | member1@mamurifc.test | BEFORE_LEAGUE |
-| 9. 클럽 격리 | captain@kadongfc.test | KADONG_BEFORE |
-| 10. 미소속 접근 | newbie@test.com | — |
-| 11. 중복 투표 | member2@mamurifc.test | BEFORE_SELF |
-| 12. 오프라인 | captain@mamurifc.test | — |
+| 시나리오              | 사용 계정             | 대상 경기              |
+| --------------------- | --------------------- | ---------------------- |
+| 1. 목록·배지          | captain@mamurifc.test | 전체 7건               |
+| 2. 투표 응답 변경     | member2@mamurifc.test | BEFORE_SELF            |
+| 3. 마감 투표          | member1@mamurifc.test | BEFORE_DEADLINE_PASSED |
+| 4. 경기 중 상태       | captain@mamurifc.test | DURING                 |
+| 5-A. 기록 미입력 CTA  | captain@mamurifc.test | AFTER_SELF_NO_RECORD   |
+| 5-B. 기록 미입력 권한 | member1@mamurifc.test | AFTER_SELF_NO_RECORD   |
+| 6-A. MOM 투표         | member1@mamurifc.test | AFTER_MOM_ACTIVE       |
+| 6-B. MOM 이미 투표    | captain@mamurifc.test | AFTER_MOM_ACTIVE       |
+| 7. 기록 완료 4탭      | captain@mamurifc.test | AFTER_LEAGUE_RECORDED  |
+| 8-A. 포지션 수정      | captain@mamurifc.test | BEFORE_LEAGUE          |
+| 8-B. 포지션 읽기      | member1@mamurifc.test | BEFORE_LEAGUE          |
+| 9. 클럽 격리          | captain@kadongfc.test | KADONG_BEFORE          |
+| 10. 미소속 접근       | newbie@test.com       | —                      |
+| 11. 중복 투표         | member2@mamurifc.test | BEFORE_SELF            |
+| 12. 오프라인          | captain@mamurifc.test | —                      |

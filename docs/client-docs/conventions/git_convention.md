@@ -12,25 +12,25 @@
 
 ## Type 목록
 
-| Type | 설명 | 예시 |
-|------|------|------|
-| `feat` | 새로운 기능 추가 | `feat(orderbook): 호가창 실시간 WebSocket 연결 구현` |
-| `fix` | 버그 수정 | `fix(funnel): 뒤로가기 시 입력값 초기화되는 문제 수정` |
-| `refactor` | 기능 변화 없는 코드 개선 | `refactor(loan): 심사 로직을 커스텀 훅으로 분리` |
-| `style` | 코드 포맷팅, 세미콜론 등 (로직 변경 없음) | `style: prettier 적용` |
-| `test` | 테스트 코드 추가/수정 | `test(orderbook): 호가 계산 유틸 단위 테스트 추가` |
-| `docs` | 문서 작성/수정 | `docs: 커밋 컨벤션 정리` |
-| `chore` | 빌드 설정, 패키지 설치 등 | `chore: eslint 설정 추가` |
-| `perf` | 성능 개선 | `perf(orderbook): throttle 적용으로 리렌더 최소화` |
-| `ci` | CI/CD 설정 변경 | `ci: GitHub Actions 정적 분석 워크플로우 추가` |
-| `revert` | 이전 커밋 되돌리기 | `revert: feat(funnel): 계좌 개설 3단계 추가` |
+| Type       | 설명                                      | 예시                                                   |
+| ---------- | ----------------------------------------- | ------------------------------------------------------ |
+| `feat`     | 새로운 기능 추가                          | `feat(orderbook): 호가창 실시간 WebSocket 연결 구현`   |
+| `fix`      | 버그 수정                                 | `fix(funnel): 뒤로가기 시 입력값 초기화되는 문제 수정` |
+| `refactor` | 기능 변화 없는 코드 개선                  | `refactor(loan): 심사 로직을 커스텀 훅으로 분리`       |
+| `style`    | 코드 포맷팅, 세미콜론 등 (로직 변경 없음) | `style: prettier 적용`                                 |
+| `test`     | 테스트 코드 추가/수정                     | `test(orderbook): 호가 계산 유틸 단위 테스트 추가`     |
+| `docs`     | 문서 작성/수정                            | `docs: 커밋 컨벤션 정리`                               |
+| `chore`    | 빌드 설정, 패키지 설치 등                 | `chore: eslint 설정 추가`                              |
+| `perf`     | 성능 개선                                 | `perf(orderbook): throttle 적용으로 리렌더 최소화`     |
+| `ci`       | CI/CD 설정 변경                           | `ci: GitHub Actions 정적 분석 워크플로우 추가`         |
+| `revert`   | 이전 커밋 되돌리기                        | `revert: feat(funnel): 계좌 개설 3단계 추가`           |
 
 ## Scope 목록
 
 ```
 team          - 팀 관련 기능
 match         - 경기 관련 기능
-vote          - 출석 투표 기능
+vote          - 경기 참석 투표 기능
 record        - 경기 기록 기능
 mercenary     - 용병 매칭 기능
 auth          - 인증/인가
@@ -62,7 +62,7 @@ feat(match): 경기 생성 시 구장 위치 지도 선택 구현
 ### refactor - 관심사 분리
 
 ```
-refactor(vote): 출석 투표 뷰와 상태 로직 분리
+refactor(vote): 경기 참석 투표 뷰와 상태 로직 분리
 
 기존 VotePage에 뷰와 투표 상태가 혼재하여 확장성이 낮았음.
 useVoteState 훅을 추출하고 3-state 전환 로직을 컴포넌트 외부로 이동.
@@ -108,7 +108,7 @@ refactor/vote-hooks-separation
 fix/mercenary-optimistic-update
 
 # PR 제목 = 커밋 타입과 동일하게
-feat(match): 경기 생성 및 출석 투표 구현
+feat(match): 경기 생성 및 경기 참석 투표 구현
 ```
 
 ## 나쁜 예시 (금지)

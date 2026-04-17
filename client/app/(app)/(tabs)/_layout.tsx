@@ -93,20 +93,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="vote"
-        options={{
-          title: '투표',
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon
-              name="checkmark-circle-outline"
-              focusedName="checkmark-circle"
-              color={color}
-              focused={focused}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="profile"
         options={{
           title: '프로필',

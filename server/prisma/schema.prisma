@@ -146,7 +146,7 @@ model User {
   clubJoinRequests  ClubJoinRequest[]   // 가입 신청 이력
   posts             Post[]              // 작성한 게시글
   comments          Comment[]           // 작성한 댓글
-  matchAttendances  MatchAttendance[]   // 출석 투표 응답
+  matchAttendances  MatchAttendance[]   // 경기 참석 투표 응답
   matchParticipants MatchParticipant[]  // 실제 경기 참가 기록
   matchComments     MatchComment[]      // 경기 코멘트
   matchPosts              MatchPost[]            // 등록한 매칭 게시글
@@ -417,14 +417,14 @@ enum MatchType {
   SELF   // 자체 훈련/연습 경기
 }
 
-// 출석 투표 응답
+// 경기 참석 투표 응답
 enum AttendanceResponse {
   ATTEND    // 참석
   ABSENT    // 불참
   UNDECIDED // 미결정 (기본값)
 }
 
-// 경기 도메인의 중심 엔터티. 출석 투표·기록·포지션 배정 등 모든 경기 데이터의 루트.
+// 경기 도메인의 중심 엔터티. 경기 참석 투표·기록·포지션 배정 등 모든 경기 데이터의 루트.
 model Match {
   id                String      @id @default(cuid())
   clubId            String      // FK → Club
@@ -436,7 +436,7 @@ model Match {
   address           String?     // 상세 주소
   startAt           DateTime    // 경기 시작 일시
   endAt             DateTime    // 경기 종료 일시
-  voteDeadline      DateTime    // 출석 투표 마감 일시
+  voteDeadline      DateTime    // 경기 참석 투표 마감 일시
 
   // ── 상대팀 정보 (LEAGUE일 때만 유효) ──
   opponentName      String?     // 상대 클럽명
@@ -460,7 +460,7 @@ model Match {
   // ── Relations ──
   club              Club                 @relation(fields: [clubId], references: [id])
   matchPost         MatchPost?           @relation(fields: [matchPostId], references: [id])
-  attendances       MatchAttendance[]    // 출석 투표 응답
+  attendances       MatchAttendance[]    // 경기 참석 투표 응답
   participants      MatchParticipant[]   // 실제 경기 참가자 (기록 입력 시 확정)
   quarters          MatchQuarter[]       // 쿼터별 포지션 배정
   goals             MatchGoal[]          // 득점 기록
@@ -474,7 +474,7 @@ model Match {
   @@map("matches")
 }
 
-// 출석 투표 응답. voteDeadline 전까지 변경 가능.
+// 경기 참석 투표 응답. voteDeadline 전까지 변경 가능.
 model MatchAttendance {
   id        String             @id @default(cuid())
   matchId   String             // FK → Match
@@ -491,7 +491,7 @@ model MatchAttendance {
   @@map("match_attendances")
 }
 
-// 실제 경기 참가자. 출석 투표(ATTEND)와 별개로 운영진이 최종 확정.
+// 실제 경기 참가자. 경기 참석 투표(ATTEND)와 별개로 운영진이 최종 확정.
 model MatchParticipant {
   id      String @id @default(cuid())
   matchId String // FK → Match

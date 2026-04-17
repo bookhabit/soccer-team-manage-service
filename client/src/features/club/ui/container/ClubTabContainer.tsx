@@ -44,6 +44,7 @@ function ClubTabContent() {
         onGoSettings={() => router.push(`/(app)/club/${club?.id}/settings` as Href)}
         onGoJoinRequests={() => router.push(`/(app)/club/${club?.id}/join-requests` as Href)}
         onGoMatches={() => router.push(`/(app)/club/${club?.id}/matches` as Href)}
+        onGoVote={() => router.push(`/(app)/club/${club?.id}/vote` as Href)}
       />
     </EmptyBoundary>
   );

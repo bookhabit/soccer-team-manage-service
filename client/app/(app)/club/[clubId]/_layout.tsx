@@ -22,6 +22,7 @@ export default function ClubIdLayout() {
       <Stack.Screen name="settings/dissolve" />
       <Stack.Screen name="transfer-captain" />
       <Stack.Screen name="matches/index" />
+      <Stack.Screen name="vote" />
     </Stack>
   );
 }

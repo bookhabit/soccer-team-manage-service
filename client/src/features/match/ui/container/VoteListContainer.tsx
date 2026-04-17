@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
@@ -10,8 +10,6 @@ import { NoClubView } from '@/src/features/club/ui/components/NoClubView';
 import type { ClubDetail } from '@/src/features/club/data/schemas/club.schema';
 import { useMatches } from '../../data/hooks/useMatch';
 import { VoteListView } from '../view/VoteListView';
-
-type FilterTab = 'upcoming' | 'past';
 
 function VoteListSkeleton() {
   return (
@@ -28,7 +26,6 @@ function VoteListSkeleton() {
 }
 
 function VoteListInner({ club }: { club: ClubDetail }) {
-  const [activeTab, setActiveTab] = useState<FilterTab>('upcoming');
   const { data, fetchNextPage, hasNextPage } = useMatches(club.id);
 
   const matches = data.pages.flatMap((p) => p.items);
@@ -37,14 +34,10 @@ function VoteListInner({ club }: { club: ClubDetail }) {
   return (
     <VoteListView
       matches={matches}
-      activeTab={activeTab}
       totalMembers={club.currentMemberCount}
       hasNextPage={hasNextPage ?? false}
       isCaptainOrVice={isCaptainOrVice}
-      onTabChange={setActiveTab}
-      onMatchPress={(matchId) =>
-        router.push(`/(app)/vote/${matchId}` as Href)
-      }
+      onMatchPress={(matchId) => router.push(`/(app)/vote/${matchId}` as Href)}
       onCreateMatch={() => router.push('/(app)/vote/create' as Href)}
       onLoadMore={() => fetchNextPage()}
     />
