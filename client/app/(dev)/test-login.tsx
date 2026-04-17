@@ -10,6 +10,36 @@ import { useAuthStore } from '@/src/shared/store/useAuthStore';
 
 const SECTIONS = [
   {
+    title: 'Match Feed 기능 테스트',
+    accounts: [
+      {
+        label: '마무리FC 주장 (서울 종로구)',
+        description: '전체 피드 확인 · "내 클럽만" ON → 마무리FC 10경기만 노출 (MFEED-04-014)',
+        email: 'captain@mamurifc.test',
+      },
+      {
+        label: '마무리FC 일반 멤버 (참가 경기 있음)',
+        description: '"내가 뛴 경기" ON → M_L1·M_L2·M_S1·기존 recorded 경기 노출 (MFEED-04-014)',
+        email: 'member1@mamurifc.test',
+      },
+      {
+        label: '카동FC 주장 (서울 강남구)',
+        description: '"내 클럽만" ON → 카동FC 5경기만 노출 / 서울 강남구 지역 필터 테스트',
+        email: 'captain@kadongfc.test',
+      },
+      {
+        label: '부산FC 주장 (부산 해운대구)',
+        description: '지역 필터 부산광역시/해운대구 → 부산FC 5경기만 노출 (MFEED-04-013)',
+        email: 'captain@busanfc.test',
+      },
+      {
+        label: '클럽 미소속 유저',
+        description: '"내 클럽만" 토글 탭 → 비활성 유지 + 안내 문구 확인 (MFEED-01-001)',
+        email: 'newbie@test.com',
+      },
+    ],
+  },
+  {
     title: 'Mercenary 기능 테스트',
     accounts: [
       {
@@ -259,7 +289,7 @@ export default function TestLoginScreen() {
 
         {/* 안내 */}
         <TextBox variant="caption" color={colors.grey400} style={{ textAlign: 'center' }}>
-          seed 실행: npm run seed:club → seed:match → seed:matching → seed:mercenary
+          seed 실행: seed:club → seed:match → seed:matching → seed:mercenary → seed:match-feed
         </TextBox>
       </ScrollView>
     </SafeAreaView>
