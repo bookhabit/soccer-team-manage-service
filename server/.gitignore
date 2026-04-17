@@ -37,3 +37,7 @@ coverage/
 
 # ── Misc ──────────────────────────────────────────────────────
 *.local
+
+# ── Uploads (유저 업로드 파일 — defaults 제외) ────────────────
+uploads/avatars/
+uploads/clubs/

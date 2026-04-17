@@ -121,6 +121,13 @@ export const ErrorCode = {
   NO_SHOW_REPORT_001: 'NO_SHOW_REPORT_001', // 신고 가능한 수락 신청 없음 403
   NO_SHOW_REPORT_002: 'NO_SHOW_REPORT_002', // 경기 날짜 이전 신고 불가 422
   NO_SHOW_REPORT_003: 'NO_SHOW_REPORT_003', // 이미 신고됨 409
+
+  // ─── Upload ────────────────────────────────────────────────────────────────
+  UPLOAD_001: 'UPLOAD_001', // 파일이 첨부되지 않음 400
+  UPLOAD_002: 'UPLOAD_002', // 허용되지 않는 파일 형식 (MIME 불일치) 415
+  UPLOAD_003: 'UPLOAD_003', // 파일 크기 초과 (5MB) 413
+  UPLOAD_004: 'UPLOAD_004', // 클럽 로고 수정 권한 없음 (CAPTAIN/VICE_CAPTAIN 아님) 403
+  UPLOAD_005: 'UPLOAD_005', // 존재하지 않는 클럽 404
 } as const;
 
 export type ErrorCode = (typeof ErrorCode)[keyof typeof ErrorCode];

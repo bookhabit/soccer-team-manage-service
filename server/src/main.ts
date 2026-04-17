@@ -1,4 +1,6 @@
 import "reflect-metadata";
+import { join } from "path";
+import { mkdirSync } from "fs";
 import { NestFactory } from "@nestjs/core";
 import { ValidationPipe } from "@nestjs/common";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
@@ -6,6 +8,11 @@ import helmet from "helmet";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const cookieParser = require("cookie-parser");
 import { AppModule } from "./app.module";
+
+// 업로드 폴더 자동 생성 (서버 시작 시)
+['uploads/avatars', 'uploads/clubs', 'uploads/defaults'].forEach((dir) =>
+  mkdirSync(join(process.cwd(), dir), { recursive: true }),
+);
 import { HttpExceptionFilter } from "./common/filters/http-exception.filter";
 import { LoggingInterceptor } from "./common/interceptors/logging.interceptor";
 import { SanitizeInterceptor } from "./common/interceptors/sanitize.interceptor";
