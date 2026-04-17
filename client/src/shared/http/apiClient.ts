@@ -2,6 +2,8 @@ import { createApiClient } from './createApiClient';
 import { API_BASE_URL } from './baseUrl';
 import { useAuthStore } from '../store/useAuthStore';
 
+console.log('API_BASE_URL', API_BASE_URL);
+
 export const apiClient = createApiClient({
   baseURL: `${API_BASE_URL}/api/v1`,
   withCredentials: true,

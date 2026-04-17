@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabView, TabBar } from 'react-native-tab-view';
 import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, EmptyState, colors, spacing } from '@ui';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 import { GoalTimeline } from '../components/GoalTimeline';
 import { MomVoteList } from '../components/MomVoteList';
 import { OpponentRatingForm } from '../components/OpponentRatingForm';
@@ -381,7 +382,7 @@ function CommentsTab({
         renderItem={({ item }) => (
           <View style={styles.commentItem}>
             <AvatarImage
-              source={item.author.avatarUrl ? { uri: item.author.avatarUrl } : null}
+              source={{ uri: getAvatarUrl(item.author.avatarUrl) }}
               size={32}
             />
             <View style={styles.commentContent}>

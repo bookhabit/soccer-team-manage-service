@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '../http/baseUrl';
 
-const DEFAULT_AVATAR = `${API_BASE_URL}/uploads/defaults/profile.jpg`;
-const DEFAULT_CLUB_LOGO = `${API_BASE_URL}/uploads/defaults/club.jpg`;
+const DEFAULT_AVATAR = `${API_BASE_URL}/upload/defaults/profile.png`;
+const DEFAULT_CLUB_LOGO = `${API_BASE_URL}/upload/defaults/club.png`;
 
 /**
  * avatarUrl이 null/undefined이면 기본 프로필 이미지 URL을 반환한다.

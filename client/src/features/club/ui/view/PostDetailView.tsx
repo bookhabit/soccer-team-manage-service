@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
 } from 'react-native';
 import { TextBox, AvatarImage, Spacing, ScreenLayout, ConfirmDialog, EmptyState, colors, spacing } from '@ui';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 import { CommentItem } from '../components/CommentItem';
 import type { Post, Comment } from '../../data/schemas/post.schema';
 
@@ -88,7 +89,7 @@ export function PostDetailView({
             </TextBox>
             <View style={styles.authorRow}>
               <AvatarImage
-                source={post.author.avatarUrl ? { uri: post.author.avatarUrl } : null}
+                source={{ uri: getAvatarUrl(post.author.avatarUrl) }}
                 size={28}
               />
               <TextBox variant="caption" color={colors.grey500}>

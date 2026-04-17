@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
 import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, EmptyState, colors, spacing } from '@ui';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 import { AttendanceSummary } from '../components/AttendanceSummary';
 import { AttendanceChip } from '../components/AttendanceChip';
 import { FormationField } from '../components/FormationField';
@@ -206,7 +207,7 @@ export function MatchProgressView({
             {attending.map((a) => (
               <View key={a.userId} style={styles.memberItem}>
                 <AvatarImage
-                  source={a.user.avatarUrl ? { uri: a.user.avatarUrl } : null}
+                  source={{ uri: getAvatarUrl(a.user.avatarUrl) }}
                   size={36}
                 />
                 <TextBox variant="caption" color={colors.grey700} numberOfLines={1}>
@@ -229,7 +230,7 @@ export function MatchProgressView({
               {absent.map((a) => (
                 <View key={a.userId} style={styles.memberItem}>
                   <AvatarImage
-                    source={a.user.avatarUrl ? { uri: a.user.avatarUrl } : null}
+                    source={{ uri: getAvatarUrl(a.user.avatarUrl) }}
                     size={36}
                   />
                   <TextBox variant="caption" color={colors.grey400} numberOfLines={1}>

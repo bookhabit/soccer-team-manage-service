@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
 import type { Href } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import {
   TextBox, ConfirmDialog, Spacing, ScreenLayout, colors, spacing, useToast,
 } from '@ui';
 import AsyncBoundary from '@/src/shared/ui/server-state-handling/AsyncBoundary';
 import { useMyClub, useLeaveClub } from '../../data/hooks/useClub';
 import type { LeaveReason } from '../../data/schemas/club.schema';
+import { useUploadClubLogo } from '@/src/features/upload/data/hooks/useUpload';
 
 function ClubSettingsContent() {
   const [isLeaveDialogOpen, setIsLeaveDialogOpen] = useState(false);
@@ -19,6 +21,31 @@ function ClubSettingsContent() {
 
   const isCaptain = club?.myRole === 'CAPTAIN';
   const isCaptainOrVice = club?.myRole === 'CAPTAIN' || club?.myRole === 'VICE_CAPTAIN';
+
+  const { mutate: uploadLogo } = useUploadClubLogo(club?.id ?? '');
+
+  const handleLogoChange = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8,
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    const asset = result.assets[0];
+    const formData = new FormData();
+    formData.append('image', {
+      uri: asset.uri,
+      name: 'logo.jpg',
+      type: 'image/jpeg',
+    } as unknown as Blob);
+
+    uploadLogo(formData, {
+      onSuccess: () => toast.success('로고가 변경되었습니다.'),
+      onError: () => toast.error('로고 변경에 실패했습니다.'),
+    });
+  };
 
   const handleLeave = () => {
     leaveClub(leaveReason, {
@@ -32,6 +59,13 @@ function ClubSettingsContent() {
       <ScrollView contentContainerStyle={styles.content}>
         <TextBox variant="heading3" color={colors.grey900}>{club?.name}</TextBox>
         <Spacing size={5} />
+
+        {isCaptainOrVice ? (
+          <SettingsRow
+            label="클럽 로고 변경"
+            onPress={handleLogoChange}
+          />
+        ) : null}
 
         {isCaptainOrVice ? (
           <SettingsRow

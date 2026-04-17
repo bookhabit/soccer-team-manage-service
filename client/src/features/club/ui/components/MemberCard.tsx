@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import type { ClubMember } from '../../data/schemas/club.schema';
 import { POSITION_LABEL } from '@/src/shared/constants/player.constants';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 
 interface MemberCardProps {
   member: ClubMember;
@@ -25,7 +26,7 @@ export function MemberCard({ member, isMe = false, onPress }: MemberCardProps) {
 
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      <AvatarImage source={member.avatarUrl ? { uri: member.avatarUrl } : null} size={44} />
+      <AvatarImage source={{ uri: getAvatarUrl(member.avatarUrl) }} size={44} />
       <View style={styles.info}>
         <View style={styles.nameRow}>
           <TextBox variant="body1Bold" color={colors.grey900}>{member.name}</TextBox>

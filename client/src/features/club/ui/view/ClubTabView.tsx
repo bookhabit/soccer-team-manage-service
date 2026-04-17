@@ -5,6 +5,7 @@ import { RecruitmentBadge } from '../components/RecruitmentBadge';
 import { ClubStatsBar } from '../components/ClubStatsBar';
 import type { ClubDetail } from '../../data/schemas/club.schema';
 import { LEVEL_LABEL } from '@/src/shared/constants/player.constants';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 interface ClubTabViewProps {
   club: ClubDetail;
@@ -37,7 +38,7 @@ export function ClubTabView({
       <ScrollView contentContainerStyle={styles.content}>
         {/* 클럽 헤더 */}
         <View style={styles.clubHeader}>
-          <AvatarImage source={club.logoUrl ? { uri: club.logoUrl } : null} style={styles.avatar} />
+          <AvatarImage source={{ uri: getClubLogoUrl(club.logoUrl) }} style={styles.avatar} />
           <View style={styles.clubInfo}>
             <View style={styles.nameRow}>
               <TextBox variant="heading3" color={colors.grey900}>

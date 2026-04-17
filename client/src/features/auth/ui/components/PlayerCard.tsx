@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import { MannerBadge } from './MannerBadge';
 import { POSITION_LABEL } from '@/src/shared/constants/player.constants';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 
 interface PlayerCardProps {
   name: string | null;
@@ -30,7 +31,7 @@ export function PlayerCard({
     <View style={styles.card}>
       <View style={styles.header}>
         <AvatarImage
-          source={avatarUrl ? { uri: avatarUrl } : null}
+          source={{ uri: getAvatarUrl(avatarUrl) }}
           size={72}
         />
         <View style={styles.info}>

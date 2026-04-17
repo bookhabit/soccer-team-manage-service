@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import type { Comment } from '../../data/schemas/post.schema';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 
 interface CommentItemProps {
   comment: Comment;
@@ -15,7 +16,7 @@ export function CommentItem({ comment, onDelete }: CommentItemProps) {
   return (
     <View style={styles.item}>
       <AvatarImage
-        source={comment.author.avatarUrl ? { uri: comment.author.avatarUrl } : null}
+        source={{ uri: getAvatarUrl(comment.author.avatarUrl) }}
         size={32}
       />
       <View style={styles.content}>

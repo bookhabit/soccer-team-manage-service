@@ -25,11 +25,18 @@ import { UploadModule } from './features/upload/upload.module';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
-      serveRoot: '/uploads',
-      exclude: ['/api*'],
-    }),
+    ServeStaticModule.forRoot(
+      {
+        rootPath: join(process.cwd(), 'uploads'),
+        serveRoot: '/uploads',
+        exclude: ['/api*'],
+      },
+      {
+        rootPath: join(process.cwd(), 'upload'),
+        serveRoot: '/upload',
+        exclude: ['/api*'],
+      },
+    ),
     PrismaModule,
     UsersModule,
     SessionsModule,

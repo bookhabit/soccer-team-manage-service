@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import type { MemberDetail } from '../../data/schemas/club.schema';
 import { POSITION_LABEL, LEVEL_LABEL } from '@/src/shared/constants/player.constants';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 
 interface FifaCardProps {
   member: MemberDetail;
@@ -35,7 +36,7 @@ export function FifaCard({ member }: FifaCardProps) {
     <View style={styles.card}>
       {/* 상단 헤더 */}
       <View style={styles.header}>
-        <AvatarImage source={member.avatarUrl ? { uri: member.avatarUrl } : null} size={72} />
+        <AvatarImage source={{ uri: getAvatarUrl(member.avatarUrl) }} size={72} />
         <View style={styles.headerInfo}>
           <TextBox variant="heading3" color={colors.grey900}>{member.name}</TextBox>
           <View style={styles.tagRow}>

@@ -4,6 +4,7 @@ import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import { RecruitmentBadge } from './RecruitmentBadge';
 import type { ClubPreview } from '../../data/schemas/club.schema';
 import { LEVEL_LABEL } from '@/src/shared/constants/player.constants';
+import { getClubLogoUrl } from '@/src/shared/utils/imageUrl';
 
 interface ClubPreviewCardProps {
   club: ClubPreview;
@@ -16,7 +17,7 @@ interface ClubPreviewCardProps {
 export function ClubPreviewCard({ club, onPress }: ClubPreviewCardProps) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      <AvatarImage source={club.logoUrl ? { uri: club.logoUrl } : null} size={48} />
+      <AvatarImage source={{ uri: getClubLogoUrl(club.logoUrl) }} size={48} />
       <View style={styles.info}>
         <View style={styles.nameRow}>
           <TextBox variant="body1Bold" color={colors.grey900}>

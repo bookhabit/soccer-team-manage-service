@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { TextBox, AvatarImage, colors, spacing } from '@ui';
 import type { Attendance } from '../../data/schemas/match.schema';
+import { getAvatarUrl } from '@/src/shared/utils/imageUrl';
 
 interface MomVoteListProps {
   participants: Attendance[];
@@ -40,7 +41,7 @@ export function MomVoteList({
               activeOpacity={disabled ? 1 : 0.7}
             >
               <AvatarImage
-                source={p.user.avatarUrl ? { uri: p.user.avatarUrl } : null}
+                source={{ uri: getAvatarUrl(p.user.avatarUrl) }}
                 size={36}
               />
               <TextBox variant="body2" color={colors.grey900}>{p.user.name ?? '선수'}</TextBox>
