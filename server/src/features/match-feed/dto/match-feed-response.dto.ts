@@ -113,6 +113,9 @@ export class MatchFeedDetailResponseDto {
   @ApiPropertyOptional({ nullable: true })
   opponentName: string | null;
 
+  @ApiPropertyOptional({ nullable: true, description: 'LEAGUE + matchPostId 있을 때만 non-null' })
+  opponentClubId: string | null;
+
   @ApiProperty({ type: [MatchGoalItemDto] })
   goals: MatchGoalItemDto[];
 

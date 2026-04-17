@@ -181,6 +181,7 @@ export class MatchFeedService {
         homeScore: true,
         awayScore: true,
         opponentName: true,
+        matchPostId: true,
         club: {
           select: {
             name: true,
@@ -241,6 +242,32 @@ export class MatchFeedService {
       }));
     }
 
+    // opponentClubId 도출 — LEAGUE + matchPostId 있을 때만 non-null
+    let opponentClubId: string | null = null;
+    if (match.type === 'LEAGUE' && match.matchPostId) {
+      const matchPost = await this.prisma.matchPost.findUnique({
+        where: { id: match.matchPostId },
+        select: {
+          clubId: true,
+          applications: {
+            where: { status: 'ACCEPTED' },
+            select: { applicantClubId: true },
+            take: 1,
+          },
+        },
+      });
+      if (matchPost) {
+        // 내 클럽이 HOST(MatchPost 등록팀)이면 → 신청팀이 상대
+        // 내 클럽이 GUEST(신청팀)이면 → 게시글 등록팀이 상대
+        const isHost = matchPost.clubId === match.clubId;
+        if (isHost) {
+          opponentClubId = matchPost.applications[0]?.applicantClubId ?? null;
+        } else {
+          opponentClubId = matchPost.clubId;
+        }
+      }
+    }
+
     // 득점 기록 — scorerUserName, assistUserName 조회
     const scorerIds = new Set<string>();
     for (const g of match.goals) {
@@ -275,6 +302,7 @@ export class MatchFeedService {
       homeScore: match.homeScore ?? 0,
       awayScore: match.awayScore ?? 0,
       opponentName: match.opponentName ?? null,
+      opponentClubId,
       goals,
       momList,
       participantCount,

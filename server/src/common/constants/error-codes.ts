@@ -106,6 +106,10 @@ export const ErrorCode = {
   MATCH_FEED_001: 'MATCH_FEED_001', // district 필터는 province와 함께 사용해야 합니다. 400
   MATCH_FEED_002: 'MATCH_FEED_002', // 날짜 범위는 최대 6개월까지 설정할 수 있습니다. 400
 
+  // ─── HeadToHead ────────────────────────────────────────────────────────────
+  H2H_001: 'H2H_001', // 해당 클럽 소속이 아님 403
+  H2H_002: 'H2H_002', // 클럽(들) 존재하지 않음 404
+
   // ─── MercenaryApplication / Recruitment ────────────────────────────────────
   MERCENARY_APP_001: 'MERCENARY_APP_001', // 존재하지 않는 신청 404
   MERCENARY_APP_002: 'MERCENARY_APP_002', // 이미 처리된 신청 409

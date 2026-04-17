@@ -59,6 +59,7 @@ export const matchFeedDetailSchema = z.object({
   homeScore: z.number().int(),
   awayScore: z.number().int(),
   opponentName: z.string().nullable(),
+  opponentClubId: z.string().nullable(),
   goals: z.array(matchGoalItemSchema),
   momList: z.array(momItemSchema),
   participantCount: z.number().int(),
