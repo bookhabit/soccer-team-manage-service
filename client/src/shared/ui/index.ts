@@ -43,6 +43,7 @@ export type {
   TextAreaProps,
 } from './components/general/TextField';
 export { Chip } from './components/general/Chip';
+export { EmptyState } from './components/general/EmptyState';
 export type { ChipProps } from './components/general/Chip';
 export { ListRow } from './components/general/ListRow';
 export type { ListRowProps } from './components/general/ListRow';

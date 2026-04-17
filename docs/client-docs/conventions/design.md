@@ -550,6 +550,42 @@ import { Chip } from '@ui';
 
 ---
 
+### EmptyState
+
+리스트·섹션의 **빈 데이터 상태**를 표시하는 공통 컴포넌트.  
+**View 내부에서 빈 상태를 `<TextBox>`로 직접 렌더링하는 것을 금지하고 `<EmptyState>`를 사용한다.**
+
+```tsx
+import { EmptyState } from '@ui';
+
+// 단순 메시지
+<EmptyState message="경기 기록이 없습니다." />
+
+// FlatList ListEmptyComponent
+<FlatList
+  ListEmptyComponent={<EmptyState message="팀원이 없습니다." />}
+  ...
+/>
+
+// 버튼 등 추가 액션이 필요한 경우 → 전용 컴포넌트로 분리
+function VoteListEmpty({ isCaptainOrVice, onCreateMatch }) {
+  return (
+    <View>
+      <EmptyState message="다가오는 경기가 없습니다." />
+      {isCaptainOrVice && <Button onPress={onCreateMatch}>경기 등록하기</Button>}
+    </View>
+  );
+}
+```
+
+| prop      | 타입     | 필수 | 설명       |
+| --------- | -------- | ---- | ---------- |
+| `message` | `string` | ✅   | 표시할 메시지 |
+
+> ⚠️ **빈 상태에 `<TextBox variant="body2" color={colors.grey400}>` 인라인 직접 사용 금지 — `<EmptyState>` 사용.**
+
+---
+
 ### ListRow
 
 리스트 항목 레이아웃.

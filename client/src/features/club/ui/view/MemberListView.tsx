@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, FlatList, StyleSheet } from 'react-native';
-import { TextBox, Input, Spacing, ScreenLayout, colors, spacing } from '@ui';
+import { TextBox, Input, Spacing, ScreenLayout, EmptyState, colors, spacing } from '@ui';
 import { MemberCard } from '../components/MemberCard';
 import type { ClubMember } from '../../data/schemas/club.schema';
 
@@ -40,11 +40,7 @@ export function MemberListView({
       </View>
 
       {isEmpty ? (
-        <View style={styles.emptyWrapper}>
-          <TextBox variant="body2" color={colors.grey400}>
-            {filter ? `'${filter}'에 해당하는 팀원이 없습니다.` : '팀원이 없습니다.'}
-          </TextBox>
-        </View>
+        <EmptyState message={filter ? `'${filter}'에 해당하는 팀원이 없습니다.` : '팀원이 없습니다.'} />
       ) : (
         <FlatList
           data={members}
@@ -71,10 +67,5 @@ const styles = StyleSheet.create({
     paddingVertical: spacing[3],
     borderBottomWidth: 1,
     borderBottomColor: colors.grey100,
-  },
-  emptyWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

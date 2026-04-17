@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList, View, StyleSheet } from 'react-native';
-import { ScreenLayout, TextBox, Spacing, colors, spacing } from '@ui';
+import { ScreenLayout, TextBox, Spacing, EmptyState, colors, spacing } from '@ui';
 import { H2HSummaryCard, H2HHistoryItem } from '../components';
 import type { HeadToHeadSummary, HeadToHeadHistoryItem } from '../../data/schemas/headToHead.schema';
 
@@ -33,14 +33,7 @@ export function HeadToHeadView({
             </View>
           </>
         }
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <Spacing size={10} />
-            <TextBox variant="body2" color={colors.grey400}>
-              아직 맞붙은 적이 없습니다.
-            </TextBox>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState message="아직 맞붙은 적이 없습니다." />}
         onEndReached={hasNextPage ? onLoadMore : undefined}
         onEndReachedThreshold={0.3}
         contentContainerStyle={styles.list}
@@ -59,9 +52,5 @@ const styles = StyleSheet.create({
     paddingBottom: spacing[2],
     borderBottomWidth: 1,
     borderBottomColor: colors.grey100,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingTop: spacing[10],
   },
 });

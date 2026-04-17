@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
-import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, colors, spacing } from '@ui';
+import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, EmptyState, colors, spacing } from '@ui';
 import { AttendanceSummary } from '../components/AttendanceSummary';
 import { AttendanceChip } from '../components/AttendanceChip';
 import { FormationField } from '../components/FormationField';
@@ -200,9 +200,7 @@ export function MatchProgressView({
         </TextBox>
         <Spacing size={2} />
         {!hasAttending ? (
-          <TextBox variant="body2" color={colors.grey400}>
-            참석 선수가 없습니다.
-          </TextBox>
+          <EmptyState message="참석 선수가 없습니다." />
         ) : (
           <View style={styles.memberRow}>
             {attending.map((a) => (

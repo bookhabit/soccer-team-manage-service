@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
 } from 'react-native';
-import { TextBox, AvatarImage, Spacing, ScreenLayout, ConfirmDialog, colors, spacing } from '@ui';
+import { TextBox, AvatarImage, Spacing, ScreenLayout, ConfirmDialog, EmptyState, colors, spacing } from '@ui';
 import { CommentItem } from '../components/CommentItem';
 import type { Post, Comment } from '../../data/schemas/post.schema';
 
@@ -139,9 +139,7 @@ export function PostDetailView({
           <Spacing size={2} />
 
           {!hasComments ? (
-            <TextBox variant="body2" color={colors.grey400}>
-              첫 댓글을 남겨보세요.
-            </TextBox>
+            <EmptyState message="첫 댓글을 남겨보세요." />
           ) : (
             comments.map((comment) => (
               <CommentItem

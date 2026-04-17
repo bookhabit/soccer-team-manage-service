@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabView, TabBar } from 'react-native-tab-view';
-import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, colors, spacing } from '@ui';
+import { TextBox, Button, AvatarImage, ScreenLayout, Spacing, EmptyState, colors, spacing } from '@ui';
 import { GoalTimeline } from '../components/GoalTimeline';
 import { MomVoteList } from '../components/MomVoteList';
 import { OpponentRatingForm } from '../components/OpponentRatingForm';
@@ -476,9 +476,7 @@ function VideosTab({
       <Spacing size={4} />
 
       {!hasVideos ? (
-        <TextBox variant="body2" color={colors.grey400}>
-          등록된 영상이 없습니다.
-        </TextBox>
+        <EmptyState message="등록된 영상이 없습니다." />
       ) : (
         videos.map((v) => (
           <View key={v.id} style={styles.videoItem}>

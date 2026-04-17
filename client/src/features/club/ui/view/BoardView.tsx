@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, FlatList, TouchableOpacity, RefreshControl, StyleSheet, useWindowDimensions } from 'react-native';
 import { TabView, TabBar } from 'react-native-tab-view';
-import { TextBox, Spacing, ScreenLayout, colors, spacing } from '@ui';
+import { TextBox, Spacing, ScreenLayout, EmptyState, colors, spacing } from '@ui';
 import { EmptyBoundary } from '@/src/shared/ui/server-state-handling/EmptyBoundary';
 import { PostListItem } from '../components/PostListItem';
 import type { PostListItem as PostListItemType, PostType } from '../../data/schemas/post.schema';
@@ -52,11 +52,7 @@ export function BoardView({
   const renderScene = () => (
     <EmptyBoundary
       data={posts}
-      fallback={
-        <View style={styles.emptyWrapper}>
-          <TextBox variant="body2" color={colors.grey400}>게시글이 없습니다.</TextBox>
-        </View>
-      }
+      fallback={<EmptyState message="게시글이 없습니다." />}
     >
       <FlatList
         data={posts}
@@ -121,10 +117,5 @@ const styles = StyleSheet.create({
   writeBtn: {
     paddingHorizontal: spacing[4],
     paddingVertical: spacing[3],
-  },
-  emptyWrapper: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });

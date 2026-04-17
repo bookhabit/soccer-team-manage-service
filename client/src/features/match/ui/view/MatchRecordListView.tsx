@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList, View, StyleSheet } from 'react-native';
-import { TextBox, ScreenLayout, Spacing, colors, spacing } from '@ui';
+import { TextBox, ScreenLayout, Spacing, EmptyState, colors, spacing } from '@ui';
 import { MatchRecordCard } from '../components/MatchRecordCard';
 import type { MatchSummary } from '../../data/schemas/match.schema';
 
@@ -44,11 +44,7 @@ export function MatchRecordListView({
         renderItem={({ item }) => (
           <MatchRecordCard match={item} onPress={() => onMatchPress(item.id)} />
         )}
-        ListEmptyComponent={
-          <View style={styles.empty}>
-            <TextBox variant="body2" color={colors.grey400}>경기 기록이 없습니다.</TextBox>
-          </View>
-        }
+        ListEmptyComponent={<EmptyState message="경기 기록이 없습니다." />}
         onEndReached={hasNextPage ? onLoadMore : undefined}
         onEndReachedThreshold={0.3}
       />
@@ -95,9 +91,5 @@ const styles = StyleSheet.create({
   list: {
     padding: spacing[4],
     paddingBottom: spacing[10],
-  },
-  empty: {
-    alignItems: 'center',
-    paddingTop: spacing[10],
   },
 });

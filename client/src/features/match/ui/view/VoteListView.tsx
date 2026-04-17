@@ -1,6 +1,6 @@
 import React from 'react';
 import { FlatList, View, TouchableOpacity, StyleSheet } from 'react-native';
-import { TextBox, ScreenLayout, Spacing, colors, spacing } from '@ui';
+import { TextBox, ScreenLayout, Spacing, EmptyState, colors, spacing } from '@ui';
 import { MatchCard } from '../components/MatchCard';
 import { computeMatchStatus } from '../../data/schemas/match.schema';
 import type { MatchSummary } from '../../data/schemas/match.schema';
@@ -13,6 +13,27 @@ interface VoteListViewProps {
   onMatchPress: (matchId: string) => void;
   onCreateMatch: () => void;
   onLoadMore: () => void;
+}
+
+function VoteListEmpty({
+  isCaptainOrVice,
+  onCreateMatch,
+}: {
+  isCaptainOrVice: boolean;
+  onCreateMatch: () => void;
+}) {
+  return (
+    <View style={styles.empty}>
+      <EmptyState message="다가오는 경기가 없습니다." />
+      {isCaptainOrVice && (
+        <TouchableOpacity onPress={onCreateMatch} activeOpacity={0.7} style={styles.createBtn}>
+          <TextBox variant="body2Bold" color={colors.blue500}>
+            + 경기 등록하기
+          </TextBox>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
 }
 
 export function VoteListView({
@@ -59,22 +80,7 @@ export function VoteListView({
           />
         )}
         ListEmptyComponent={
-          <View style={styles.empty}>
-            <TextBox variant="body2" color={colors.grey400}>
-              다가오는 경기가 없습니다.
-            </TextBox>
-            {isCaptainOrVice ? (
-              <TouchableOpacity
-                onPress={onCreateMatch}
-                activeOpacity={0.7}
-                style={styles.createBtn}
-              >
-                <TextBox variant="body2Bold" color={colors.blue500}>
-                  + 경기 등록하기
-                </TextBox>
-              </TouchableOpacity>
-            ) : null}
-          </View>
+          <VoteListEmpty isCaptainOrVice={isCaptainOrVice} onCreateMatch={onCreateMatch} />
         }
         onEndReached={hasNextPage ? onLoadMore : undefined}
         onEndReachedThreshold={0.3}

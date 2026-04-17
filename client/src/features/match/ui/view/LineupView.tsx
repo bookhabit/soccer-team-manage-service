@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
-import { TextBox, Button, ScreenLayout, Spacing, Select, colors, spacing } from '@ui';
+import { TextBox, Button, ScreenLayout, Spacing, Select, EmptyState, colors, spacing } from '@ui';
 import { FormationField } from '../components/FormationField';
 import { QuarterTab } from '../components/QuarterTab';
 import type { Quarter, Attendance, FormationSlot } from '../../data/schemas/match.schema';
@@ -112,7 +112,7 @@ export function LineupView({
             <Spacing size={2} />
 
             {!hasAttendingPlayers ? (
-              <TextBox variant="body2" color={colors.grey400}>참석 선수가 없습니다.</TextBox>
+              <EmptyState message="참석 선수가 없습니다." />
             ) : (
               attendingPlayers.map((a) => {
                 const assignment = currentQuarter.assignments.find(
@@ -138,9 +138,7 @@ export function LineupView({
             )}
           </>
         ) : (
-          <TextBox variant="body2" color={colors.grey400}>
-            쿼터 데이터가 없습니다.
-          </TextBox>
+          <EmptyState message="쿼터 데이터가 없습니다." />
         )}
 
         <Spacing size={4} />
