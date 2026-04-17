@@ -242,29 +242,38 @@ export class MatchFeedService {
       }));
     }
 
-    // opponentClubId 도출 — LEAGUE + matchPostId 있을 때만 non-null
+    // opponentClubId 도출 — matchPostId 우선, 없으면 opponentName으로 클럽 조회
     let opponentClubId: string | null = null;
-    if (match.type === 'LEAGUE' && match.matchPostId) {
-      const matchPost = await this.prisma.matchPost.findUnique({
-        where: { id: match.matchPostId },
-        select: {
-          clubId: true,
-          applications: {
-            where: { status: 'ACCEPTED' },
-            select: { applicantClubId: true },
-            take: 1,
+    if (match.type === 'LEAGUE') {
+      if (match.matchPostId) {
+        const matchPost = await this.prisma.matchPost.findUnique({
+          where: { id: match.matchPostId },
+          select: {
+            clubId: true,
+            applications: {
+              where: { status: 'ACCEPTED' },
+              select: { applicantClubId: true },
+              take: 1,
+            },
           },
-        },
-      });
-      if (matchPost) {
-        // 내 클럽이 HOST(MatchPost 등록팀)이면 → 신청팀이 상대
-        // 내 클럽이 GUEST(신청팀)이면 → 게시글 등록팀이 상대
-        const isHost = matchPost.clubId === match.clubId;
-        if (isHost) {
-          opponentClubId = matchPost.applications[0]?.applicantClubId ?? null;
-        } else {
-          opponentClubId = matchPost.clubId;
+        });
+        if (matchPost) {
+          // 내 클럽이 HOST(MatchPost 등록팀)이면 → 신청팀이 상대
+          // 내 클럽이 GUEST(신청팀)이면 → 게시글 등록팀이 상대
+          const isHost = matchPost.clubId === match.clubId;
+          if (isHost) {
+            opponentClubId = matchPost.applications[0]?.applicantClubId ?? null;
+          } else {
+            opponentClubId = matchPost.clubId;
+          }
         }
+      } else if (match.opponentName) {
+        // matchPostId 없는 경우 opponentName으로 클럽 조회 (fallback)
+        const opponentClub = await this.prisma.club.findFirst({
+          where: { name: match.opponentName },
+          select: { id: true },
+        });
+        opponentClubId = opponentClub?.id ?? null;
       }
     }
 

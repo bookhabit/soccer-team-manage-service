@@ -32,12 +32,19 @@ function MatchFeedDetailInner({ matchId }: MatchFeedDetailContainerProps) {
   const { data: detail } = useMatchFeedDetail(matchId);
   const { data: myClub } = useMyClub();
 
-  const canGoH2H = detail.clubId === myClub?.id && detail.opponentClubId !== null;
-  const onGoOpponentRecord = canGoH2H
-    ? () =>
-        router.push(
-          `/(app)/club/${detail.clubId}/head-to-head/${detail.opponentClubId}` as Href,
-        )
+  // 내 클럽이 이 경기의 두 클럽(레코드 주인 or 상대) 중 하나일 때 버튼 노출
+  const myClubId = myClub?.id;
+  const opponentClubId = detail.opponentClubId;
+  const isMyMatch =
+    opponentClubId !== null &&
+    myClubId !== undefined &&
+    (detail.clubId === myClubId || opponentClubId === myClubId);
+
+  const h2hClubId = detail.clubId === myClubId ? detail.clubId : opponentClubId;
+  const h2hOpponentId = detail.clubId === myClubId ? opponentClubId : detail.clubId;
+
+  const onGoOpponentRecord = isMyMatch
+    ? () => router.push(`/(app)/club/${h2hClubId}/head-to-head/${h2hOpponentId}` as Href)
     : undefined;
 
   return (
