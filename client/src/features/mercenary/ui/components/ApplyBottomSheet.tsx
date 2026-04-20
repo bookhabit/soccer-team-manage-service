@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Drawer, TextBox, TextArea, Button, BottomCTASingle, Spacing, colors, spacing } from '@ui';
+import { Drawer, TextBox, TextArea, BottomCTASingle, Spacing, colors, spacing } from '@ui';
 import { CreateMercenaryApplicationSchema } from '../../data/schemas/mercenaryPost.schema';
 import type { CreateMercenaryApplicationInput } from '../../data/schemas/mercenaryPost.schema';
 
@@ -42,16 +42,13 @@ export function ApplyBottomSheet({ isOpen, onClose, onSubmit, isLoading }: Props
           )}
         />
       </View>
-      <BottomCTASingle safeArea>
-        <Button
-          variant="primary"
-          onPress={handleSubmit(onSubmit)}
-          disabled={isLoading}
-          fullWidth
-        >
-          지원하기
-        </Button>
-      </BottomCTASingle>
+      <BottomCTASingle
+        label="지원하기"
+        onClick={handleSubmit(onSubmit)}
+        disabled={isLoading}
+        loading={isLoading}
+        safeArea
+      />
     </Drawer>
   );
 }

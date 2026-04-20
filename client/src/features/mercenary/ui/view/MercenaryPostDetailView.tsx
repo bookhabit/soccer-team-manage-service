@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
-import { TextBox, colors, spacing, Flex, BottomCTASingle, Button, Spacing } from '@ui';
+import { TextBox, colors, spacing, Flex, BottomCTASingle, Spacing, Button, ScreenLayout } from '@ui';
 import { MercenaryStatusBadge } from '../components/MercenaryStatusBadge';
 import type { MercenaryPostDetail } from '../../data/schemas/mercenaryPost.schema';
 
@@ -43,9 +43,27 @@ export function MercenaryPostDetailView({
 }: Props) {
   const canEditPost = !post.isExpired && post.status === 'OPEN';
 
+  const cta = post.isOwnPost ? (
+    <BottomCTASingle label="지원자 관리" onClick={onManageApplications} />
+  ) : (
+    <BottomCTASingle
+      label={
+        post.alreadyApplied
+          ? '지원 완료'
+          : post.isExpired
+            ? '만료된 게시글'
+            : post.status === 'CLOSED'
+              ? '마감된 게시글'
+              : '지원하기'
+      }
+      onClick={onApply}
+      disabled={!post.canApply || isApplying}
+    />
+  );
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+    <ScreenLayout bottomSlot={cta}>
+      <ScrollView contentContainerStyle={styles.content}>
         {/* 상태 */}
         <MercenaryStatusBadge status={post.status} isExpired={post.isExpired} />
         <Spacing size={3} />
@@ -132,33 +150,7 @@ export function MercenaryPostDetailView({
           </View>
         )}
       </ScrollView>
-
-      {/* CTA */}
-      {post.isOwnPost ? (
-        <BottomCTASingle safeArea label="지원자 관리">
-          <Button variant="primary" onPress={onManageApplications} fullWidth>
-            지원자 관리
-          </Button>
-        </BottomCTASingle>
-      ) : (
-        <BottomCTASingle safeArea>
-          <Button
-            variant="primary"
-            onPress={onApply}
-            disabled={!post.canApply || isApplying}
-            fullWidth
-          >
-            {post.alreadyApplied
-              ? '지원 완료'
-              : post.isExpired
-                ? '만료된 게시글'
-                : post.status === 'CLOSED'
-                  ? '마감된 게시글'
-                  : '지원하기'}
-          </Button>
-        </BottomCTASingle>
-      )}
-    </View>
+    </ScreenLayout>
   );
 }
 
@@ -176,8 +168,6 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
   content: { padding: spacing[4], paddingBottom: spacing[24] },
   section: {
     marginBottom: spacing[5],

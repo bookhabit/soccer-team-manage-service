@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet } from 'react-native';
-import { TextBox, colors, spacing, Flex, AvatarImage, BottomCTASingle, Button, Spacing } from '@ui';
+import { TextBox, colors, spacing, Flex, AvatarImage, BottomCTASingle, Spacing, Button, ScreenLayout } from '@ui';
 import type { MercenaryAvailabilityDetail } from '../../data/schemas/mercenaryAvailability.schema';
 
 interface Props {
@@ -29,12 +29,28 @@ function formatDate(dateStr: string) {
   return `${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-export function MercenaryAvailabilityDetailView({ avail, onRecruit, onEdit, onDelete, isRecruiting }: Props) {
+export function MercenaryAvailabilityDetailView({
+  avail,
+  onRecruit,
+  onEdit,
+  onDelete,
+  isRecruiting,
+}: Props) {
   const sortedDates = [...avail.availableDates].sort();
 
+  const cta = !avail.isOwnPost ? (
+    <BottomCTASingle
+      label={
+        avail.alreadyRecruited ? '신청 완료' : avail.isExpired ? '만료된 게시글' : '영입 신청'
+      }
+      onClick={onRecruit}
+      disabled={!avail.canRecruit || isRecruiting}
+    />
+  ) : undefined;
+
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+    <ScreenLayout bottomSlot={cta}>
+      <ScrollView contentContainerStyle={styles.content}>
         {/* 개인 정보 */}
         <Flex direction="row" align="center" gap={spacing[4]} style={styles.section}>
           {avail.userAvatarUrl ? (
@@ -43,10 +59,14 @@ export function MercenaryAvailabilityDetailView({ avail, onRecruit, onEdit, onDe
             <View style={styles.avatarPlaceholder} />
           )}
           <View>
-            <TextBox variant="heading3" color={colors.grey900}>{avail.userName}</TextBox>
+            <TextBox variant="heading3" color={colors.grey900}>
+              {avail.userName}
+            </TextBox>
             <Flex direction="row" gap={spacing[2]}>
               {avail.age && (
-                <TextBox variant="body2" color={colors.grey500}>{avail.age}세</TextBox>
+                <TextBox variant="body2" color={colors.grey500}>
+                  {avail.age}세
+                </TextBox>
               )}
               {avail.userLevel && (
                 <TextBox variant="body2" color={colors.grey500}>
@@ -59,9 +79,14 @@ export function MercenaryAvailabilityDetailView({ avail, onRecruit, onEdit, onDe
 
         {/* 용병 가능 정보 */}
         <View style={styles.section}>
-          <TextBox variant="body2Bold" color={colors.grey700}>용병 가능 정보</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey700}>
+            용병 가능 정보
+          </TextBox>
           <Spacing size={2} />
-          <InfoRow label="포지션" value={avail.positions.map((p) => POSITION_LABEL[p] ?? p).join(', ')} />
+          <InfoRow
+            label="포지션"
+            value={avail.positions.map((p) => POSITION_LABEL[p] ?? p).join(', ')}
+          />
           <InfoRow label="가능 날짜" value={sortedDates.map(formatDate).join(', ')} />
           <InfoRow label="가능 지역" value={avail.regionNames.join(', ')} />
           {avail.timeSlot && <InfoRow label="가능 시간" value={avail.timeSlot} />}
@@ -71,15 +96,21 @@ export function MercenaryAvailabilityDetailView({ avail, onRecruit, onEdit, onDe
         {/* 자기소개 */}
         {avail.bio && (
           <View style={styles.section}>
-            <TextBox variant="body2Bold" color={colors.grey700}>자기소개</TextBox>
+            <TextBox variant="body2Bold" color={colors.grey700}>
+              자기소개
+            </TextBox>
             <Spacing size={2} />
-            <TextBox variant="body2" color={colors.grey600}>{avail.bio}</TextBox>
+            <TextBox variant="body2" color={colors.grey600}>
+              {avail.bio}
+            </TextBox>
           </View>
         )}
 
         {/* 플레이어 정보 */}
         <View style={styles.section}>
-          <TextBox variant="body2Bold" color={colors.grey700}>플레이어 정보</TextBox>
+          <TextBox variant="body2Bold" color={colors.grey700}>
+            플레이어 정보
+          </TextBox>
           <Spacing size={2} />
           <InfoRow label="매너 점수" value={`${avail.mannerScore.toFixed(1)}°`} />
           <InfoRow label="용병 경기" value={`${avail.mercenaryMatchCount}회`} />
@@ -104,40 +135,24 @@ export function MercenaryAvailabilityDetailView({ avail, onRecruit, onEdit, onDe
           </View>
         )}
       </ScrollView>
-
-      {/* 영입 신청 CTA (관리자에게만) */}
-      {!avail.isOwnPost && (
-        <BottomCTASingle safeArea>
-          <Button
-            variant="primary"
-            onPress={onRecruit}
-            disabled={!avail.canRecruit || isRecruiting}
-            fullWidth
-          >
-            {avail.alreadyRecruited
-              ? '신청 완료'
-              : avail.isExpired
-              ? '만료된 게시글'
-              : '영입 신청'}
-          </Button>
-        </BottomCTASingle>
-      )}
-    </View>
+    </ScreenLayout>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
     <Flex direction="row" style={styles.infoRow}>
-      <TextBox variant="body2" color={colors.grey500} style={styles.infoLabel}>{label}</TextBox>
-      <TextBox variant="body2" color={colors.grey900} style={styles.infoValue}>{value}</TextBox>
+      <TextBox variant="body2" color={colors.grey500} style={styles.infoLabel}>
+        {label}
+      </TextBox>
+      <TextBox variant="body2" color={colors.grey900} style={styles.infoValue}>
+        {value}
+      </TextBox>
     </Flex>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
   content: { padding: spacing[4], paddingBottom: spacing[24] },
   avatarPlaceholder: {
     width: 64,

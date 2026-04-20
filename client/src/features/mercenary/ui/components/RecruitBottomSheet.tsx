@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Drawer, TextBox, TextArea, TextField, Button, BottomCTASingle, Spacing, colors, spacing } from '@ui';
+import { Drawer, TextBox, TextArea, TextField, BottomCTASingle, Spacing, colors, spacing } from '@ui';
 import { CreateMercenaryRecruitmentSchema } from '../../data/schemas/mercenaryAvailability.schema';
 import type { CreateMercenaryRecruitmentInput } from '../../data/schemas/mercenaryAvailability.schema';
 
@@ -82,16 +82,13 @@ export function RecruitBottomSheet({
           )}
         />
       </View>
-      <BottomCTASingle safeArea>
-        <Button
-          variant="primary"
-          onPress={handleSubmit(onSubmit)}
-          disabled={isLoading}
-          fullWidth
-        >
-          영입 신청하기
-        </Button>
-      </BottomCTASingle>
+      <BottomCTASingle
+        label="영입 신청하기"
+        onClick={handleSubmit(onSubmit)}
+        disabled={isLoading}
+        loading={isLoading}
+        safeArea
+      />
     </Drawer>
   );
 }
